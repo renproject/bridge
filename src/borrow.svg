@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="14px" height="14px" viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>24px (2)</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Home" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Desktop-HD" transform="translate(-176.000000, -234.000000)">
+            <g id="Group-5" transform="translate(175.000000, 176.000000)">
+                <g id="Group-12" transform="translate(0.000000, 53.000000)">
+                    <g id="24px-(2)" transform="translate(0.000000, 4.000000)">
+                        <path d="M8,1 C4.136,1 1,4.136 1,8 C1,11.864 4.136,15 8,15 C11.864,15 15,11.864 15,8 C15,4.136 11.864,1 8,1 Z M8.987,12.263 L8.987,13.6 L7.118,13.6 L7.118,12.249 C5.921,11.997 4.906,11.227 4.829,9.869 L6.201,9.869 C6.271,10.604 6.775,11.178 8.056,11.178 C9.428,11.178 9.736,10.492 9.736,10.065 C9.736,9.484 9.428,8.938 7.867,8.567 C6.131,8.147 4.941,7.433 4.941,5.998 C4.941,4.794 5.914,4.01 7.118,3.751 L7.118,2.4 L8.987,2.4 L8.987,3.765 C10.289,4.08 10.94,5.067 10.982,6.138 L9.61,6.138 C9.575,5.361 9.162,4.829 8.056,4.829 C7.006,4.829 6.376,5.305 6.376,5.977 C6.376,6.565 6.831,6.95 8.245,7.314 C9.659,7.678 11.171,8.287 11.171,10.051 C11.164,11.332 10.205,12.032 8.987,12.263 Z" id="Shape" fill="#000000" fill-rule="nonzero"></path>
+                        <polygon id="Path" points="0 0 16 0 16 16 0 16"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
