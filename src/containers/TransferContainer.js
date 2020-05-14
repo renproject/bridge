@@ -10,15 +10,10 @@ import {
     addTx,
     updateTx,
     removeTx,
-    initMonitoring,
-    initConvertToEthereum,
-    initConvertFromEthereum,
-    initTransfer,
-    gatherFeeData,
     initGJSDeposit,
     initGJSWithdraw
 } from '../utils/txUtils'
-import { MINI_ICON_MAP, initLocalWeb3, setWbtcAllowance, abbreviateAddress } from '../utils/walletUtils'
+import { MINI_ICON_MAP, SYMBOL_MAP, initLocalWeb3, setWbtcAllowance, abbreviateAddress } from '../utils/walletUtils'
 import Web3 from "web3";
 import { ethers } from 'ethers';
 
@@ -31,6 +26,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 
 import CurrencyInput from '../components/CurrencyInput';
+import CurrencySelect from '../components/CurrencySelect';
 import BigCurrencyInput from '../components/BigCurrencyInput';
 import ActionLink from '../components/ActionLink';
 import adapterABI from "../utils/adapterABI.json";
@@ -174,6 +170,9 @@ const styles = () => ({
             display: 'flex',
             alignItems: 'center'
         }
+    },
+    addressInput: {
+        // width: '100%'
     }
 })
 
@@ -200,6 +199,11 @@ class TransferContainer extends React.Component {
 
     async gatherFeeData() {
 
+    }
+
+    getBalance(asset) {
+        const { store } = this.props
+        return store.get(`ren${asset.toUpperCase()}Balance`)
     }
 
     async newDeposit() {
@@ -254,8 +258,7 @@ class TransferContainer extends React.Component {
             sourceAsset: asset,
             sourceNetwork: 'ethereum',
             sourceNetworkVersion: network,
-            // destAddress: destination,
-            destAddress: '2NGZrVvZG92qGYqzTLjCAewvPZ7JE8S8VxE',
+            destAddress: destination,
             destNetwork: 'bitcoin',
             destNetworkVersion: network,
             destAsset: 'btc',
@@ -285,17 +288,16 @@ class TransferContainer extends React.Component {
         const selectedAsset  = store.get('selectedAsset')
         const showAboutModal = store.get('showAboutModal')
 
-        const depositAmount = store.get('depositAmount')
-        const withdrawAmount = store.get('withdrawAmount')
-        const withdrawAddressValid = store.get('withdrawAddressValid')
-        const transferAmount = store.get('transferAmount')
-        const transferAddressValid = store.get('transferAddressValid')
 
+        // 0 = mint, 1 = release
         const selectedDirection  = store.get('convert.selectedDirection')
+        const selectedFormat = store.get('convert.selectedFormat')
 
         const localWeb3Address = store.get('localWeb3Address')
         const space = store.get('space')
-        const renBTCBalance = store.get('renBTCBalance')
+        const balance = store.get(SYMBOL_MAP[selectedFormat] + 'Balance')
+        const address = store.get('convert.destination')
+        const addressValid = store.get('convert.destinationValid')
 
         const amount = store.get('convert.amount')
         const exchangeRate = store.get('convert.exchangeRate')
@@ -308,10 +310,10 @@ class TransferContainer extends React.Component {
 
         const convertAddressValid = store.get('convert.destinationValid')
         const canConvertTo = amount > 0.00010001
-        const canConvertFrom = Number(total) > 0.00010001 && amount <= Number(renBTCBalance)
+        const canConvertFrom = Number(total) > 0.00010001 && amount <= Number(balance)
 
-        const sourceAsset = selectedDirection ? 'WBTC' : 'BTC'
-        const destAsset = selectedDirection ? 'BTC' : 'WBTC'
+        const sourceAsset = selectedDirection ? selectedFormat : selectedAsset
+        const destAsset = selectedDirection ? selectedAsset : selectedFormat
 
 
         // console.log('transfer render', store.getState())
@@ -328,7 +330,7 @@ class TransferContainer extends React.Component {
                             store.set('convert.selectedDirection', Number(newValue))
                             store.set('convert.amount', '')
                             store.set('convert.destination', '')
-                            gatherFeeData()
+                            // gatherFeeData()
                         }
                     }}>
                     <ToggleButton key={0} value={'0'}>
@@ -345,7 +347,7 @@ class TransferContainer extends React.Component {
                         <Grid item xs={12}>
 
                             {selectedDirection === 0 && <React.Fragment>
-                                <BigCurrencyInput symbol='BTC' placeholder='0.00 BTC' onChange={(value) => {
+                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedAsset]} placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]} onChange={(value) => {
                                     store.set('convert.amount', value)
                                   }}/>
 
@@ -355,7 +357,13 @@ class TransferContainer extends React.Component {
                                             Asset
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <img src={MINI_ICON_MAP['btc']}/>BTC
+                                            <CurrencySelect items={['BTC', 'ZEC', 'BCH']}
+                                              onCurrencyChange={(v) => {
+                                                const asset = v.toLowerCase()
+                                                store.set('convert.selectedFormat', `ren${asset}`)
+                                                store.set('selectedAsset', asset)
+                                              }} />
+                                            {/*<img src={MINI_ICON_MAP['btc']}/>BTC*/}
                                         </Grid>
                                     </Grid>
                                     <Grid container className={classes.option}>
@@ -371,20 +379,20 @@ class TransferContainer extends React.Component {
                                             You will receive
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <img src={MINI_ICON_MAP['renbtc']}/>0.999 renBTC
+                                            <img src={MINI_ICON_MAP[destAsset]}/>{total || '0.00'} {SYMBOL_MAP[destAsset]}
                                         </Grid>
                                     </Grid>
                                 </Grid>
                             </React.Fragment>}
 
                             {selectedDirection === 1 && <React.Fragment>
-                                <BigCurrencyInput symbol='renBTC' placeholder='0.00 renBTC' onChange={(value) => {
+                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedFormat]} placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]} onChange={(value) => {
                                     store.set('convert.amount', value)
                                   }}/>
 
                                 <Grid className={classes.balanceContainer} container justify='space-between'>
-                                  <Typography variant='caption'>renBTC Balance</Typography>
-                                  <Typography><ActionLink>{renBTCBalance} renBTC</ActionLink></Typography>
+                                  <Typography variant='caption'>{SYMBOL_MAP[selectedFormat]} Balance</Typography>
+                                  <Typography><ActionLink>{balance} {SYMBOL_MAP[selectedFormat]}</ActionLink></Typography>
                                 </Grid>
 
                                 <Grid className={classes.optionsContainer} container direction='column'>
@@ -393,23 +401,41 @@ class TransferContainer extends React.Component {
                                             Asset
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <img src={MINI_ICON_MAP['renbtc']}/>renBTC
+                                            <CurrencySelect items={['renBTC', 'renZEC', 'renBCH']}
+                                              onCurrencyChange={(v) => {
+                                                const asset = v.toLowerCase()
+                                                store.set('convert.selectedFormat', asset)
+                                                store.set('selectedAsset', asset.replace('ren', ''))
+                                              }} />
+                                            {/*<img src={MINI_ICON_MAP['renbtc']}/>renBTC*/}
                                         </Grid>
                                     </Grid>
                                     <Grid container className={classes.option}>
-                                        <Grid item xs={6}>
+                                        <Grid xs={12}>
+                                            <TextField className={classes.addressInput}
+                                                label="Destination"
+                                                size='large'
+                                                fullWidth={true}
+                                                error={address && !addressValid}
+                                                onChange={(event) => {
+                                                  const value = event.target.value
+                                                  store.set('convert.destination', value)
+                                                  store.set('convert.destinationValid', AddressValidator.validate(value, 'BTC', selectedNetwork === 'testnet' ? 'testnet' : 'prod'))
+                                              }}/>
+                                        </Grid>
+                                        {/*<Grid item xs={6}>
                                             Destination
                                         </Grid>
                                         <Grid item xs={6}>
                                             <img src={WalletIcon}/>{abbreviateAddress('2NGZrVvZG92qGYqzTLjCAewvPZ7JE8S8VxE')}
-                                        </Grid>
+                                        </Grid>*/}
                                     </Grid>
                                     <Grid container className={classes.option}>
                                         <Grid item xs={6}>
                                             You will receive
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <img src={MINI_ICON_MAP['btc']}/>0.999 BTC
+                                            <img src={MINI_ICON_MAP[destAsset]}/>{total || '0.00'} {SYMBOL_MAP[destAsset]}
                                         </Grid>
                                     </Grid>
                                 </Grid>

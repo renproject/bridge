@@ -1,5 +1,6 @@
 import Web3 from "web3";
-// import RenSDK from "@renproject/ren";
+import GatewayJS from '@renproject/gateway'
+
 import DetectNetwork from "web3-detect-network";
 import Box from '3box';
 import Portis from '@portis/web3';
@@ -11,26 +12,27 @@ import Fortmatic from "fortmatic";
 import BTC from '../assets/btc.png'
 import ETH from '../assets/eth.png'
 import ZEC from '../assets/zec.jpg'
+import BCH from '../assets/bch.png'
 import DAI from '../assets/dai.png'
 import USDC from '../assets/usdc.png'
 import WBTC from '../assets/wbtc.png'
 import RENBTC from '../assets/renBTC.svg'
+import RENZEC from '../assets/renZEC.svg'
+import RENBCH from '../assets/renBCH.svg'
+
 
 import {
-    ZBTC_MAIN,
-    ZBTC_TEST,
     RENBTC_MAIN,
     RENBTC_TEST,
-    ADAPTER_MAIN,
-    ADAPTER_TEST,
-    BTC_SHIFTER_MAIN,
-    BTC_SHIFTER_TEST,
-    WBTC_TEST
+    RENZEC_MAIN,
+    RENZEC_TEST,
+    RENBCH_MAIN,
+    RENBCH_TEST
 } from './web3Utils'
 
 import {
     initMonitoring,
-    gatherFeeData,
+    // gatherFeeData,
     recoverTrades
 } from './txUtils'
 
@@ -46,6 +48,7 @@ export const NAME_MAP = {
     btc: 'Bitcoin',
     eth: 'Ethereum',
     zec: 'Zcash',
+    bch: 'Bitcoin Cash',
     dai: 'DAI',
     usdc: 'USDC',
     wbtc: 'Wrapped Bitcoin',
@@ -58,6 +61,7 @@ export const SYMBOL_MAP = {
     btc: 'BTC',
     eth: 'ETH',
     zec: 'ZEC',
+    bch: 'BCH',
     dai: 'DAI',
     usdc: 'USDC',
     wbtc: 'WBTC',
@@ -70,12 +74,13 @@ export const MINI_ICON_MAP = {
     btc: BTC,
     eth: ETH,
     zec: ZEC,
+    bch: BCH,
     dai: DAI,
     usdc: USDC,
     wbtc: WBTC,
     renbtc: RENBTC,
-    renzec: RENBTC,
-    renbch: RENBTC
+    renzec: RENZEC,
+    renbch: RENBCH
 }
 
 export const resetWallet = async function() {
@@ -87,41 +92,8 @@ export const resetWallet = async function() {
     store.set('convert.transactions', [])
 }
 
-export const updateAllowance = async function() {
-    const store = getStore()
+export const updateMarketData = async function() {
 
-    const web3 = store.get('localWeb3')
-    const walletAddress = store.get('localWeb3Address')
-
-    if (!web3 || !walletAddress) {
-        return
-    }
-
-    const contract = new web3.eth.Contract(erc20ABI, WBTC_TEST);
-    const allowance = await contract.methods.allowance(walletAddress, ADAPTER_TEST).call();
-
-    // console.log('allowance', allowance)
-
-    store.set('convert.adapterWbtcAllowance', Number(parseInt(allowance.toString()) / 10 ** 8).toFixed(8))
-}
-
-export const setWbtcAllowance = async function() {
-    const store = getStore()
-    const walletAddress = store.get('localWeb3Address')
-    const web3 = store.get('localWeb3')
-
-    const contract = new web3.eth.Contract(erc20ABI, WBTC_TEST)
-    store.set('convert.adapterWbtcAllowanceRequesting', true)
-    try {
-        await contract.methods.approve(ADAPTER_TEST, web3.utils.toWei('1000000000000000000')).send({
-            from: walletAddress
-        })
-        updateAllowance();
-        store.set('convert.adapterWbtcAllowanceRequesting', false)
-    } catch(e) {
-        // console.log(e)
-        store.set('convert.adapterWbtcAllowanceRequesting', false)
-    }
 }
 
 export const updateBalance = async function() {
@@ -157,10 +129,10 @@ export const watchWalletData = async function() {
     if (walletDataInterval) {
         clearInterval(walletDataInterval)
     }
-    await updateAllowance()
+    // await updateAllowance()
     await updateBalance()
     walletDataInterval = setInterval(async () => {
-        await updateAllowance()
+        // await updateAllowance()
         await updateBalance()
     }, 10 * 1000)
 }
@@ -174,6 +146,7 @@ export const initDataWeb3 = async function() {
 export const initLocalWeb3 = async function() {
     const store = getStore()
     store.set('spaceError', false)
+    const selectedNetwork = store.get('selectedNetwork')
 
     const providerOptions = {
         // authereum: {
@@ -199,7 +172,7 @@ export const initLocalWeb3 = async function() {
     }
 
     const web3Modal = new Web3Modal({
-        network: "kovan", // optional
+        network: selectedNetwork === 'testnet' ? "kovan" : 'mainnet', // optional
         cacheProvider: false, // optional
         providerOptions // required
     })
@@ -213,11 +186,14 @@ export const initLocalWeb3 = async function() {
     let network = ''
     if (currentProvider.networkVersion === '1') {
         network = 'mainnet'
-        store.set('showNetworkModal', true)
-        return
     } else if (currentProvider.networkVersion === '42' ||
       (currentProvider.authereum && currentProvider.authereum.networkId === 42)) {
         network = 'testnet'
+    }
+
+    if (selectedNetwork !== network) {
+        store.set('showNetworkModal', true)
+        return
     }
 
     store.set('localWeb3', web3)
@@ -242,8 +218,8 @@ export const initLocalWeb3 = async function() {
 
         if (network === 'testnet') {
             watchWalletData()
-            gatherFeeData()
-            initMonitoring()
+            // gatherFeeData()
+            // initMonitoring()
             recoverTrades()
         }
 
@@ -269,31 +245,26 @@ export const initLocalWeb3 = async function() {
     return
 }
 
-export const setNetwork = async function(network) {
-    const {
-        store
-    } = this.props
-    store.set('selectedNetwork', network)
-    store.set('showNetworkMenu', false)
-
-    setAddresses.bind(this)()
-    resetWallet.bind(this)()
-}
-
 export const setAddresses = async function() {
-    const {
-        store
-    } = this.props
+    const store = getStore()
     const network = store.get('selectedNetwork')
     if (network === 'testnet') {
-        store.set('zbtcAddress', ZBTC_TEST)
-        store.set('btcShifterAddress', BTC_SHIFTER_TEST)
-        store.set('adapterAddress', ADAPTER_TEST)
+        store.set('renBTCAddress', RENBTC_TEST)
+        store.set('renZECAddress', RENZEC_TEST)
+        store.set('renBCHAddress', RENBCH_TEST)
     } else {
-        store.set('zbtcAddress', ZBTC_MAIN)
-        store.set('btcShifterAddress', BTC_SHIFTER_MAIN)
-        store.set('adapterAddress', ADAPTER_MAIN)
+        store.set('renBTCAddress', RENBTC_MAIN)
+        store.set('renZECAddress', RENZEC_MAIN)
+        store.set('renBCHAddress', RENBCH_MAIN)
     }
+}
+
+export const setNetwork = async function(network) {
+    const store = getStore()
+    store.set('selectedNetwork', network)
+    store.set('gjs', new GatewayJS(network))
+
+    setAddresses.bind(this)()
 }
 
 export const abbreviateAddress = function(walletAddress) {
@@ -304,7 +275,7 @@ export const abbreviateAddress = function(walletAddress) {
     }
 }
 
-window.setWbtcAllowance = setWbtcAllowance
+// window.setWbtcAllowance = setWbtcAllowance
 
 export default {
     resetWallet,

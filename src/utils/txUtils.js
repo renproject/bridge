@@ -2,10 +2,8 @@ import { withStore } from '@spyna/react-store'
 import GatewayJS from "@renproject/gateway";
 import BigNumber from "bignumber.js";
 import adapterABI from "../utils/adapterCurveABI.json";
-// import adapterABI from "../utils/adapterABI.json";
 import zbtcABI from "../utils/erc20ABI.json";
 import curveABI from "../utils/curveABI.json";
-// import shifterABI from "../utils/shifterABI.json";
 import { getStore } from '../services/storeService'
 import {
     BTC_GATEWAY_MAIN,
@@ -163,6 +161,7 @@ export const recoverTrades = async function() {
     const store = getStore()
     const gjs = store.get('gjs')
     const localWeb3 = store.get('localWeb3')
+    console.log(store.getState())
 
     // Re-open incomplete trades
     const previousGateways = await gjs.getGateways();
@@ -179,30 +178,8 @@ export const recoverTrades = async function() {
     }
 }
 
-export const completeConvertToEthereum = async function(tx) {
-}
-
-export const initMint = function(tx) {
-}
-
-export const initConvertToEthereum = async function(tx) {
-}
-
-export const initConvertFromEthereum = async function(tx) {
-}
-
-export const gatherFeeData = async function() {
-}
-
-export const initMonitoring = function() {
-}
-
 export default {
     addTx,
     updateTx,
     removeTx,
-    initMint,
-    initConvertToEthereum,
-    initConvertFromEthereum,
-    initMonitoring,
 }

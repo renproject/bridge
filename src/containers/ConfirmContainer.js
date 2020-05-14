@@ -34,7 +34,7 @@ import CurrencyInput from '../components/CurrencyInput';
 import BigCurrencyInput from '../components/BigCurrencyInput';
 import ActionLink from '../components/ActionLink';
 import BackArrow from '../assets/back-arrow.svg';
-
+import WalletIcon from '../assets/wallet-icon.svg'
 
 import adapterABI from "../utils/adapterABI.json";
 
@@ -326,7 +326,8 @@ class ConfirmContainer extends React.Component {
                                         Destination
                                     </Grid>
                                     <Grid item xs={6}>
-                                        {abbreviateAddress(localWeb3Address)}
+                                        <img src={WalletIcon}/>
+                                        {abbreviateAddress(confirmTx.destAddress)}
                                     </Grid>
                                 </Grid>
                                 <Grid container className={classes.option}>

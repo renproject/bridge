@@ -5,20 +5,17 @@ import EthCrypto from 'eth-crypto'
 import { createStore, withStore } from '@spyna/react-store'
 import ApolloClient, { gql, InMemoryCache } from 'apollo-boost'
 import { ApolloProvider, Query } from 'react-apollo'
+import queryString from 'query-string'
 import { storeListener } from './services/storeService'
 
 import NavContainer from './containers/NavContainer'
 import TransferContainer from './containers/TransferContainer'
 import ConfirmContainer from './containers/ConfirmContainer'
 import IntroContainer from './containers/IntroContainer'
-
-import DepositModalContainer from './containers/DepositModalContainer'
-import CancelModalContainer from './containers/CancelModalContainer'
-import ViewGatewayContainer from './containers/ViewGatewayContainer'
 import NetworkModalContainer from './containers/NetworkModalContainer'
-import TransactionsTableContainer from './containers/TransactionsTableContainer'
 
-import { initDataWeb3, updateAllowance, updateBalance } from './utils/walletUtils'
+
+import { setNetwork } from './utils/walletUtils'
 
 import RenVM from './assets/renvm-powered.svg';
 import Twitter from './assets/twitter.svg';
@@ -37,23 +34,15 @@ import Typography from '@material-ui/core/Typography'
 import Table from '@material-ui/core/Table';
 
 // import RenSDK from "@renproject/ren";
-import GatewayJS from '@renproject/gateway'
+// import GatewayJS from '@renproject/gateway'
 
 import {
-    ZBTC_MAIN,
-    ZBTC_TEST,
     RENBTC_MAIN,
     RENBTC_TEST,
     RENZEC_MAIN,
     RENZEC_TEST,
     RENBCH_MAIN,
     RENBCH_TEST,
-    WBTC_TEST,
-    ADAPTER_MAIN,
-    ADAPTER_TEST,
-    BTC_SHIFTER_MAIN,
-    BTC_SHIFTER_TEST,
-    CURVE_TEST
 } from './utils/web3Utils'
 
 const styles = () => ({
@@ -92,9 +81,10 @@ const initialState = {
     renZECAddress: RENZEC_TEST,
     renBCHAddress: RENBCH_TEST,
 
-    btcShifterAddress: BTC_SHIFTER_TEST,
-    adapterAddress: ADAPTER_TEST,
-    selectedNetwork: 'testnet',
+    // btcShifterAddress: BTC_SHIFTER_TEST,
+    // adapterAddress: ADAPTER_TEST,
+    selectedNetwork: 'mainnet',
+    queryParams: {},
 
     // wallet & web3
     dataWeb3: null,
@@ -110,11 +100,11 @@ const initialState = {
     renBCHBalance: 0,
     ethBalance: 0,
     // sdk: new RenSDK("testnet"),
-    gjs: new GatewayJS('testnet'),
+    gjs: null,
 
     // navigation
     selectedTab: 1,
-    selectedAsset: 'renbtc',
+    selectedAsset: 'btc',
     confirmTx: null,
     confirmAction: '',
 
@@ -129,7 +119,7 @@ const initialState = {
     showAboutModal: false,
 
     // conversions
-    'convert.adapterAddress': ADAPTER_TEST,
+    // 'convert.adapterAddress': ADAPTER_TEST,
     'convert.adapterWbtcAllowance': '',
     'convert.adapterWbtcAllowanceRequesting': '',
     'convert.transactions': [],
@@ -151,7 +141,12 @@ class AppWrapper extends React.Component {
     }
 
     async componentDidMount() {
-        initDataWeb3()
+        const { store } = this.props
+        const params = queryString.parse(window.location.search)
+        store.set('queryParams', params)
+
+        setNetwork(params.network === 'mainnet' ? 'mainnet' : 'testnet')
+        // initDataWeb3()
     }
 
     render() {
@@ -162,8 +157,11 @@ class AppWrapper extends React.Component {
         const localWeb3Address = store.get('localWeb3Address')
         const confirmAction = store.get('confirmAction')
 
+        console.log(store.getState())
+
         return (
           <ThemeProvider theme={theme}>
+                <NetworkModalContainer />
                 <Grid container className={classes.container} direction='column'>
                     <NavContainer />
                     <Grid item className={classes.contentContainer}>
@@ -179,12 +177,12 @@ class AppWrapper extends React.Component {
                     <Grid container className={classes.footerContainer}>
                       <Container size='lg'>
                         <Grid container alignItems='center' justify='space-between'>
-                            <Typography className={classes.footerLinks} variant='caption'><a target='_blank' href={'https://kovan.etherscan.io/address/' + ADAPTER_TEST}>What is RenVM?</a> <a target='_blank' href={'https://kovan.etherscan.io/address/' + CURVE_TEST}>Docs</a></Typography>
+                            <Typography className={classes.footerLinks} variant='caption'><a target='_blank' href={'https://kovan.etherscan.io/address/'}>What is RenVM?</a> <a target='_blank' href={'https://kovan.etherscan.io/address/'}>Docs</a></Typography>
                             <Typography className={classes.footerLinks} variant='caption'>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/' + ADAPTER_TEST}><img className={classes.footerLogo} src={Twitter} /></a>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/' + ADAPTER_TEST}><img className={classes.footerLogo} src={Github} /></a>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/' + ADAPTER_TEST}><img className={classes.footerLogo} src={Telegram} /></a>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/' + ADAPTER_TEST}><img className={classes.footerLogo} src={Reddit} /></a>
+                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Twitter} /></a>
+                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Github} /></a>
+                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Telegram} /></a>
+                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Reddit} /></a>
                             </Typography>
                       </Grid>
                       </Container>
