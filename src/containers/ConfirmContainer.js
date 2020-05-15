@@ -335,7 +335,7 @@ class ConfirmContainer extends React.Component {
                                         RenVM Fee
                                     </Grid>
                                     <Grid item xs={6}>
-
+                                        <img src={MINI_ICON_MAP[sourceAsset]}/>{fee} {SYMBOL_MAP[sourceAsset]}
                                     </Grid>
                                 </Grid>
                                 <Grid container className={classes.option}>
@@ -343,7 +343,7 @@ class ConfirmContainer extends React.Component {
                                         You will receive
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <img src={MINI_ICON_MAP[destAsset]}/>0.00 {SYMBOL_MAP[destAsset]}
+                                        <img src={MINI_ICON_MAP[destAsset]}/>{total} {SYMBOL_MAP[destAsset]}
                                     </Grid>
                                 </Grid>
                             </Grid>

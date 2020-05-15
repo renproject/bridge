@@ -102,6 +102,20 @@ export const txExists = function(tx) {
     return getStore().get('convert.transactions').filter(t => t.id === tx.id).length > 0
 }
 
+export const gatherFeeData = async function() {
+    const store = getStore()
+    const amount = store.get('convert.amount')
+
+    if (!amount) return
+
+    const amountInSats = GatewayJS.utils.value(amount, "btc").sats().toNumber()
+
+    const fee = Number((Number(amount) * 0.001) + 0.00005).toFixed(6)
+    const total = Number(amount-fee).toFixed(6)
+    store.set('convert.networkFee', fee)
+    store.set('convert.conversionTotal', total)
+}
+
 // transfers
 export const initGJSDeposit = async function(tx) {
     const {

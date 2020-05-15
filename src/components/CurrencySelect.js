@@ -87,7 +87,8 @@ class CurrencySelect extends React.Component {
         const {
             classes,
             onCurrencyChange,
-            items
+            items,
+            className
         } = this.props
 
         const {
@@ -97,7 +98,7 @@ class CurrencySelect extends React.Component {
 
         const selected = currency || items[0]
 
-        return <div>
+        return <div className={className || ''}>
             <Button className={classes.button} ref={this.anchorEl} aria-controls="menu" aria-haspopup="true" onClick={this.handleOpen.bind(this)}>
                 <img src={MINI_ICON_MAP[selected.toLowerCase()]} className={classes.icon} />
                 <span>{selected}</span>

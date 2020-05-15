@@ -49,9 +49,9 @@ const BigCurrencyInput = function(props) {
         {...props}
       />
 
-      <p>
+      {<p>
         =${0.00}
-      </p>
+      </p>}
     </div>
 }
 
