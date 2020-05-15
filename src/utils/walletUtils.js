@@ -70,6 +70,19 @@ export const SYMBOL_MAP = {
     renbch: 'renBCH'
 }
 
+export const NETWORK_MAP = {
+    btc: 'bitcoin',
+    eth: 'ethereum',
+    zec: 'zcash',
+    bch: 'bitcoin-cash',
+    dai: 'ethereum',
+    usdc: 'ethereum',
+    wbtc: 'ethereum',
+    renbtc: 'ethereum',
+    renzec: 'ethereum',
+    renbch: 'ethereum'
+}
+
 export const MINI_ICON_MAP = {
     btc: BTC,
     eth: ETH,
@@ -93,8 +106,41 @@ export const resetWallet = async function() {
 }
 
 export const updateMarketData = async function() {
+    const store = getStore()
 
+    try {
+        const btc = await fetch(`https://api.coincap.io/v2/assets/bitcoin`, {
+            method: 'GET',
+        })
+
+        store.set('btcusd', (await btc.json()).data.priceUsd)
+    } catch(e) {
+        console.log(e)
+    }
+
+    try {
+        const zec = await fetch(`https://api.coincap.io/v2/assets/zcash`, {
+            method: 'GET',
+        })
+
+        store.set('zecusd', (await zec.json()).data.priceUsd)
+    } catch(e) {
+        console.log(e)
+    }
+
+    try {
+        const bch = await fetch(`https://api.coincap.io/v2/assets/bitcoin-cash`, {
+            method: 'GET',
+        })
+
+        store.set('bchusd', (await bch.json()).data.priceUsd)
+    } catch(e) {
+        console.log(e)
+    }
+
+    store.set()
 }
+
 
 export const updateBalance = async function() {
     const store = getStore()
@@ -122,6 +168,8 @@ export const updateBalance = async function() {
     store.set('renZECBalance', Number(parseInt(renZECBalance.toString()) / 10 ** 8).toFixed(8))
     store.set('renBCHBalance', Number(parseInt(renBCHBalance.toString()) / 10 ** 8).toFixed(8))
     store.set('loadingBalances', false)
+
+    updateMarketData()
 }
 
 export const watchWalletData = async function() {
@@ -145,6 +193,12 @@ export const initDataWeb3 = async function() {
 
 export const initLocalWeb3 = async function() {
     const store = getStore()
+    
+    // already connected
+    if (store.get('localWeb3Address')) {
+        return
+    }
+
     store.set('spaceError', false)
     const selectedNetwork = store.get('selectedNetwork')
 
@@ -216,12 +270,8 @@ export const initLocalWeb3 = async function() {
         const transactions = txData ? JSON.parse(txData) : []
         store.set('convert.transactions', transactions)
 
-        if (network === 'testnet') {
-            watchWalletData()
-            // gatherFeeData()
-            // initMonitoring()
-            recoverTrades()
-        }
+        watchWalletData()
+        recoverTrades()
 
         // listen for changes
         currentProvider.on('accountsChanged', async () => {

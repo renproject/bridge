@@ -1,5 +1,5 @@
 import React from 'react';
-import FormattedInput from 'react-formatted-input'
+import Numeral from 'numeral'
 import NumericInput from 'react-numeric-input'
 import theme from '../theme/theme'
 import classNames from 'classnames'
@@ -30,7 +30,9 @@ const BigCurrencyInput = function(props) {
         classes,
         className,
         onChange,
-        symbol
+        symbol,
+        usdValue,
+        inputRef
     } = props
 
     const change = onChange || (() => {})
@@ -43,6 +45,7 @@ const BigCurrencyInput = function(props) {
 
     return <div className={classes.container}>
       <NumericInput
+        ref={inputRef}
         style={false}
         className={classNames(classes.input, className)}
         format={format}
@@ -50,7 +53,7 @@ const BigCurrencyInput = function(props) {
       />
 
       {<p>
-        =${0.00}
+        ={Numeral(usdValue).format('$0,0.00')}
       </p>}
     </div>
 }

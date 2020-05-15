@@ -12,9 +12,18 @@ import {
     removeTx,
     initGJSDeposit,
     initGJSWithdraw,
-    gatherFeeData
+    gatherFeeData,
+    MIN_TX_AMOUNTS
 } from '../utils/txUtils'
-import { MINI_ICON_MAP, SYMBOL_MAP, initLocalWeb3, setWbtcAllowance, abbreviateAddress } from '../utils/walletUtils'
+import {
+  MINI_ICON_MAP,
+  SYMBOL_MAP,
+  NETWORK_MAP,
+  NAME_MAP,
+  initLocalWeb3,
+  setWbtcAllowance,
+  abbreviateAddress
+} from '../utils/walletUtils'
 import Web3 from "web3";
 import { ethers } from 'ethers';
 
@@ -167,16 +176,20 @@ const styles = () => ({
             width: 24,
             marginRight: theme.spacing(1)
         },
-        '& div': {
+        '& .MuiGrid-root': {
             display: 'flex',
             alignItems: 'center'
         }
     },
     addressInput: {
-        // width: '100%'
+        width: '100%',
     },
     currencySelect: {
         marginLeft: theme.spacing(-1)
+    },
+    balanceContainer: {
+        display: 'flex',
+        alignItems: 'flex-end'
     }
 })
 
@@ -185,6 +198,7 @@ class TransferContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = props.store.getState()
+        this.burnInputRef = React.createRef()
     }
 
     componentDidMount() {
@@ -218,20 +232,21 @@ class TransferContainer extends React.Component {
         const amount = store.get('convert.amount')
         const localWeb3Address = store.get('localWeb3Address')
         const network = store.get('selectedNetwork')
-        const asset = store.get('convert.selectedFormat')
+        const format = store.get('convert.selectedFormat')
+        const asset = store.get('selectedAsset')
 
         const tx = {
             id: 'tx-' + Math.floor(Math.random() * (10 ** 16)),
             type: 'convert',
             instant: false,
-            awaiting: 'btc-init',
-            sourceAsset: 'btc',
-            sourceNetwork: 'bitcoin',
+            // awaiting: `${asset}-init`,
+            sourceAsset: asset,
+            sourceNetwork: NETWORK_MAP[asset],
             sourceNetworkVersion: network,
             destAddress: localWeb3Address,
-            destNetwork: 'ethereum',
+            destNetwork: NETWORK_MAP[format],
             destNetworkVersion: network,
-            destAsset: asset,
+            destAsset: format,
             amount: amount,
             error: false,
             txHash: ''
@@ -252,20 +267,21 @@ class TransferContainer extends React.Component {
         const amount = store.get('convert.amount')
         const destination = store.get('convert.destination')
         const network = store.get('selectedNetwork')
-        const asset = store.get('convert.selectedFormat')
+        const format = store.get('convert.selectedFormat')
+        const asset = store.get('selectedAsset')
 
         const tx = {
             id: 'tx-' + Math.floor(Math.random() * (10 ** 16)),
             type: 'convert',
             instant: false,
-            awaiting: 'eth-settle',
-            sourceAsset: asset,
-            sourceNetwork: 'ethereum',
+            // awaiting: 'eth-settle',
+            sourceAsset: format,
+            sourceNetwork: NETWORK_MAP[format],
             sourceNetworkVersion: network,
             destAddress: destination,
-            destNetwork: 'bitcoin',
+            destNetwork: NETWORK_MAP[asset],
             destNetworkVersion: network,
-            destAsset: 'btc',
+            destAsset: asset,
             amount: amount,
             error: false,
             txHash: ''
@@ -302,6 +318,7 @@ class TransferContainer extends React.Component {
         const balance = store.get(SYMBOL_MAP[selectedFormat] + 'Balance')
         const address = store.get('convert.destination')
         const addressValid = store.get('convert.destinationValid')
+        const addressFocused = store.get('convert.destinationInputFocused')
 
         const amount = store.get('convert.amount')
         const exchangeRate = store.get('convert.exchangeRate')
@@ -313,12 +330,14 @@ class TransferContainer extends React.Component {
         const allowanceRequesting = store.get('convert.adapterWbtcAllowanceRequesting')
 
         const convertAddressValid = store.get('convert.destinationValid')
-        const canConvertTo = amount > 0.00010001
-        const canConvertFrom = Number(total) > 0.00010001 && amount <= Number(balance)
+        const canConvertTo = amount > MIN_TX_AMOUNTS[selectedAsset]
+        const canConvertFrom = Number(amount) > MIN_TX_AMOUNTS[selectedAsset] && amount <= Number(balance) && convertAddressValid
+        const showAddressError = !addressFocused && address && !convertAddressValid
 
         const sourceAsset = selectedDirection ? selectedFormat : selectedAsset
         const destAsset = selectedDirection ? selectedAsset : selectedFormat
 
+        const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(2)
 
         // console.log('transfer render', store.getState())
 
@@ -352,10 +371,13 @@ class TransferContainer extends React.Component {
                         <Grid item xs={12}>
 
                             {selectedDirection === 0 && <React.Fragment>
-                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedAsset]} placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]} onChange={(value) => {
-                                    store.set('convert.amount', value)
-                                    gatherFeeData()
-                                  }}/>
+                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedAsset]}
+                                    placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]}
+                                    usdValue={usdValue}
+                                    onChange={(value) => {
+                                      store.set('convert.amount', value)
+                                      gatherFeeData()
+                                    }}/>
 
                                 <Grid className={classes.optionsContainer} container direction='column'>
                                     <Grid container className={classes.option}>
@@ -363,7 +385,8 @@ class TransferContainer extends React.Component {
                                             Asset
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <CurrencySelect className={classes.currencySelect}
+                                            <CurrencySelect active={SYMBOL_MAP[selectedAsset]}
+                                              className={classes.currencySelect}
                                               items={['BTC', 'ZEC', 'BCH']}
                                               onCurrencyChange={(v) => {
                                                 const asset = v.toLowerCase()
@@ -394,14 +417,21 @@ class TransferContainer extends React.Component {
                             </React.Fragment>}
 
                             {selectedDirection === 1 && <React.Fragment>
-                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedFormat]} placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]} onChange={(value) => {
-                                    store.set('convert.amount', value)
-                                    gatherFeeData()
-                                  }}/>
+                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedFormat]}
+                                    inputRef={this.burnInputRef}
+                                    placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]}
+                                    usdValue={usdValue}
+                                    onChange={(value) => {
+                                      store.set('convert.amount', value)
+                                      gatherFeeData()
+                                    }}/>
 
                                 <Grid className={classes.balanceContainer} container justify='space-between'>
                                   <Typography variant='caption'>{SYMBOL_MAP[selectedFormat]} Balance</Typography>
-                                  <Typography><ActionLink>{balance} {SYMBOL_MAP[selectedFormat]}</ActionLink></Typography>
+                                  <Typography><ActionLink onClick={() => {
+                                        this.burnInputRef.current.refsInput.setValue(`${balance} ${SYMBOL_MAP[selectedFormat]}`)
+                                        console.log(this.burnInputRef, this.burnInputRef.current)
+                                    }}>{balance} {SYMBOL_MAP[selectedFormat]}</ActionLink></Typography>
                                 </Grid>
 
                                 <Grid className={classes.optionsContainer} container direction='column'>
@@ -410,7 +440,8 @@ class TransferContainer extends React.Component {
                                             Asset
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <CurrencySelect className={classes.currencySelect}
+                                            <CurrencySelect active={SYMBOL_MAP[selectedFormat]}
+                                              className={classes.currencySelect}
                                               items={['renBTC', 'renZEC', 'renBCH']}
                                               onCurrencyChange={(v) => {
                                                 const asset = v.toLowerCase()
@@ -423,16 +454,37 @@ class TransferContainer extends React.Component {
                                     </Grid>
                                     <Grid container className={classes.option}>
                                         <Grid xs={12}>
-                                            <TextField className={classes.addressInput}
-                                                label="Destination"
-                                                size='large'
-                                                fullWidth={true}
-                                                error={address && !addressValid}
-                                                onChange={(event) => {
-                                                  const value = event.target.value
-                                                  store.set('convert.destination', value)
-                                                  store.set('convert.destinationValid', AddressValidator.validate(value, 'BTC', selectedNetwork === 'testnet' ? 'testnet' : 'prod'))
-                                              }}/>
+                                            <div className={classes.addressInput}>
+                                                <TextField label="Destination"
+                                                    placeholder={`Enter ${NAME_MAP[selectedAsset]} Address`}
+                                                    size='large'
+                                                    fullWidth={true}
+                                                    error={showAddressError}
+                                                    helperText={showAddressError ? `Please enter a valid ${NAME_MAP[selectedAsset]} address`: ''}
+                                                    InputProps={{
+                                                        disableUnderline: true,
+                                                    }}
+                                                    InputLabelProps={{
+                                                        shrink: true
+                                                    }}
+                                                    inputProps={{
+                                                        onFocus: () => {
+                                                            store.set('convert.destinationInputFocused', true)
+                                                        },
+                                                        onBlur: () => {
+                                                            store.set('convert.destinationInputFocused', false)
+                                                        }
+                                                    }}
+                                                    onChange={(event) => {
+                                                      const value = event.target.value
+                                                      store.set('convert.destination', value)
+                                                      store.set('convert.destinationValid', AddressValidator.validate(
+                                                        value,
+                                                        selectedAsset.toUpperCase(),
+                                                        selectedNetwork === 'testnet' ? 'testnet' : 'prod'
+                                                      ))
+                                                  }}/>
+                                            </div>
                                         </Grid>
                                         {/*<Grid item xs={6}>
                                             Destination
@@ -546,7 +598,7 @@ class TransferContainer extends React.Component {
                         </Grid>}
                         {selectedDirection === 1 && <Grid item xs={12}>
                             <Button
-                                disabled={false}
+                                disabled={!canConvertFrom}
                                 variant={canConvertFrom ? 'outlined' : 'contained'}
                                 size="small"
                                 className={classNames(classes.margin, classes.actionButton)}

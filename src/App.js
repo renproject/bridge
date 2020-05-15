@@ -98,8 +98,10 @@ const initialState = {
     renBTCBalance: 0,
     renZECBalance: 0,
     renBCHBalance: 0,
+    btcusd: 0,
+    zecusd: 0,
+    bchusd: 0,
     ethBalance: 0,
-    // sdk: new RenSDK("testnet"),
     gjs: null,
 
     // navigation
@@ -129,6 +131,7 @@ const initialState = {
     'convert.amount': '',
     'convert.destination': '',
     'convert.destinationValid': false,
+    'convert.destinationInputFocused': false,
     'convert.exchangeRate': '',
     'convert.networkFee': '',
     'convert.conversionTotal': '',
@@ -156,6 +159,7 @@ class AppWrapper extends React.Component {
 
         const localWeb3Address = store.get('localWeb3Address')
         const confirmAction = store.get('confirmAction')
+        const confirmTx = store.get('confirmTx')
 
         console.log(store.getState())
 
@@ -170,7 +174,7 @@ class AppWrapper extends React.Component {
                                 <IntroContainer />
                             </Grid> :
                             <Grid item xs={12} sm={8} md={4}>
-                                {confirmAction ? <ConfirmContainer /> : <TransferContainer />}
+                                {confirmAction && confirmTx ? <ConfirmContainer /> : <TransferContainer />}
                             </Grid>}
                         </Grid>
                     </Grid>
