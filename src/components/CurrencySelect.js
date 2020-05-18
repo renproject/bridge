@@ -47,12 +47,12 @@ const styles = () => ({
         }
     },
     icon: {
-        width: 16,
-        height: 16,
+        width: 15,
+        height: 15,
         marginRight: theme.spacing(0.75),
     },
     button: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#585861'
     }
 })

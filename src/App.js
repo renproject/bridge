@@ -173,7 +173,7 @@ class AppWrapper extends React.Component {
                             {!localWeb3Address ? <Grid item xs={12} sm={8} md={6}>
                                 <IntroContainer />
                             </Grid> :
-                            <Grid item xs={12} sm={8} md={4}>
+                            <Grid item xs={12} sm={8} md={6}>
                                 {confirmAction && confirmTx ? <ConfirmContainer /> : <TransferContainer />}
                             </Grid>}
                         </Grid>

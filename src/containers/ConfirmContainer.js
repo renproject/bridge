@@ -3,6 +3,7 @@ import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
 import theme from '../theme/theme'
 import classNames from 'classnames'
+import Numeral from 'numeral'
 // import RenSDK from "@renproject/ren";
 import sb from "satoshi-bitcoin"
 import AddressValidator from "wallet-address-validator";
@@ -41,7 +42,12 @@ import adapterABI from "../utils/adapterABI.json";
 const styles = () => ({
     container: {
         background: '#fff',
-        border: '0.5px solid ' + theme.palette.divider
+        border: '1px solid ' + theme.palette.divider,
+        borderRadius: 4,
+        boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)',
+        maxWidth: 400,
+        width: '100%',
+        margin: '0px auto'
     },
     transferActionTabs: {
         margin: '0px auto',
@@ -62,8 +68,7 @@ const styles = () => ({
         // marginTop: theme.spacing(1)
     },
     actionButtonContainer: {
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
+        padding: theme.spacing(3),
         textAlign: 'center',
         '& button': {
             // minHeight: 64,
@@ -91,7 +96,7 @@ const styles = () => ({
     },
     actions: {
         paddingTop: theme.spacing(1),
-        padding: theme.spacing(3)
+        // padding: theme.spacing(3)
     },
     transactionsContainer: {
         padding: theme.spacing(3),
@@ -159,13 +164,33 @@ const styles = () => ({
       paddingBottom: theme.spacing(3)
     },
     optionsContainer: {
-        border: '1px solid ' + theme.palette.divider,
+        // border: '1px solid ' + theme.palette.divider,
         borderBottom: 'none',
-        marginTop: theme.spacing(3)
+        // marginTop: theme.spacing(3),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+        '& :last-child': {
+            borderBottom: '1px solid transparent'
+        }
     },
     option: {
         borderBottom: '1px solid ' + theme.palette.divider,
-        padding: theme.spacing(3),
+        minHeight: 60,
+        fontSize: 14,
+        '& img': {
+            height: 'auto',
+            width: 24,
+            marginRight: theme.spacing(1)
+        },
+        '& div': {
+            display: 'flex',
+            alignItems: 'center'
+        },
+    },
+    totalOption: {
+        minHeight: 60,
+        fontSize: 16,
+        color: '#3F3F48',
         '& img': {
             height: 'auto',
             width: 24,
@@ -176,17 +201,32 @@ const styles = () => ({
             alignItems: 'center'
         }
     },
+    totalContainer: {
+        borderTop: '1px solid ' + theme.palette.divider,
+        borderBottom: '1px solid ' + theme.palette.divider,
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+        // marginTop: -1
+    },
     headerText: {
         textAlign: 'center',
         position: 'relative',
         backgroundColor: '#fbfbfb',
-        borderLeft: '1px solid ' + theme.palette.divider,
-        borderRight: '1px solid ' + theme.palette.divider,
+        borderTopRightRadius: 4,
+        borderTopLeftRadius: 4,
+        // borderLeft: '1px solid ' + theme.palette.divider,
+        // borderRight: '1px solid ' + theme.palette.divider,
         borderBottom: '1px solid ' + theme.palette.divider,
-        paddingBottom: theme.spacing(6)
+        paddingBottom: theme.spacing(6),
+        paddingTop: theme.spacing(1)
     },
     titleAmount: {
-        marginTop: theme.spacing(5)
+        marginTop: theme.spacing(5),
+        fontSize: 52,
+        marginBottom: theme.spacing(1)
+    },
+    navTitle: {
+        color: '#87888C'
     },
     back: {
         position: 'absolute',
@@ -285,6 +325,7 @@ class ConfirmContainer extends React.Component {
         const sourceAsset = confirmTx.sourceAsset
         const destAsset = confirmTx.destAsset
 
+        const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(2)
 
         // console.log('transfer render', store.getState())
 
@@ -296,7 +337,7 @@ class ConfirmContainer extends React.Component {
                       store.set('confirmTx', null)
                       store.set('confirmAction', '')
                   }}/>
-                <Typography variant='overline'>
+                <Typography variant='overline' className={classes.navTitle}>
                     {isDeposit ? 'Minting' : 'Releasing'}
                 </Typography>
 
@@ -305,7 +346,7 @@ class ConfirmContainer extends React.Component {
                 </Typography>
 
                 <Typography variant='p' className={classes.usdAmount}>
-                    = $0.00
+                    = {Numeral(usdValue).format('$0,0.00')}
                 </Typography>
             </div>
             <div className={classes.actionsContainer}>
@@ -338,24 +379,31 @@ class ConfirmContainer extends React.Component {
                                         <img src={MINI_ICON_MAP[sourceAsset]}/>{fee} {SYMBOL_MAP[sourceAsset]}
                                     </Grid>
                                 </Grid>
-                                <Grid container className={classes.option}>
-                                    <Grid item xs={6}>
-                                        You will receive
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <img src={MINI_ICON_MAP[destAsset]}/>{total} {SYMBOL_MAP[destAsset]}
-                                    </Grid>
-                                </Grid>
+
                             </Grid>
                         </Grid>
+
                     </Grid>
+
+                    <div className={classes.totalContainer}>
+                        <Grid container className={classNames(classes.totalOption)}>
+                            <Grid item xs={6}>
+                                You will receive
+                            </Grid>
+                            <Grid item xs={6}>
+                                <img src={MINI_ICON_MAP[destAsset]}/>{total} {SYMBOL_MAP[destAsset]}
+                            </Grid>
+                        </Grid>
+                    </div>
 
                     <Grid container justify='center' className={classes.actionButtonContainer}>
                         {selectedDirection === 0 && <Grid item xs={12}>
                             <Button
                                 disabled={!canConvertTo}
-                                variant={canConvertTo ? 'outlined' : 'contained'}
-                                size="small"
+                                variant={'contained'}
+                                color='primary'
+                                size="large"
+                                fullWidth
                                 className={classNames(classes.margin, classes.actionButton)}
                                 onClick={this.confirmDeposit.bind(this)}>
                                 Confirm
@@ -364,8 +412,10 @@ class ConfirmContainer extends React.Component {
                         {selectedDirection === 1 && <Grid item xs={12}>
                             <Button
                                 disabled={false}
-                                variant={canConvertFrom ? 'outlined' : 'contained'}
-                                size="small"
+                                variant={'contained'}
+                                color='primary'
+                                size="large"
+                                fullWidth
                                 className={classNames(classes.margin, classes.actionButton)}
                                 onClick={this.confirmWithdraw.bind(this)}>
                                 Confirm

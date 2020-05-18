@@ -9,6 +9,10 @@ const styles = () => ({
         fontSize: 12,
         textDecoration: 'underline',
         cursor: 'pointer',
+        color: '#006FE8',
+        '&:hover': {
+            color: '#006FE8'
+        }
     }
 })
 

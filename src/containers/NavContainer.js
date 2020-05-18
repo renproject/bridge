@@ -180,11 +180,13 @@ class NavContainer extends React.Component {
                               {/*walletAddress && <div className={classes.faq}>
                                   <Typography variant='caption'>Balance: {balance} WBTC</Typography>
                               </div>*/}
-                              {<Button disableRipple={walletAddress.length} onClick={() => {
-                                  if (!walletAddress) {
-                                      initLocalWeb3()
-                                  }
-                              }} variant="outlined" size='large' className={classNames(classes.accountButton, walletAddress && classes.disabled)}>
+                              {<Button disableRipple={walletAddress.length}
+                                color={walletAddress ? '' : 'primary'}
+                                onClick={() => {
+                                    if (!walletAddress) {
+                                        initLocalWeb3()
+                                    }
+                                }} variant="outlined" className={classNames(classes.accountButton, walletAddress && classes.disabled)}>
                                 {walletAddress ? (walletAddress.slice(0,7) + '...' + walletAddress.slice(walletAddress.length - 5)) : <span>Connect Wallet<span className={classes.hideMobile}></span></span>}
                               </Button>}
 

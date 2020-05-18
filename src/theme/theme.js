@@ -6,6 +6,7 @@ export default createMuiTheme({
     typography: {
         fontFamily: [
             // 'Roboto Mono',
+            "Suisse Intl",
             '-apple-system',
             'BlinkMacSystemFont',
             '"Segoe UI"',
@@ -21,9 +22,9 @@ export default createMuiTheme({
     palette: {
         type: 'light',
         primary: {
-            light: '#000',
-            main: '#000',
-            dark: '#000',
+            light: '#649dff',
+            main: '#006fe8',
+            dark: '#0045b5',
             contrastText: '#fff',
         },
         // primary: blueGrey,
@@ -33,6 +34,7 @@ export default createMuiTheme({
         MuiButton: {
             root: {
                 textTransform: 'none',
+                borderRadius: 4,
                 '&.MuiButton-outlined': {
                     // border: '1px solid #eee',
                     '&.Mui-disabled': {
@@ -40,7 +42,10 @@ export default createMuiTheme({
                         border: '1px solid transparent'
                     }
                 },
-                borderRadius: 0
+                '&.MuiButton-sizeLarge': {
+                    minHeight: 54,
+                    fontSize: 14,
+                },
             }
         },
         PrivateNotchedOutline: {
@@ -122,7 +127,7 @@ export default createMuiTheme({
                 },
                 '& .MuiToggleButton-label': {
                     fontSize: 12
-                }
+                },
             }
         }
     }

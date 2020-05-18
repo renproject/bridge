@@ -9,7 +9,8 @@ import Typography from '@material-ui/core/Typography';
 const styles = () => ({
     container: {
         width: '100%',
-        textAlign: 'center'
+        textAlign: 'center',
+        // fontWeight: 'bold'
     },
     input: {
         fontSize: 52,
@@ -19,6 +20,9 @@ const styles = () => ({
         border: '0px solid transparent'
         // textDecoration: 'underline',
         // cursor: 'pointer',
+    },
+    grayText: {
+        color: '#D0D2D9'
     }
 })
 
@@ -52,8 +56,8 @@ const BigCurrencyInput = function(props) {
         {...props}
       />
 
-      {<p>
-        ={Numeral(usdValue).format('$0,0.00')}
+    {<p className={usdValue ? classes.grayText : ''}>
+        = {Numeral(usdValue).format('$0,0.00')}
       </p>}
     </div>
 }

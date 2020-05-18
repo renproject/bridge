@@ -21,18 +21,24 @@ const styles = () => ({
         textAlign: 'center'
     },
     title: {
-        marginBottom: theme.spacing(3)
+        marginBottom: theme.spacing(3),
+        fontSize: 48
     },
     metamask: {
         paddingTop: theme.spacing(6),
-        paddingBottom: theme.spacing(6),
+        paddingBottom: theme.spacing(3),
         '& img': {
             width: 92,
             height: 'auto',
         }
     },
     message: {
-        marginBottom: theme.spacing(3)
+        // marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(4)
+    },
+    button: {
+        width: '100%',
+        maxWidth: 230
     }
 })
 
@@ -61,7 +67,7 @@ class IntroContainer extends React.Component {
                 Bitcoin, Zcash and Bitcoin Cash on&nbsp;Ethereum.
             </Typography>
             <Typography className={classes.subtitle} variant='p'>
-                The safe, fast and most secure way to bring cross-chain assets to Ethereum in a completely decentralized&nbsp;way.
+                The safe, fast and most secure way to bring cross-chain assets to&nbsp;Ethereum.
             </Typography>
             <Grid className={classes.metamask} container justify='center'>
                 <img src={MetaMask} />
@@ -72,7 +78,11 @@ class IntroContainer extends React.Component {
                 </Typography>
             </Grid>
             <Grid container justify='center'>
-                <Button onClick={initLocalWeb3} variant='contained'>
+                <Button onClick={initLocalWeb3}
+                    className={classes.button}
+                    size='large'
+                    color='primary'
+                    variant='contained'>
                     Connect Wallet
                 </Button>
             </Grid>

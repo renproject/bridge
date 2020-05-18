@@ -6,6 +6,7 @@ import classNames from 'classnames'
 // import RenSDK from "@renproject/ren";
 import sb from "satoshi-bitcoin"
 import AddressValidator from "wallet-address-validator";
+import bchaddr from 'bchaddrjs'
 import {
     addTx,
     updateTx,
@@ -46,7 +47,12 @@ import WalletIcon from '../assets/wallet-icon.svg'
 const styles = () => ({
     container: {
         background: '#fff',
-        border: '0.5px solid ' + theme.palette.divider
+        border: '1px solid ' + theme.palette.divider,
+        borderRadius: 4,
+        boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)',
+        maxWidth: 400,
+        width: '100%',
+        margin: '0px auto'
     },
     transferActionTabs: {
         margin: '0px auto',
@@ -151,11 +157,21 @@ const styles = () => ({
         minHeight: 'auto',
         border: '0px solid transparent',
         borderBottom: '1px solid ' + theme.palette.divider,
+        height: 56,
+        backgroundColor: '#DBE0E8',
+        // padding: theme.spacing(3),
         '&:first-child': {
           borderRight: '1px solid ' + theme.palette.divider
         },
         '&.Mui-selected': {
-          borderBottom: '0px solid transparent'
+          borderBottom: '1px solid transparent',
+          color: theme.palette.primary.main
+        },
+        '& .MuiToggleButton-label': {
+          fontSize: 16,
+        },
+        '& span': {
+          textTransform: 'capitalize !important',
         }
       }
     },
@@ -166,11 +182,17 @@ const styles = () => ({
     optionsContainer: {
         border: '1px solid ' + theme.palette.divider,
         borderBottom: 'none',
-        marginTop: theme.spacing(3)
+        borderRadius: 4,
+        boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)'
+        // marginTop: theme.spacing(3)
     },
     option: {
         borderBottom: '1px solid ' + theme.palette.divider,
-        padding: theme.spacing(3),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+        minHeight: 60,
+        fontSize: 14,
+        // fontWeight: 'bold',
         '& img': {
             height: 'auto',
             width: 24,
@@ -183,13 +205,20 @@ const styles = () => ({
     },
     addressInput: {
         width: '100%',
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2)
     },
     currencySelect: {
         marginLeft: theme.spacing(-1)
     },
     balanceContainer: {
         display: 'flex',
-        alignItems: 'flex-end'
+        alignItems: 'flex-end',
+        marginBottom: theme.spacing(1)
+    },
+    amountContainer: {
+        paddingTop: theme.spacing(5),
+        paddingBottom: theme.spacing(5)
     }
 })
 
@@ -357,10 +386,10 @@ class TransferContainer extends React.Component {
                             store.set('convert.destination', '')
                         }
                     }}>
-                    <ToggleButton key={0} value={'0'}>
+                    <ToggleButton disableRipple={true} key={0} value={'0'}>
                       Mint
                     </ToggleButton>
-                    <ToggleButton key={1} value={'1'}>
+                    <ToggleButton disableRipple={true} key={1} value={'1'}>
                       Release
                     </ToggleButton>
                 </ToggleButtonGroup>
@@ -371,14 +400,15 @@ class TransferContainer extends React.Component {
                         <Grid item xs={12}>
 
                             {selectedDirection === 0 && <React.Fragment>
-                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedAsset]}
-                                    placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]}
-                                    usdValue={usdValue}
-                                    onChange={(value) => {
-                                      store.set('convert.amount', value)
-                                      gatherFeeData()
-                                    }}/>
-
+                                <Grid className={classes.amountContainer} container>
+                                  <BigCurrencyInput symbol={SYMBOL_MAP[selectedAsset]}
+                                      placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]}
+                                      usdValue={usdValue}
+                                      onChange={(value) => {
+                                        store.set('convert.amount', value)
+                                        gatherFeeData()
+                                      }}/>
+                                </Grid>
                                 <Grid className={classes.optionsContainer} container direction='column'>
                                     <Grid container className={classes.option}>
                                         <Grid item xs={6}>
@@ -417,15 +447,16 @@ class TransferContainer extends React.Component {
                             </React.Fragment>}
 
                             {selectedDirection === 1 && <React.Fragment>
-                                <BigCurrencyInput symbol={SYMBOL_MAP[selectedFormat]}
-                                    inputRef={this.burnInputRef}
-                                    placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]}
-                                    usdValue={usdValue}
-                                    onChange={(value) => {
-                                      store.set('convert.amount', value)
-                                      gatherFeeData()
-                                    }}/>
-
+                                <Grid className={classes.amountContainer} container>
+                                  <BigCurrencyInput symbol={SYMBOL_MAP[selectedFormat]}
+                                      inputRef={this.burnInputRef}
+                                      placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]}
+                                      usdValue={usdValue}
+                                      onChange={(value) => {
+                                        store.set('convert.amount', value)
+                                        gatherFeeData()
+                                      }}/>
+                                </Grid>
                                 <Grid className={classes.balanceContainer} container justify='space-between'>
                                   <Typography variant='caption'>{SYMBOL_MAP[selectedFormat]} Balance</Typography>
                                   <Typography><ActionLink onClick={() => {
@@ -478,11 +509,16 @@ class TransferContainer extends React.Component {
                                                     onChange={(event) => {
                                                       const value = event.target.value
                                                       store.set('convert.destination', value)
-                                                      store.set('convert.destinationValid', AddressValidator.validate(
-                                                        value,
-                                                        selectedAsset.toUpperCase(),
-                                                        selectedNetwork === 'testnet' ? 'testnet' : 'prod'
-                                                      ))
+                                                      if (selectedAsset === 'bch') {
+                                                          store.set('convert.destinationValid', bchaddr.isValidAddress(value))
+                                                      } else {
+                                                          store.set('convert.destinationValid', AddressValidator.validate(
+                                                            value,
+                                                            selectedAsset.toUpperCase(),
+                                                            selectedNetwork === 'testnet' ? 'testnet' : 'prod'
+                                                          ))
+                                                      }
+
                                                   }}/>
                                             </div>
                                         </Grid>
@@ -589,8 +625,10 @@ class TransferContainer extends React.Component {
                         {selectedDirection === 0 && <Grid item xs={12}>
                             <Button
                                 disabled={!canConvertTo}
-                                variant={canConvertTo ? 'outlined' : 'contained'}
-                                size="small"
+                                variant={'contained'}
+                                color='primary'
+                                size="large"
+                                fullWidth
                                 className={classNames(classes.margin, classes.actionButton)}
                                 onClick={this.newDeposit.bind(this)}>
                                 Next
@@ -599,8 +637,10 @@ class TransferContainer extends React.Component {
                         {selectedDirection === 1 && <Grid item xs={12}>
                             <Button
                                 disabled={!canConvertFrom}
-                                variant={canConvertFrom ? 'outlined' : 'contained'}
-                                size="small"
+                                variant={'contained'}
+                                color='primary'
+                                fullWidth
+                                size='large'
                                 className={classNames(classes.margin, classes.actionButton)}
                                 onClick={this.newWithdraw.bind(this)}>
                                 Next
