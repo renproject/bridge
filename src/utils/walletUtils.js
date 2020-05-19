@@ -2,7 +2,7 @@ import Web3 from "web3";
 import GatewayJS from '@renproject/gateway'
 
 import DetectNetwork from "web3-detect-network";
-import Box from '3box';
+// import Box from '3box';
 // import Portis from '@portis/web3';
 // import Torus from "@toruslabs/torus-embed";
 import Web3Modal from 'web3modal'
@@ -321,7 +321,7 @@ export const abbreviateAddress = function(walletAddress) {
     if (!walletAddress || typeof walletAddress !== 'string') {
         return ''
     } else {
-        return (walletAddress.slice(0,7) + '...' + walletAddress.slice(walletAddress.length - 5))
+        return (walletAddress.slice(0,5) + '...' + walletAddress.slice(walletAddress.length - 5))
     }
 }
 

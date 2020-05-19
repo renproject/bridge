@@ -11,6 +11,7 @@ body {
   /* background: #040e13; */
   background: #FBFBFB;
   color: #585861;
+  min-height: 100vh;
 }
 
 code {

@@ -155,17 +155,21 @@ const styles = () => ({
     toggle: {
       '& button': {
         minHeight: 'auto',
-        border: '0px solid transparent',
+        border: '1px solid transparent',
         borderBottom: '1px solid ' + theme.palette.divider,
         height: 56,
-        backgroundColor: '#DBE0E8',
+        backgroundColor: '#fff',
         // padding: theme.spacing(3),
         '&:first-child': {
           borderRight: '1px solid ' + theme.palette.divider
         },
+        '&.MuiToggleButton-root': {
+          // backgroundColor: '#fbfbfb',
+        },
         '&.Mui-selected': {
           borderBottom: '1px solid transparent',
-          color: theme.palette.primary.main
+          color: theme.palette.primary.main,
+          backgroundColor: '#transparent !important',
         },
         '& .MuiToggleButton-label': {
           fontSize: 16,
@@ -219,6 +223,9 @@ const styles = () => ({
     amountContainer: {
         paddingTop: theme.spacing(5),
         paddingBottom: theme.spacing(5)
+    },
+    totalCell: {
+        wordBreak: 'break-word'
     }
 })
 
@@ -404,6 +411,7 @@ class TransferContainer extends React.Component {
                                   <BigCurrencyInput symbol={SYMBOL_MAP[selectedAsset]}
                                       placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]}
                                       usdValue={usdValue}
+                                      value={amount}
                                       onChange={(value) => {
                                         store.set('convert.amount', value)
                                         gatherFeeData()
@@ -439,7 +447,7 @@ class TransferContainer extends React.Component {
                                         <Grid item xs={6}>
                                             You will receive
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid item xs={6} className={classes.totalCell}>
                                             <img src={MINI_ICON_MAP[destAsset]}/>{total || ''} {SYMBOL_MAP[destAsset]}
                                         </Grid>
                                     </Grid>
@@ -449,6 +457,7 @@ class TransferContainer extends React.Component {
                             {selectedDirection === 1 && <React.Fragment>
                                 <Grid className={classes.amountContainer} container>
                                   <BigCurrencyInput symbol={SYMBOL_MAP[selectedFormat]}
+                                      value={amount}
                                       inputRef={this.burnInputRef}
                                       placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]}
                                       usdValue={usdValue}
@@ -533,7 +542,7 @@ class TransferContainer extends React.Component {
                                         <Grid item xs={6}>
                                             You will receive
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid item xs={6} className={classes.totalCell}>
                                             <img src={MINI_ICON_MAP[destAsset]}/>{total || ''} {SYMBOL_MAP[destAsset]}
                                         </Grid>
                                     </Grid>

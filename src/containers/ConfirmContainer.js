@@ -222,7 +222,7 @@ const styles = () => ({
     },
     titleAmount: {
         marginTop: theme.spacing(5),
-        fontSize: 52,
+        // fontSize: 52,
         marginBottom: theme.spacing(1)
     },
     navTitle: {
@@ -236,6 +236,21 @@ const styles = () => ({
         width: 18,
         cursor: 'pointer',
         zIndex: 100000
+    },
+    large: {
+        fontSize: 52,
+    },
+    medium: {
+        fontSize: 42,
+    },
+    small: {
+        fontSize: 32,
+    },
+    smallest: {
+        fontSize: 22,
+    },
+    amountCell: {
+        wordBreak: 'break-word'
     }
 })
 
@@ -327,6 +342,17 @@ class ConfirmContainer extends React.Component {
 
         const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(2)
 
+        const chars = String(amount).replace('.', '')
+
+        let size = 'large'
+        if (chars.length > 5 && chars.length <= 7) {
+            size = 'medium'
+        } else if (chars.length > 7 && chars.length <= 9) {
+            size = 'small'
+        } else if (chars.length > 9){
+            size = 'smallest'
+        }
+
         // console.log('transfer render', store.getState())
 
         return <div className={classes.container}>
@@ -341,7 +367,7 @@ class ConfirmContainer extends React.Component {
                     {isDeposit ? 'Minting' : 'Releasing'}
                 </Typography>
 
-                <Typography variant='h4' className={classes.titleAmount}>
+                <Typography variant='h4' className={classNames(classes.titleAmount, classes[size])}>
                     {confirmTx.amount} {SYMBOL_MAP[sourceAsset]}
                 </Typography>
 
@@ -375,7 +401,7 @@ class ConfirmContainer extends React.Component {
                                     <Grid item xs={6}>
                                         RenVM Fee
                                     </Grid>
-                                    <Grid item xs={6}>
+                                    <Grid item xs={6} className={classes.amountCell}>
                                         <img src={MINI_ICON_MAP[sourceAsset]}/>{fee} {SYMBOL_MAP[sourceAsset]}
                                     </Grid>
                                 </Grid>
@@ -390,7 +416,7 @@ class ConfirmContainer extends React.Component {
                             <Grid item xs={6}>
                                 You will receive
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={6} className={classes.amountCell}>
                                 <img src={MINI_ICON_MAP[destAsset]}/>{total} {SYMBOL_MAP[destAsset]}
                             </Grid>
                         </Grid>

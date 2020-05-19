@@ -18,7 +18,8 @@ import MetaMask from '../assets/metamask-intro.svg'
 
 const styles = () => ({
     container: {
-        textAlign: 'center'
+        textAlign: 'center',
+        paddingTop: theme.spacing(3)
     },
     title: {
         marginBottom: theme.spacing(3),

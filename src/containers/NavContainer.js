@@ -8,7 +8,7 @@ import { resetWallet, setNetwork, initLocalWeb3 } from '../utils/walletUtils'
 
 import Web3 from "web3";
 import EthCrypto from 'eth-crypto'
-import Box from '3box';
+// import Box from '3box';
 import Portis from '@portis/web3';
 import Torus from "@toruslabs/torus-embed";
 
@@ -72,7 +72,8 @@ const styles = () => ({
         [theme.breakpoints.down('xs')]: {
             width: '100%',
             marginTop: theme.spacing(2)
-        }
+      },
+      display: 'inline-block'
     },
     title: {
       // marginBottom: theme.spacing(0.5),
@@ -95,6 +96,18 @@ const styles = () => ({
     disabled: {
         // pointerEvents: 'none',
         cursor: 'auto'
+    },
+    circle: {
+        width: 8,
+        height: 8,
+        backgroundColor: '#3CBC98',
+        borderRadius: 4,
+        float: 'left',
+        marginTop: 6.85,
+        marginRight: 6
+    },
+    walletLabel: {
+        marginRight: theme.spacing(1)
     }
 })
 
@@ -181,13 +194,17 @@ class NavContainer extends React.Component {
                                   <Typography variant='caption'>Balance: {balance} WBTC</Typography>
                               </div>*/}
                               {<Button disableRipple={walletAddress.length}
-                                color={walletAddress ? '' : 'primary'}
+                                color={''}
                                 onClick={() => {
                                     if (!walletAddress) {
                                         initLocalWeb3()
                                     }
                                 }} variant="outlined" className={classNames(classes.accountButton, walletAddress && classes.disabled)}>
-                                {walletAddress ? (walletAddress.slice(0,7) + '...' + walletAddress.slice(walletAddress.length - 5)) : <span>Connect Wallet<span className={classes.hideMobile}></span></span>}
+                                {walletAddress ? <div>
+                                  <div className={classes.circle}></div>
+                                  {/*<span className={classes.walletLabel}>Metamask</span>*/}
+                                  <span>{(walletAddress.slice(0,7) + '...' + walletAddress.slice(walletAddress.length - 5))}</span>
+                                </div> : <span>Connect Wallet<span className={classes.hideMobile}></span></span>}
                               </Button>}
 
                     </Grid>

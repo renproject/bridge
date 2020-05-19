@@ -1,5 +1,4 @@
 import React from 'react';
-import Box from '3box';
 import { ethers } from 'ethers'
 import EthCrypto from 'eth-crypto'
 import { createStore, withStore } from '@spyna/react-store'
@@ -51,7 +50,7 @@ const styles = () => ({
     minHeight: '100vh'
   },
   contentContainer: {
-    paddingTop: theme.spacing(3),
+    // paddingTop: theme.spacing(3),
     flex: 1
   },
   footerContainer: {
@@ -161,12 +160,12 @@ class AppWrapper extends React.Component {
         const confirmAction = store.get('confirmAction')
         const confirmTx = store.get('confirmTx')
 
-        console.log(store.getState())
+        // console.log(store.getState())
 
         return (
           <ThemeProvider theme={theme}>
                 <NetworkModalContainer />
-                <Grid container className={classes.container} direction='column'>
+                <Grid container className={classes.container}>
                     <NavContainer />
                     <Grid item className={classes.contentContainer}>
                         <Grid container justify='center' alignItems='center'>
@@ -178,15 +177,15 @@ class AppWrapper extends React.Component {
                             </Grid>}
                         </Grid>
                     </Grid>
-                    <Grid container className={classes.footerContainer}>
+                    <Grid container className={classes.footerContainer} alignItems='flex-end'>
                       <Container size='lg'>
                         <Grid container alignItems='center' justify='space-between'>
-                            <Typography className={classes.footerLinks} variant='caption'><a target='_blank' href={'https://kovan.etherscan.io/address/'}>What is RenVM?</a> <a target='_blank' href={'https://kovan.etherscan.io/address/'}>Docs</a></Typography>
+                            <Typography className={classes.footerLinks} variant='caption'><a target='_blank' href={'https://renproject.io/renvm'}>What is RenVM?</a> <a target='_blank' href={'https://docs.renproject.io/developers/'}>Docs</a></Typography>
                             <Typography className={classes.footerLinks} variant='caption'>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Twitter} /></a>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Github} /></a>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Telegram} /></a>
-                              <a target='_blank' href={'https://kovan.etherscan.io/address/'}><img className={classes.footerLogo} src={Reddit} /></a>
+                              <a target='_blank' href={'https://twitter.com/renprotocol'}><img className={classes.footerLogo} src={Twitter} /></a>
+                              <a target='_blank' href={'https://github.com/renproject'}><img className={classes.footerLogo} src={Github} /></a>
+                              <a target='_blank' href={'https://t.me/renproject'}><img className={classes.footerLogo} src={Telegram} /></a>
+                              <a target='_blank' href={'https://www.reddit.com/r/renproject'}><img className={classes.footerLogo} src={Reddit} /></a>
                             </Typography>
                       </Grid>
                       </Container>

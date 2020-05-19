@@ -29,6 +29,7 @@ export default createMuiTheme({
         },
         // primary: blueGrey,
         secondary: grey,
+        divider: '#DBE0E8'
     },
     overrides: {
         MuiButton: {
@@ -36,7 +37,7 @@ export default createMuiTheme({
                 textTransform: 'none',
                 borderRadius: 4,
                 '&.MuiButton-outlined': {
-                    // border: '1px solid #eee',
+                    border: '1px solid #DCE0E3',
                     '&.Mui-disabled': {
                       // backgroundColor: 'rgba(255, 255, 255, 0.1) !important',
                         border: '1px solid transparent'
@@ -80,14 +81,16 @@ export default createMuiTheme({
         },
         MuiToggleButtonGroup: {
           root: {
-            backgroundColor: 'transparent',
+            backgroundColor: '#fff',
             '& span': {
               fontSize: 14
             },
             '& button': {
               minHeight: 54
             },
-            borderRadius: 0
+            borderRadius: 0,
+            borderTopLeftRadius: 4,
+            borderTopRightRadius: 4,
           },
           grouped: {
             '&:not(:first-child)': {
@@ -104,7 +107,7 @@ export default createMuiTheme({
         MuiToggleButton: {
             root: {
                 // border: '1px solid rgba(255, 255, 255, 0.23)',
-                backgroundColor: 'transparent !important',
+                backgroundColor: '#eeeeee2e !important',
                 '& img': {
                   opacity: 0.75
                 },
@@ -123,7 +126,7 @@ export default createMuiTheme({
                 },
                 borderRadius: 0,
                 '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1) !important',
+                    backgroundColor: '#eeeeee2e !important',
                 },
                 '& .MuiToggleButton-label': {
                     fontSize: 12

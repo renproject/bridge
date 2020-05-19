@@ -10,7 +10,30 @@ const styles = () => ({
     container: {
         width: '100%',
         textAlign: 'center',
-        // fontWeight: 'bold'
+        '& input': {
+          fontFamily: 'inherit',
+          color: '#3F3F48'
+        },
+    },
+    large: {
+      '& input': {
+        fontSize: 52,
+      }
+    },
+    medium: {
+      '& input': {
+        fontSize: 42,
+      }
+    },
+    small: {
+      '& input': {
+        fontSize: 32,
+      }
+    },
+    smallest: {
+      '& input': {
+        fontSize: 22,
+      }
     },
     input: {
         fontSize: 52,
@@ -36,18 +59,33 @@ const BigCurrencyInput = function(props) {
         onChange,
         symbol,
         usdValue,
+        value,
         inputRef
     } = props
 
     const change = onChange || (() => {})
     const asset = symbol || ''
+    const val = value ? String(value) : ''
 
     function format(n = '') {
         console.log(n)
         return n + ' ' + asset
     }
 
-    return <div className={classes.container}>
+    const chars = val.replace('.', '')
+
+    let size = 'large'
+    if (chars.length > 5 && chars.length <= 7) {
+        size = 'medium'
+    } else if (chars.length > 7 && chars.length <= 9) {
+        size = 'small'
+    } else if (chars.length > 9){
+        size = 'smallest'
+    }
+
+    console.log(size)
+
+    return <div className={classNames(classes.container, classes[size])}>
       <NumericInput
         ref={inputRef}
         style={false}
