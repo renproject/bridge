@@ -321,6 +321,27 @@ export const abbreviateAddress = function(walletAddress) {
     }
 }
 
+export const modifyNumericInput = function(value, string, input) {
+    console.log(value, string, input)
+    const valStr = String(value)
+    if (string === '.') {
+        setTimeout(() => {
+          input.setValue('.')
+        }, 1)
+    } else if (valStr.length === 3 && valStr.charAt(1) === '.'){
+        setTimeout(() => {
+          if (input.createTextRange) {
+              var part = input.createTextRange();
+              part.move("character", 3);
+              part.select();
+          } else if (input.setSelectionRange) {
+              input.setSelectionRange(3, 3);
+          }
+          input.focus();
+        }, 1)
+    }
+}
+
 // window.setWbtcAllowance = setWbtcAllowance
 
 export default {

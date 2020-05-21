@@ -66,7 +66,6 @@ class BigCurrencyInput extends React.PureComponent {
         value: this.props.value
     }
 
-    // console.log('shouldComponentUpdate', JSON.stringify(nextData) !== JSON.stringify(currentData))
     return nextData !== currentData
   }
 
@@ -81,13 +80,13 @@ class BigCurrencyInput extends React.PureComponent {
         inputRef
     } = this.props
 
-    const change = onChange || (() => {})
     const asset = symbol || ''
     const val = value ? String(value) : ''
     const ref = inputRef || this.defaultRef
+    const change = onChange || (() => {})
 
-    function format(n) {
-        // console.log(n)
+    function format(n = '') {
+        console.log(n)
         return n + ' ' + asset
     }
 
@@ -109,23 +108,6 @@ class BigCurrencyInput extends React.PureComponent {
         value={val}
         className={classNames(classes.input, className)}
         format={format}
-        onFocus={() => {
-          // const inp = ref.current.refsInput
-          // console.log(inp)
-          // inp.setValue(' ')
-          // inp.setValue(' .')
-          // inp.setValue('')
-          // // inp.dispatchEvent(new KeyboardEvent('keypress',{'key':'.'}))
-          // // inp.dispatchEvent(new KeyboardEvent('keypress',{'key':' '}))
-          // if (inp.createTextRange) {
-          //     var part = inp.createTextRange();
-          //     part.move("character", 0);
-          //     part.select();
-          // } else if (inp.setSelectionRange) {
-          //     inp.setSelectionRange(0, 0);
-          // }
-          // inp.focus();
-        }}
         {...this.props}
       />
 

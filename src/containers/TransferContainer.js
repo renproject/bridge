@@ -3,7 +3,6 @@ import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
 import theme from '../theme/theme'
 import classNames from 'classnames'
-// import RenSDK from "@renproject/ren";
 import sb from "satoshi-bitcoin"
 import AddressValidator from "wallet-address-validator";
 import bchaddr from 'bchaddrjs'
@@ -24,7 +23,8 @@ import {
   initLocalWeb3,
   setWbtcAllowance,
   abbreviateAddress,
-  updateBalance
+  updateBalance,
+  modifyNumericInput
 } from '../utils/walletUtils'
 import Web3 from "web3";
 import { ethers } from 'ethers';
@@ -384,7 +384,8 @@ class TransferContainer extends React.Component {
                                       placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]}
                                       usdValue={usdValue}
                                       value={amount}
-                                      onChange={(value) => {
+                                      onChange={(value, string, input) => {
+                                        modifyNumericInput(value, string, input)
                                         store.set('convert.amount', value)
                                         gatherFeeData()
                                       }}/>
@@ -432,11 +433,8 @@ class TransferContainer extends React.Component {
                                       inputRef={this.burnInputRef}
                                       placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]}
                                       usdValue={usdValue}
-                                      onChange={(value, valueString, input) => {
-                                        // console.log(valueString, valueString === '.', input)
-                                        // if (valueString === '.') {
-                                        //     this.burnInputRef.current.refsInput.setValue(`${0} ${SYMBOL_MAP[selectedFormat]}`)
-                                        // }
+                                      onChange={(value, string, input) => {
+                                        modifyNumericInput(value, string, input)
                                         store.set('convert.amount', value)
                                         gatherFeeData()
                                       }}/>

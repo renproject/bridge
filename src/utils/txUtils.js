@@ -119,8 +119,10 @@ export const gatherFeeData = async function() {
 
     const amountInSats = GatewayJS.utils.value(amount, "btc").sats().toNumber()
 
-    const fee = Number((Number(amount) * 0.001) + 0.00005).toFixed(6)
-    const total = Number(amount-fee).toFixed(6)
+    const fee = Number((Number(amount) * 0.001) + 0.00035).toFixed(6)
+    // console.log(amount, fee, Number(amount-fee))
+    const total = Number(amount-fee) > 0 ? Number(amount-fee).toFixed(6) : '0.000000'
+
     store.set('convert.networkFee', fee)
     store.set('convert.conversionTotal', total)
 }
