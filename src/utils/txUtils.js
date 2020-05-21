@@ -148,7 +148,7 @@ export const initGJSDeposit = async function(tx) {
         web3Provider: localWeb3.currentProvider
     }
 
-    console.log('initGJSDeposit', data)
+    // console.log('initGJSDeposit', data)
 
     gjs.open(data);
 
@@ -180,7 +180,7 @@ export const initGJSWithdraw = async function(tx) {
         web3Provider: localWeb3.currentProvider
     }
 
-    console.log('initGJSWithdraw', data)
+    // console.log('initGJSWithdraw', data)
 
     gjs.open(data);
 }
@@ -189,15 +189,15 @@ export const recoverTrades = async function() {
     const store = getStore()
     const gjs = store.get('gjs')
     const localWeb3 = store.get('localWeb3')
-    console.log(store.getState())
+    // console.log(store.getState())
 
     // Re-open incomplete trades
     const previousGateways = await gjs.getGateways();
     for (const trade of Array.from(previousGateways.values())) {
-        console.log('trade', trade)
+        // console.log('trade', trade)
         if (trade.status === GatewayJS.LockAndMintStatus.ConfirmedOnEthereum || trade.status === GatewayJS.BurnAndReleaseStatus.ReturnedFromRenVM) { continue; }
         const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade)
-        console.log(gateway)
+        // console.log(gateway)
         // gateway.close()
         // gateway.cancel();
         gateway.result()

@@ -51,7 +51,12 @@ const styles = () => ({
   },
   contentContainer: {
     // paddingTop: theme.spacing(3),
-    flex: 1
+    flex: 1,
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: theme.spacing(2),
+      paddingRight: theme.spacing(2)
+        // marginTop: theme.spacing(2)
+    }
   },
   footerContainer: {
     paddingTop: theme.spacing(3),
@@ -59,7 +64,9 @@ const styles = () => ({
     fontSize: 10,
     '& a': {
         color: '#333',
-        marginRight: theme.spacing(2)
+        marginRight: theme.spacing(2),
+        textDecoration: 'none',
+        opacity: 0.75
     }
   },
   footerLogo: {
@@ -147,7 +154,7 @@ class AppWrapper extends React.Component {
         const params = queryString.parse(window.location.search)
         store.set('queryParams', params)
 
-        setNetwork(params.network === 'mainnet' ? 'mainnet' : 'testnet')
+        setNetwork(params.network === 'testnet' ? 'testnet' : 'mainnet')
         // initDataWeb3()
     }
 

@@ -4,7 +4,6 @@ import { withStyles } from '@material-ui/styles';
 import theme from '../theme/theme'
 import classNames from 'classnames'
 import Numeral from 'numeral'
-// import RenSDK from "@renproject/ren";
 import sb from "satoshi-bitcoin"
 import AddressValidator from "wallet-address-validator";
 import {
@@ -39,7 +38,7 @@ import WalletIcon from '../assets/wallet-icon.svg'
 
 import adapterABI from "../utils/adapterABI.json";
 
-const styles = () => ({
+const styles = (theme) => ({
     container: {
         background: '#fff',
         border: '1px solid ' + theme.palette.divider,
@@ -47,11 +46,13 @@ const styles = () => ({
         boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)',
         maxWidth: 400,
         width: '100%',
-        margin: '0px auto'
+        margin: '0px auto',
+        [theme.breakpoints.down('sm')]: {
+            maxWidth: '100%'
+        }
     },
     transferActionTabs: {
         margin: '0px auto',
-        // marginTop: theme.spacing(2),
         marginBottom: theme.spacing(1),
         '& div.MuiToggleButtonGroup-root': {
             width: '100%'
@@ -61,22 +62,15 @@ const styles = () => ({
         }
     },
     depositAddressContainer: {
-        // marginTop: theme.spacing(1)
     },
     depositAddress: {
         width: '100%',
-        // marginTop: theme.spacing(1)
     },
     actionButtonContainer: {
         padding: theme.spacing(3),
         textAlign: 'center',
         '& button': {
-            // minHeight: 64,
-            // borderRadius: theme.spacing(1),
-            // background: 'linear-gradient(60deg,#ffc826,#fb8c00)',
-            // boxShadow: 'none',
             '&.Mui-disabled': {
-                // background: '#eee'
             },
             margin: '0px auto',
             fontSize: 12,
@@ -88,15 +82,11 @@ const styles = () => ({
         width: '100%'
     },
     depositButton: {
-        // width: '100%'
     },
     withdrawButton: {
-        // width: '100%'
-        // margin: '0px auto'
     },
     actions: {
         paddingTop: theme.spacing(1),
-        // padding: theme.spacing(3)
     },
     transactionsContainer: {
         padding: theme.spacing(3),
@@ -105,11 +95,6 @@ const styles = () => ({
         borderTop: '1px solid #EBEBEB'
     },
     actionsContainer: {
-        // border: '1px solid #EBEBEB',
-        // borderTop: '0px solid transparent',
-        // padding: theme.spacing(3),
-        // paddingTop: 0,
-        // border: '1px solid ' +  theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
         borderTopLeftRadius: 0,
         borderTopRightRadius: 0,
@@ -127,7 +112,6 @@ const styles = () => ({
     },
     fees: {
         width: '100%',
-        // borderRadius: 4,
         border: '1px solid ' + theme.palette.divider,
         fontSize: 12,
         padding: theme.spacing(1),
@@ -144,7 +128,6 @@ const styles = () => ({
         width: 16,
         height: 16,
         marginRight: theme.spacing(0.75),
-        // marginLeft: theme.spacing(0.75),
     },
     toggle: {
       '& button': {
@@ -164,9 +147,7 @@ const styles = () => ({
       paddingBottom: theme.spacing(3)
     },
     optionsContainer: {
-        // border: '1px solid ' + theme.palette.divider,
         borderBottom: 'none',
-        // marginTop: theme.spacing(3),
         paddingLeft: theme.spacing(3),
         paddingRight: theme.spacing(3),
         '& :last-child': {
@@ -206,7 +187,6 @@ const styles = () => ({
         borderBottom: '1px solid ' + theme.palette.divider,
         paddingLeft: theme.spacing(3),
         paddingRight: theme.spacing(3),
-        // marginTop: -1
     },
     headerText: {
         textAlign: 'center',
@@ -214,15 +194,12 @@ const styles = () => ({
         backgroundColor: '#fbfbfb',
         borderTopRightRadius: 4,
         borderTopLeftRadius: 4,
-        // borderLeft: '1px solid ' + theme.palette.divider,
-        // borderRight: '1px solid ' + theme.palette.divider,
         borderBottom: '1px solid ' + theme.palette.divider,
         paddingBottom: theme.spacing(6),
         paddingTop: theme.spacing(1)
     },
     titleAmount: {
         marginTop: theme.spacing(5),
-        // fontSize: 52,
         marginBottom: theme.spacing(1)
     },
     navTitle: {
@@ -235,7 +212,10 @@ const styles = () => ({
         height: 'auto',
         width: 18,
         cursor: 'pointer',
-        zIndex: 100000
+        zIndex: 100000,
+        '&:hover': {
+          opacity: 0.75
+        }
     },
     large: {
         fontSize: 52,
@@ -353,8 +333,6 @@ class ConfirmContainer extends React.Component {
             size = 'smallest'
         }
 
-        // console.log('transfer render', store.getState())
-
         return <div className={classes.container}>
             <div className={classes.headerText}>
                 <img className={classes.back}
@@ -429,6 +407,7 @@ class ConfirmContainer extends React.Component {
                                 variant={'contained'}
                                 color='primary'
                                 size="large"
+                                disableRipple
                                 fullWidth
                                 className={classNames(classes.margin, classes.actionButton)}
                                 onClick={this.confirmDeposit.bind(this)}>
@@ -441,6 +420,7 @@ class ConfirmContainer extends React.Component {
                                 variant={'contained'}
                                 color='primary'
                                 size="large"
+                                disableRipple
                                 fullWidth
                                 className={classNames(classes.margin, classes.actionButton)}
                                 onClick={this.confirmWithdraw.bind(this)}>

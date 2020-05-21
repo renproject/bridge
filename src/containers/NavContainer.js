@@ -40,6 +40,10 @@ const styles = () => ({
         paddingTop: theme.spacing(4),
         paddingBottom: theme.spacing(4),
         minHeight: 52,
+        [theme.breakpoints.down('sm')]: {
+            paddingTop: theme.spacing(2),
+            paddingBottom: theme.spacing(2),
+        }
         // borderBottom: '1px solid ' + theme.palette.divider,
         // backgroundColor: '#fff'
     },
@@ -66,6 +70,7 @@ const styles = () => ({
     },
     accountButton: {
       fontSize: 12,
+      color: '#3F3F48',
       '& svg': {
         marginRight: theme.spacing(1)
         },

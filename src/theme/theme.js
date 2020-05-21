@@ -47,6 +47,12 @@ export default createMuiTheme({
                     minHeight: 54,
                     fontSize: 14,
                 },
+                '&.MuiButton-contained': {
+                    boxShadow: 'none',
+                    '&:hover': {
+                        boxShadow: 'none'
+                    }
+                }
             }
         },
         PrivateNotchedOutline: {
@@ -101,6 +107,13 @@ export default createMuiTheme({
         MuiTableCell: {
             root: {
                 // borderBottom: '0.5px solid rgba(255, 255, 255, 0.12)',
+            }
+        },
+        MuiMenu: {
+            paper: {
+                boxShadow: '0px 1px 3px rgba(0, 27, 58, 0.1)',
+                border: '1px solid #DCE0E3',
+                minWidth: 190
             }
         },
         // .MuiToggleButtonGroup-grouped:not(:first-child)

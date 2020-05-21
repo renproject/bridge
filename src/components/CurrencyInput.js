@@ -17,7 +17,6 @@ import { MINI_ICON_MAP } from '../utils/walletUtils'
 const styles = () => ({
     amountField: {
         width: '100%',
-        // marginBottom: theme.spacing(2)
     },
     endAdornment: {
         '& p': {
@@ -133,23 +132,6 @@ class CurrencyInput extends React.Component {
                          </MenuItem>)}
 
                        </Menu>
-                        {/*<Select
-                          className={classes.select}
-                          variant='outlined'
-                          value={currency || items[0]}
-                          onChange={(event) => {
-                              onCurrencyChange(event.target.value)
-                              this.setState({ currency: event.target.value })
-                          }}
-                          inputProps={{
-                              disableUnderline: true
-                          }}
-                        >
-                        {items.map((i, index) => <MenuItem key={index} value={i}>
-                            <img src={MINI_ICON_MAP[i.toLowerCase()]} className={classes.icon} />
-                            <span>{i}</span>
-                        </MenuItem>)}
-                        </Select>*/}
                     </InputAdornment> : <InputAdornment className={classes.endAdornment} position="end">{<div className={classes.item}>
                         {<img src={MINI_ICON_MAP[items[0].toLowerCase()]} className={classes.icon} />}
                         <span>{items[0]}</span>

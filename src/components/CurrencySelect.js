@@ -6,22 +6,22 @@ import { withStyles } from '@material-ui/styles';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
+import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 
-import { MINI_ICON_MAP } from '../utils/walletUtils'
+import { MINI_ICON_MAP, NAME_MAP } from '../utils/walletUtils'
 
 const styles = () => ({
     amountField: {
         width: '100%',
-        // marginBottom: theme.spacing(2)
     },
     endAdornment: {
         '& p': {
-            // color: '#000'
         }
     },
     item: {
@@ -29,12 +29,15 @@ const styles = () => ({
         fontSize: 14,
         alignItems: 'center',
         minWidth: 55,
-        paddingLeft: theme.spacing(1),
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(2),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
         '& div': {
             display: 'flex',
             // fontSize: 14
         },
-        justifyContent: 'flex-end'
+        justifyContent: 'flex-start'
     },
     select: {
         display: 'flex',
@@ -47,13 +50,34 @@ const styles = () => ({
         }
     },
     icon: {
-        width: 15,
-        height: 15,
-        marginRight: theme.spacing(0.75),
+        width: 32,
+        height: 'auto',
+        marginRight: 10,
     },
     button: {
         fontSize: 14,
+        color: '#585861',
+        display: 'flex',
+        justifyContent: 'flex-start'
+    },
+    arrow: {
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        '& svg': {
+            width: 22,
+            height: 'auto',
+            marginLeft: theme.spacing(0.75)
+        }
+    },
+    balance: {
+        fontSize: 12,
+        marginTop: -2,
         color: '#585861'
+    },
+    menu: {
+
     }
 })
 
@@ -100,45 +124,39 @@ class CurrencySelect extends React.Component {
         const selected = active || items[0]
 
         return <div className={className || ''}>
-            <Button className={classes.button} ref={this.anchorEl} aria-controls="menu" aria-haspopup="true" onClick={this.handleOpen.bind(this)}>
+            <Button fullWidth className={classes.button} ref={this.anchorEl} aria-controls="menu" aria-haspopup="true" onClick={this.handleOpen.bind(this)}>
                 <img src={MINI_ICON_MAP[selected.toLowerCase()]} className={classes.icon} />
                 <span>{selected}</span>
+                <div className={classes.arrow}>
+                  <ArrowDropDown />
+                </div>
             </Button>
             <Menu
                id="menu"
                anchorEl={this.anchorEl.current}
                keepMounted
+               className={classes.menu}
                open={open}
                onClose={this.handleClose.bind(this)}
              >
-               {items.map((i, index) => <MenuItem onClick={() => {
-                 this.handleClose.bind(this)({
-                    target: {
-                        value: i
-                    }
-                 })
-               }} key={index} value={i}>
-                   <img src={MINI_ICON_MAP[i.toLowerCase()]} className={classes.icon} />
-                   <span>{i}</span>
-               </MenuItem>)}
+               {items.map((i, index) => {
+                 const balance = this.props[`${i}Balance`]
+
+                 return <MenuItem className={classes.item} onClick={() => {
+                     this.handleClose.bind(this)({
+                        target: {
+                            value: i
+                        }
+                     })
+                   }} key={index} value={i}>
+                       <div><img src={MINI_ICON_MAP[i.toLowerCase()]} className={classes.icon} /></div>
+                       <Grid container direction='column' alignItems='flex-start'>
+                         <span>{i}</span>
+                         <span className={classes.balance}>{balance ? `${balance} ${i}` : NAME_MAP[i.toLowerCase()]}</span>
+                       </Grid>
+                   </MenuItem>
+                 })}
              </Menu>
-              {/*<Select
-                className={classes.select}
-                variant='outlined'
-                value={currency || items[0]}
-                onChange={(event) => {
-                    onCurrencyChange(event.target.value)
-                    this.setState({ currency: event.target.value })
-                }}
-                inputProps={{
-                    disableUnderline: true
-                }}
-              >
-              {items.map((i, index) => <MenuItem key={index} value={i}>
-                  <img src={MINI_ICON_MAP[i.toLowerCase()]} className={classes.icon} />
-                  <span>{i}</span>
-              </MenuItem>)}
-              </Select>*/}
           </div>
     }
 }

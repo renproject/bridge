@@ -2202,13 +2202,13 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@renproject/chains@^1.0.0-alpha.7":
-  version "1.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@renproject/chains/-/chains-1.0.0-alpha.7.tgz#ce954454e625ac529524421bee61fd2d4af0a084"
-  integrity sha512-YczGFA/0hHl5uO3YOaCbC55LtTV8Qf/b1+u1lQUEuwb0s0XHQUMugLPhKh/NSQ3Q25xXDBjYu23dGPKwnE0nfQ==
+"@renproject/chains@^1.0.0-alpha.9":
+  version "1.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@renproject/chains/-/chains-1.0.0-alpha.9.tgz#f91be178fe6e647f2f8ef4f45360cbf2a1b34d40"
+  integrity sha512-kZWpOw+ohsEpAP+OqzXVM5H8kKzc1aEn+xVEnXWMPYjvPuYTv8iQGUuIyfzA/2diMHvmzaugCau2dGAheWkaGw==
   dependencies:
     "@renproject/contracts" "^0.6.0"
-    "@renproject/interfaces" "^1.0.0-alpha.7"
+    "@renproject/interfaces" "^1.0.0-alpha.9"
     "@types/bn.js" "^4.11.6"
     "@types/bs58" "^4.0.1"
     "@types/ethereumjs-util" "^6.1.0"
@@ -2237,36 +2237,36 @@
   dependencies:
     darknode-sol "https://github.com/renproject/darknode-sol#f692da1b99a88d7691d80d6e28337a9dedfbe501"
 
-"@renproject/gateway@^1.0.0-alpha.7":
-  version "1.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@renproject/gateway/-/gateway-1.0.0-alpha.7.tgz#61a81a157fee50c2214a91b63dab9f7cf39d8094"
-  integrity sha512-e2qieHEWUQWIAgnZSGODh4hfQL+tYTBSoZf6AnfyRptkYnUF5w6Fgg7/em0h7pLhXl+/mK7KvSDQOnZKuGJp6w==
+"@renproject/gateway@^1.0.0-alpha.9":
+  version "1.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@renproject/gateway/-/gateway-1.0.0-alpha.9.tgz#1b03fbbe3111f61e896ac3c61e583bd6269d1adf"
+  integrity sha512-XnzyWNDUP62znYcv9MCdHBa6aSvLLJwSCGDNRwv3F4uDat+q3PvIfu0ka35+GSstpkcQAothA5PInVa/1nKHnQ==
   dependencies:
-    "@renproject/interfaces" "^1.0.0-alpha.7"
-    "@renproject/utils" "^1.0.0-alpha.7"
+    "@renproject/interfaces" "^1.0.0-alpha.9"
+    "@renproject/utils" "^1.0.0-alpha.9"
     "@types/bn.js" "^4.11.6"
     "@types/node" "^13.13.4"
     push.js "^1.0.12"
     web3 "^2.0.0-alpha.1"
 
-"@renproject/interfaces@^1.0.0-alpha.7":
-  version "1.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@renproject/interfaces/-/interfaces-1.0.0-alpha.7.tgz#b54993a2db02ddb5c5e7fc8a76d62915a49baf4b"
-  integrity sha512-Xv4umtIe2j1zUIYtlP2A5cmDBRDM47Fjlz5lnz+41bD/3lgygrTU3/2/DEbh60LBgvrGMC7aHZwmSmmq9SDBvQ==
+"@renproject/interfaces@^1.0.0-alpha.9":
+  version "1.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@renproject/interfaces/-/interfaces-1.0.0-alpha.9.tgz#1c27ae96e0d71e2d98f24ef0cfa62e5058c0fc69"
+  integrity sha512-9NBXZqdeIZ/R1yo3AQ6nYtOdCPs8sGu+CU5iKprTQfQ4RANXEvTKrpDf5TS+tTG6qvFuDRN3jpSAg8He9Tq+SA==
   dependencies:
     "@renproject/contracts" "^0.6.0"
     "@types/node" "^13.13.4"
     bignumber.js "^9.0.0"
     events "^3.1.0"
 
-"@renproject/utils@^1.0.0-alpha.7":
-  version "1.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@renproject/utils/-/utils-1.0.0-alpha.7.tgz#3d333dd154b7d346b855a929e42b5c14a6ca3fc5"
-  integrity sha512-+LoEDd6KBPf5wMfjoXj2iad8IgtTtXp7j2IgHry7pA0kw6f/1W9JGSSNaw8sMxE+ATPBLWhVJFxNAdjQghiSfw==
+"@renproject/utils@^1.0.0-alpha.9":
+  version "1.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@renproject/utils/-/utils-1.0.0-alpha.9.tgz#73dfcf87e8d382dd1df31743b16d613fc97a4e70"
+  integrity sha512-GnA/BzXJjkuuLCUPLfzyO86nichUbOKh++nIvXCEjXMQ2Tormarzpd42vuy1l6KKmnPrdQyemloCdDITNcdP9A==
   dependencies:
-    "@renproject/chains" "^1.0.0-alpha.7"
+    "@renproject/chains" "^1.0.0-alpha.9"
     "@renproject/contracts" "^0.6.0"
-    "@renproject/interfaces" "^1.0.0-alpha.7"
+    "@renproject/interfaces" "^1.0.0-alpha.9"
     "@types/bn.js" "^4.11.6"
     "@types/bs58" "^4.0.1"
     "@types/ethereumjs-util" "^6.1.0"
@@ -4704,7 +4704,7 @@ bitcore-lib-cash@^8.19.0:
     inherits "=2.0.1"
     lodash "=4.17.15"
 
-bitcore-lib-zcash@zcash-hackworks/bitcore-lib-zcash:
+"bitcore-lib-zcash@github:zcash-hackworks/bitcore-lib-zcash":
   version "0.13.19"
   resolved "https://codeload.github.com/zcash-hackworks/bitcore-lib-zcash/tar.gz/e97ae1dd2e9f14d6076d5e5429c75d8965afa4ab"
   dependencies:

@@ -34,7 +34,6 @@ const ConversionActions = function(props) {
                 store.set('gatewayModalTx', tx)
             }}>View Gateway Address</a>
             <a className={classes.viewLink} onClick={() => {
-                // TODO: are you sure modal
                 removeTx(tx)
             }}>Cancel</a>
         </React.Fragment>}

@@ -3,7 +3,6 @@ import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
 import theme from '../theme/theme'
 import classNames from 'classnames'
-// import RenSDK from "@renproject/ren";
 import DetectNetwork from "web3-detect-network";
 import { initLocalWeb3 } from '../utils/walletUtils'
 import { removeTx } from '../utils/txUtils'
@@ -16,14 +15,21 @@ import Typography from '@material-ui/core/Typography';
 import MetaMask from '../assets/metamask-intro.svg'
 
 
-const styles = () => ({
+const styles = (theme) => ({
     container: {
         textAlign: 'center',
-        paddingTop: theme.spacing(3)
+        paddingTop: theme.spacing(3),
+        [theme.breakpoints.down('sm')]: {
+            maxWidth: '100%'
+        }
     },
     title: {
         marginBottom: theme.spacing(3),
-        fontSize: 48
+        fontSize: 48,
+        color: '#3F3F48',
+        [theme.breakpoints.down('sm')]: {
+            fontSize: 24
+        }
     },
     metamask: {
         paddingTop: theme.spacing(6),
@@ -83,6 +89,7 @@ class IntroContainer extends React.Component {
                     className={classes.button}
                     size='large'
                     color='primary'
+                    disableRipple
                     variant='contained'>
                     Connect Wallet
                 </Button>

@@ -2,12 +2,7 @@ import Web3 from "web3";
 import GatewayJS from '@renproject/gateway'
 
 import DetectNetwork from "web3-detect-network";
-// import Box from '3box';
-// import Portis from '@portis/web3';
-// import Torus from "@toruslabs/torus-embed";
 import Web3Modal from 'web3modal'
-// import Authereum from "authereum"
-// import Fortmatic from "fortmatic";
 
 import BTC from '../assets/btc.png'
 import ETH from '../assets/eth.png'
@@ -270,7 +265,8 @@ export const initLocalWeb3 = async function() {
         const transactions = txData ? JSON.parse(txData) : []
         store.set('convert.transactions', transactions)
 
-        watchWalletData()
+        // watchWalletData()
+        updateBalance()
         recoverTrades()
 
         // listen for changes

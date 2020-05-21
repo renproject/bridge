@@ -41,8 +41,6 @@ const styles = () => ({
         outline: 'none',
         textAlign: 'center',
         border: '0px solid transparent'
-        // textDecoration: 'underline',
-        // cursor: 'pointer',
     },
     grayText: {
         color: '#D0D2D9'
@@ -51,9 +49,29 @@ const styles = () => ({
 
 
 
-const BigCurrencyInput = function(props) {
+class BigCurrencyInput extends React.PureComponent {
+  constructor(props) {
+    super(props)
+    this.defaultRef = React.createRef()
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    const nextData = {
+        symbol: nextProps.symbol,
+        value: nextProps.value,
+    }
+
+    const currentData = {
+        symbol: this.props.symbol,
+        value: this.props.value
+    }
+
+    // console.log('shouldComponentUpdate', JSON.stringify(nextData) !== JSON.stringify(currentData))
+    return nextData !== currentData
+  }
+
+  render() {
     const {
-        children,
         classes,
         className,
         onChange,
@@ -61,14 +79,15 @@ const BigCurrencyInput = function(props) {
         usdValue,
         value,
         inputRef
-    } = props
+    } = this.props
 
     const change = onChange || (() => {})
     const asset = symbol || ''
     const val = value ? String(value) : ''
+    const ref = inputRef || this.defaultRef
 
-    function format(n = '') {
-        console.log(n)
+    function format(n) {
+        // console.log(n)
         return n + ' ' + asset
     }
 
@@ -83,21 +102,38 @@ const BigCurrencyInput = function(props) {
         size = 'smallest'
     }
 
-    console.log(size)
-
     return <div className={classNames(classes.container, classes[size])}>
       <NumericInput
-        ref={inputRef}
+        ref={ref}
         style={false}
+        value={val}
         className={classNames(classes.input, className)}
         format={format}
-        {...props}
+        onFocus={() => {
+          // const inp = ref.current.refsInput
+          // console.log(inp)
+          // inp.setValue(' ')
+          // inp.setValue(' .')
+          // inp.setValue('')
+          // // inp.dispatchEvent(new KeyboardEvent('keypress',{'key':'.'}))
+          // // inp.dispatchEvent(new KeyboardEvent('keypress',{'key':' '}))
+          // if (inp.createTextRange) {
+          //     var part = inp.createTextRange();
+          //     part.move("character", 0);
+          //     part.select();
+          // } else if (inp.setSelectionRange) {
+          //     inp.setSelectionRange(0, 0);
+          // }
+          // inp.focus();
+        }}
+        {...this.props}
       />
 
     {<p className={usdValue ? classes.grayText : ''}>
         = {Numeral(usdValue).format('$0,0.00')}
       </p>}
     </div>
+  }
 }
 
 export default withStyles(styles)(BigCurrencyInput);
