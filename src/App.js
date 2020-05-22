@@ -138,6 +138,7 @@ const initialState = {
     'convert.destination': '',
     'convert.destinationValid': false,
     'convert.destinationInputFocused': false,
+    'convert.showDestinationError': false,
     'convert.exchangeRate': '',
     'convert.networkFee': '',
     'convert.conversionTotal': '',
@@ -187,7 +188,9 @@ class AppWrapper extends React.Component {
                     <Grid container className={classes.footerContainer} alignItems='flex-end'>
                       <Container size='lg'>
                         <Grid container alignItems='center' justify='space-between'>
-                            <Typography className={classes.footerLinks} variant='caption'><a target='_blank' href={'https://renproject.io/renvm'}>What is RenVM?</a> <a target='_blank' href={'https://docs.renproject.io/developers/'}>Docs</a></Typography>
+                            <Typography className={classes.footerLinks} variant='caption'>
+                              <a target='_blank' href={'https://renproject.io/renvm'}>What is RenVM?</a> <a target='_blank' href={'https://docs.renproject.io/darknodes/faq/renbridge-faq'}>FAQs</a> <a target='_blank' href={'https://docs.renproject.io/developers/'}>Docs</a>
+                            </Typography>
                             <Typography className={classes.footerLinks} variant='caption'>
                               <a target='_blank' href={'https://twitter.com/renprotocol'}><img className={classes.footerLogo} src={Twitter} /></a>
                               <a target='_blank' href={'https://github.com/renproject'}><img className={classes.footerLogo} src={Github} /></a>

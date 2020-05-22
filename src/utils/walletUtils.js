@@ -133,7 +133,14 @@ export const updateMarketData = async function() {
         console.log(e)
     }
 
-    store.set()
+    try {
+        // console.log(store.get('gjs').send('ren_queryFees', {}))
+        // const fees = await GatewayJS.renVM.sendMessage('ren_queryFees', {})
+        // console.log(fees)
+    } catch(e) {
+        console.log(e)
+    }
+
 }
 
 
@@ -322,11 +329,16 @@ export const abbreviateAddress = function(walletAddress) {
 }
 
 export const modifyNumericInput = function(value, string, input) {
-    console.log(value, string, input)
     const valStr = String(value)
+    console.log(value, string, input, valStr)
     if (string === '.') {
         setTimeout(() => {
-          input.setValue('.')
+          input.value = '0.'
+        }, 1)
+    } else if (string === '.0') {
+        setTimeout(() => {
+          input.setValue(0.0)
+          input.value = '0.0'
         }, 1)
     } else if (valStr.length === 3 && valStr.charAt(1) === '.'){
         setTimeout(() => {

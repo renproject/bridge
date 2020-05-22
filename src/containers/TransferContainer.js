@@ -169,13 +169,13 @@ const styles = (theme) => ({
       paddingBottom: theme.spacing(3)
     },
     optionsContainer: {
-        border: '1px solid ' + theme.palette.divider,
+        border: '1px solid #EDEFF3',
         borderBottom: 'none',
         borderRadius: 4,
         boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)'
     },
     option: {
-        borderBottom: '1px solid ' + theme.palette.divider,
+        borderBottom: '1px solid #EDEFF3',
         paddingLeft: theme.spacing(3),
         paddingRight: theme.spacing(3),
         minHeight: 60,
@@ -189,6 +189,12 @@ const styles = (theme) => ({
             display: 'flex',
             alignItems: 'center'
         }
+    },
+    standaloneOption: {
+        border: '1px solid #DBE0E8',
+        borderRadius: 4,
+        marginBottom: theme.spacing(2),
+        boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)'
     },
     addressInput: {
         width: '100%',
@@ -210,6 +216,12 @@ const styles = (theme) => ({
     },
     totalCell: {
         wordBreak: 'break-word'
+    },
+    amountError: {
+        textAlign: 'center',
+        color: '#FF4545',
+        fontSize: 12,
+        margin: '0px auto'
     }
 })
 
@@ -244,6 +256,51 @@ class TransferContainer extends React.Component {
         return store.get(`ren${asset.toUpperCase()}Balance`)
     }
 
+    validateDeposit() {
+        const { store } = this.props
+        const selectedAsset  = store.get('selectedAsset')
+        const amount = store.get('convert.amount')
+        const amountValid = Number(amount) > MIN_TX_AMOUNTS[selectedAsset]
+
+        if (!amount || !amountValid) {
+            store.set('convert.showAmountError', true)
+            return false
+        } else {
+            store.set('convert.showAmountError', false)
+            return true
+        }
+    }
+
+    validateWithdraw() {
+        const { store } = this.props
+        const amount = store.get('convert.amount')
+        const address = store.get('convert.destination')
+        const convertAddressValid = store.get('convert.destinationValid')
+        const showAddressError = !convertAddressValid
+        const selectedAsset  = store.get('selectedAsset')
+        const selectedFormat  = store.get('convert.selectedFormat')
+        const balance = store.get(SYMBOL_MAP[selectedFormat] + 'Balance')
+        const amountValid = Number(amount) > MIN_TX_AMOUNTS[selectedAsset] && amount <= Number(balance)
+
+        if (showAddressError) {
+            store.set('convert.showDestinationError', true)
+        } else {
+            store.set('convert.showDestinationError', false)
+        }
+
+        if (!amount || !amountValid) {
+            store.set('convert.showAmountError', true)
+        } else {
+            store.set('convert.showAmountError', false)
+        }
+
+        if (showAddressError || !amount || !amountValid) {
+            return false
+        } else {
+            return true
+        }
+    }
+
     async newDeposit() {
         const { store } = this.props
 
@@ -265,9 +322,13 @@ class TransferContainer extends React.Component {
             destNetwork: NETWORK_MAP[format],
             destNetworkVersion: network,
             destAsset: format,
-            amount: amount,
+            amount: Number(amount),
             error: false,
             txHash: ''
+        }
+
+        if (!this.validateDeposit()) {
+            return
         }
 
         store.set('confirmTx', tx)
@@ -295,9 +356,13 @@ class TransferContainer extends React.Component {
             destNetwork: NETWORK_MAP[asset],
             destNetworkVersion: network,
             destAsset: asset,
-            amount: amount,
+            amount: Number(amount),
             error: false,
             txHash: ''
+        }
+
+        if (!this.validateWithdraw()) {
+            return
         }
 
         store.set('confirmTx', tx)
@@ -342,12 +407,15 @@ class TransferContainer extends React.Component {
         const convertAddressValid = store.get('convert.destinationValid')
         const canConvertTo = amount > MIN_TX_AMOUNTS[selectedAsset]
         const canConvertFrom = Number(amount) > MIN_TX_AMOUNTS[selectedAsset] && amount <= Number(balance) && convertAddressValid
-        const showAddressError = !addressFocused && address && !convertAddressValid
+        const showAmountError = store.get('convert.showAmountError')
+        const showDestinationError = store.get('convert.showDestinationError')
 
         const sourceAsset = selectedDirection ? selectedFormat : selectedAsset
         const destAsset = selectedDirection ? selectedAsset : selectedFormat
 
         const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(2)
+
+        // console.log(store.getState())
 
         return <div className={classes.container}>
             {<Grid container className={classes.transferActionTabs}>
@@ -363,6 +431,8 @@ class TransferContainer extends React.Component {
                             store.set('convert.networkFee', '')
                             store.set('convert.conversionTotal', '')
                             store.set('convert.destination', '')
+                            store.set('convert.showAmountError', false)
+                            store.set('convert.showDestinationError', false)
                         }
                     }}>
                     <ToggleButton disableRipple={true} key={0} value={'0'}>
@@ -384,29 +454,34 @@ class TransferContainer extends React.Component {
                                       placeholder={'0.00 ' + SYMBOL_MAP[selectedAsset]}
                                       usdValue={usdValue}
                                       value={amount}
-                                      onChange={(value, string, input) => {
-                                        modifyNumericInput(value, string, input)
-                                        store.set('convert.amount', value)
+                                      onChange={(event) => {
+                                        const value = event.value || ''
+                                        store.set('convert.amount', String(value))
                                         gatherFeeData()
                                       }}/>
+                                    {showAmountError && <Typography className={classes.amountError}>
+                                      Minimum mint amount is {MIN_TX_AMOUNTS[selectedAsset]} {SYMBOL_MAP[selectedAsset]}
+                                    </Typography>}
                                 </Grid>
-                                <Grid className={classes.optionsContainer} container direction='column'>
-                                    <Grid container className={classes.option}>
-                                        <Grid item xs={6}>
-                                            Asset
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <CurrencySelect active={SYMBOL_MAP[selectedAsset]}
-                                              className={classes.currencySelect}
-                                              items={['BTC', 'ZEC', 'BCH']}
-                                              onCurrencyChange={(v) => {
-                                                const asset = v.toLowerCase()
-                                                store.set('convert.selectedFormat', `ren${asset}`)
-                                                store.set('selectedAsset', asset)
-                                                gatherFeeData()
-                                              }} />
-                                        </Grid>
+
+                                <Grid container className={classNames(classes.standaloneOption, classes.option)}>
+                                    <Grid item xs={6}>
+                                        Asset
                                     </Grid>
+                                    <Grid item xs={6}>
+                                        <CurrencySelect active={SYMBOL_MAP[selectedAsset]}
+                                          className={classes.currencySelect}
+                                          items={['BTC', 'ZEC', 'BCH']}
+                                          onCurrencyChange={(v) => {
+                                            const asset = v.toLowerCase()
+                                            store.set('convert.selectedFormat', `ren${asset}`)
+                                            store.set('selectedAsset', asset)
+                                            gatherFeeData()
+                                          }} />
+                                    </Grid>
+                                </Grid>
+
+                                <Grid className={classes.optionsContainer} container direction='column'>
                                     <Grid container className={classes.option}>
                                         <Grid item xs={6}>
                                             Destination
@@ -430,84 +505,85 @@ class TransferContainer extends React.Component {
                                 <Grid className={classes.amountContainer} container>
                                   <BigCurrencyInput symbol={SYMBOL_MAP[selectedFormat]}
                                       value={amount}
-                                      inputRef={this.burnInputRef}
                                       placeholder={'0.00 ' + SYMBOL_MAP[selectedFormat]}
                                       usdValue={usdValue}
-                                      onChange={(value, string, input) => {
-                                        modifyNumericInput(value, string, input)
-                                        store.set('convert.amount', value)
+                                      onChange={(event) => {
+                                        const value = event.value || ''
+                                        store.set('convert.amount', String(value))
                                         gatherFeeData()
                                       }}/>
+                                  {showAmountError && <Typography className={classes.amountError}>
+                                    Please enter a valid amount to release
+                                  </Typography>}
                                 </Grid>
                                 <Grid className={classes.balanceContainer} container justify='space-between'>
                                   <Typography variant='caption'>{SYMBOL_MAP[selectedFormat]} Balance</Typography>
                                   <Typography><ActionLink onClick={() => {
-                                        this.burnInputRef.current.refsInput.setValue(`${balance} ${SYMBOL_MAP[selectedFormat]}`)
-                                        console.log(this.burnInputRef, this.burnInputRef.current)
+                                        store.set('convert.amount', balance)
                                     }}>{balance} {SYMBOL_MAP[selectedFormat]}</ActionLink></Typography>
+                                </Grid>
+                                <Grid container className={classNames(classes.standaloneOption, classes.option)}>
+                                    <Grid item xs={6}>
+                                        Asset
+                                    </Grid>
+                                    <Grid item xs={6} onClick={updateBalance}>
+                                        <CurrencySelect active={SYMBOL_MAP[selectedFormat]}
+                                          className={classes.currencySelect}
+                                          items={['renBTC', 'renZEC', 'renBCH']}
+                                          renBTCBalance={store.get('renBTCBalance')}
+                                          renZECBalance={store.get('renZECBalance')}
+                                          renBCHBalance={store.get('renBCHBalance')}
+                                          onCurrencyChange={(v) => {
+                                            const asset = v.toLowerCase()
+                                            store.set('convert.selectedFormat', asset)
+                                            store.set('selectedAsset', asset.replace('ren', ''))
+                                            gatherFeeData()
+                                          }} />
+                                    </Grid>
+                                </Grid>
+                                <Grid container className={classNames(classes.standaloneOption, classes.option)}>
+                                    <Grid xs={12}>
+                                        <div className={classes.addressInput}>
+                                            <TextField label="Destination"
+                                                placeholder={`Enter ${NAME_MAP[selectedAsset]} Address`}
+                                                size='large'
+                                                fullWidth={true}
+                                                error={showDestinationError}
+                                                helperText={showDestinationError ? `Please enter a valid ${NAME_MAP[selectedAsset]} address`: ''}
+                                                InputProps={{
+                                                    disableUnderline: true,
+                                                }}
+                                                InputLabelProps={{
+                                                    shrink: true
+                                                }}
+                                                inputProps={{
+                                                    onFocus: () => {
+                                                        store.set('convert.destinationInputFocused', true)
+                                                    },
+                                                    onBlur: () => {
+                                                        store.set('convert.destinationInputFocused', false)
+                                                    }
+                                                }}
+                                                onChange={(event) => {
+                                                  const value = event.target.value
+                                                  store.set('convert.destination', value)
+                                                  if (selectedAsset === 'bch') {
+                                                      store.set('convert.destinationValid', bchaddr.isValidAddress(value))
+                                                  } else {
+                                                      store.set('convert.destinationValid', AddressValidator.validate(
+                                                        value,
+                                                        selectedAsset.toUpperCase(),
+                                                        selectedNetwork === 'testnet' ? 'testnet' : 'prod'
+                                                      ))
+                                                  }
+
+                                              }}/>
+                                        </div>
+                                    </Grid>
+
                                 </Grid>
 
                                 <Grid className={classes.optionsContainer} container direction='column'>
-                                    <Grid container className={classes.option}>
-                                        <Grid item xs={6}>
-                                            Asset
-                                        </Grid>
-                                        <Grid item xs={6} onClick={updateBalance}>
-                                            <CurrencySelect active={SYMBOL_MAP[selectedFormat]}
-                                              className={classes.currencySelect}
-                                              items={['renBTC', 'renZEC', 'renBCH']}
-                                              renBTCBalance={store.get('renBTCBalance')}
-                                              renZECBalance={store.get('renZECBalance')}
-                                              renBCHBalance={store.get('renBCHBalance')}
-                                              onCurrencyChange={(v) => {
-                                                const asset = v.toLowerCase()
-                                                store.set('convert.selectedFormat', asset)
-                                                store.set('selectedAsset', asset.replace('ren', ''))
-                                                gatherFeeData()
-                                              }} />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container className={classes.option}>
-                                        <Grid xs={12}>
-                                            <div className={classes.addressInput}>
-                                                <TextField label="Destination"
-                                                    placeholder={`Enter ${NAME_MAP[selectedAsset]} Address`}
-                                                    size='large'
-                                                    fullWidth={true}
-                                                    error={showAddressError}
-                                                    helperText={showAddressError ? `Please enter a valid ${NAME_MAP[selectedAsset]} address`: ''}
-                                                    InputProps={{
-                                                        disableUnderline: true,
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true
-                                                    }}
-                                                    inputProps={{
-                                                        onFocus: () => {
-                                                            store.set('convert.destinationInputFocused', true)
-                                                        },
-                                                        onBlur: () => {
-                                                            store.set('convert.destinationInputFocused', false)
-                                                        }
-                                                    }}
-                                                    onChange={(event) => {
-                                                      const value = event.target.value
-                                                      store.set('convert.destination', value)
-                                                      if (selectedAsset === 'bch') {
-                                                          store.set('convert.destinationValid', bchaddr.isValidAddress(value))
-                                                      } else {
-                                                          store.set('convert.destinationValid', AddressValidator.validate(
-                                                            value,
-                                                            selectedAsset.toUpperCase(),
-                                                            selectedNetwork === 'testnet' ? 'testnet' : 'prod'
-                                                          ))
-                                                      }
-
-                                                  }}/>
-                                            </div>
-                                        </Grid>
-
-                                    </Grid>
                                     <Grid container className={classes.option}>
                                         <Grid item xs={6}>
                                             You will receive
@@ -527,7 +603,7 @@ class TransferContainer extends React.Component {
                     <Grid container justify='center' className={classes.actionButtonContainer}>
                         {selectedDirection === 0 && <Grid item xs={12}>
                             <Button
-                                disabled={!canConvertTo}
+                                disabled={false}
                                 variant={'contained'}
                                 disableRipple
                                 color='primary'
@@ -540,7 +616,7 @@ class TransferContainer extends React.Component {
                         </Grid>}
                         {selectedDirection === 1 && <Grid item xs={12}>
                             <Button
-                                disabled={!canConvertFrom}
+                                disabled={false}
                                 variant={'contained'}
                                 disableRipple
                                 color='primary'

@@ -16,12 +16,12 @@ import {
 } from './web3Utils'
 
 export const MIN_TX_AMOUNTS = {
-    btc: 0.00010001,
-    zec: 0.00010001,
-    bch: 0.00010001,
-    renbtc: 0.00010001,
-    renzec: 0.00010001,
-    renbch: 0.00010001
+    btc: 0.00035001,
+    zec: 0.00035001,
+    bch: 0.00035001,
+    renbtc: 0.00035001,
+    renzec: 0.00035001,
+    renbch: 0.00035001
 }
 
 export const windowBlocker = function(event) {

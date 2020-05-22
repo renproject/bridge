@@ -1,6 +1,6 @@
 import React from 'react';
 import Numeral from 'numeral'
-import NumericInput from 'react-numeric-input'
+import NumberFormat from 'react-number-format'
 import theme from '../theme/theme'
 import classNames from 'classnames'
 import { withStyles } from '@material-ui/styles';
@@ -52,22 +52,34 @@ const styles = () => ({
 class BigCurrencyInput extends React.PureComponent {
   constructor(props) {
     super(props)
-    this.defaultRef = React.createRef()
+    this.ref = React.createRef()
+    this.input = null
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    const nextData = {
-        symbol: nextProps.symbol,
-        value: nextProps.value,
-    }
+  componentDidMount() {
+      const inputRef = this.props.inputRef
+      if (this.props.inputRef) {
+        this.ref = inputRef
+      }
 
-    const currentData = {
-        symbol: this.props.symbol,
-        value: this.props.value
-    }
-
-    return nextData !== currentData
+      if (this.input) {
+          this.input.focus()
+      }
   }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   const nextData = {
+  //       symbol: nextProps.symbol,
+  //       value: nextProps.value,
+  //   }
+  //
+  //   const currentData = {
+  //       symbol: this.props.symbol,
+  //       value: this.props.value
+  //   }
+  //
+  //   return nextData !== currentData
+  // }
 
   render() {
     const {
@@ -77,20 +89,16 @@ class BigCurrencyInput extends React.PureComponent {
         symbol,
         usdValue,
         value,
-        inputRef
+        inputRef,
+        placeholder
     } = this.props
 
     const asset = symbol || ''
     const val = value ? String(value) : ''
-    const ref = inputRef || this.defaultRef
+    const ref = this.ref
     const change = onChange || (() => {})
 
-    function format(n = '') {
-        console.log(n)
-        return n + ' ' + asset
-    }
-
-    const chars = val.replace('.', '')
+    const chars = val.replace('.', '').replace(` ${symbol}`, '')
 
     let size = 'large'
     if (chars.length > 5 && chars.length <= 7) {
@@ -101,19 +109,25 @@ class BigCurrencyInput extends React.PureComponent {
         size = 'smallest'
     }
 
-    return <div className={classNames(classes.container, classes[size])}>
-      <NumericInput
-        ref={ref}
-        style={false}
-        value={val}
-        className={classNames(classes.input, className)}
-        format={format}
-        {...this.props}
-      />
+    // console.log(value, val)
 
-    {<p className={usdValue ? classes.grayText : ''}>
-        = {Numeral(usdValue).format('$0,0.00')}
-      </p>}
+    return <div className={classNames(classes.container, classes[size])}>
+        <NumberFormat value={val}
+          ref={ref}
+          thousandSeparator={true}
+          allowLeadingZeros={true}
+          allowNegative={false}
+          suffix={' ' + symbol}
+          onValueChange={change}
+          getInputRef={(input) => {
+              this.input = input
+          }}
+          className={classNames(classes.input, className)}
+          placeholder={placeholder} />
+
+        {<p className={usdValue ? classes.grayText : ''}>
+            = {Numeral(usdValue).format('$0,0.00')}
+          </p>}
     </div>
   }
 }
