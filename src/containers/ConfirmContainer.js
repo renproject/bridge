@@ -18,7 +18,7 @@ import {
     initGJSDeposit,
     initGJSWithdraw
 } from '../utils/txUtils'
-import { MINI_ICON_MAP, SYMBOL_MAP, initLocalWeb3, setWbtcAllowance, abbreviateAddress } from '../utils/walletUtils'
+import { MINI_ICON_MAP, SYMBOL_MAP, NAME_MAP, initLocalWeb3, setWbtcAllowance, abbreviateAddress } from '../utils/walletUtils'
 import Web3 from "web3";
 import { ethers } from 'ethers';
 
@@ -301,7 +301,8 @@ class ConfirmContainer extends React.Component {
 
         const amount = store.get('convert.amount')
         const exchangeRate = store.get('convert.exchangeRate')
-        const fee = store.get('convert.networkFee')
+        const renVMFee = store.get('convert.renVMFee')
+        const networkFee = store.get('convert.networkFee')
         const total = store.get('convert.conversionTotal')
 
         const allowance = store.get('convert.adapterWbtcAllowance')
@@ -375,12 +376,22 @@ class ConfirmContainer extends React.Component {
                                         {abbreviateAddress(confirmTx.destAddress)}
                                     </Grid>
                                 </Grid>
+
                                 <Grid container className={classes.option}>
                                     <Grid item xs={6}>
                                         RenVM Fee
                                     </Grid>
                                     <Grid item xs={6} className={classes.amountCell}>
-                                        <img src={MINI_ICON_MAP[sourceAsset]}/>{fee} {SYMBOL_MAP[sourceAsset]}
+                                        <img src={MINI_ICON_MAP[sourceAsset]}/>{renVMFee} {SYMBOL_MAP[sourceAsset]}
+                                    </Grid>
+                                </Grid>
+
+                                <Grid container className={classes.option}>
+                                    <Grid item xs={6}>
+                                        {NAME_MAP[selectedAsset]} Network Fee
+                                    </Grid>
+                                    <Grid item xs={6} className={classes.amountCell}>
+                                        <img src={MINI_ICON_MAP[selectedAsset]}/>{networkFee} {SYMBOL_MAP[selectedAsset]}
                                     </Grid>
                                 </Grid>
 

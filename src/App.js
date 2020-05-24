@@ -66,7 +66,9 @@ const styles = () => ({
         color: '#333',
         marginRight: theme.spacing(2),
         textDecoration: 'none',
-        opacity: 0.75
+        '&:hover': {
+            opacity: 0.75
+        }
     }
   },
   footerLogo: {
@@ -100,6 +102,7 @@ const initialState = {
     box: null,
     space: null,
     spaceError: false,
+    spaceRequesting: false,
     loadingBalances: true,
     renBTCBalance: 0,
     renZECBalance: 0,
@@ -140,6 +143,7 @@ const initialState = {
     'convert.destinationInputFocused': false,
     'convert.showDestinationError': false,
     'convert.exchangeRate': '',
+    'convert.renVMFee': '',
     'convert.networkFee': '',
     'convert.conversionTotal': '',
 }
@@ -156,7 +160,6 @@ class AppWrapper extends React.Component {
         store.set('queryParams', params)
 
         setNetwork(params.network === 'testnet' ? 'testnet' : 'mainnet')
-        // initDataWeb3()
     }
 
     render() {

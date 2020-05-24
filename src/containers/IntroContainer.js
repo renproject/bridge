@@ -13,6 +13,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import MetaMask from '../assets/metamask-intro.svg'
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 const styles = (theme) => ({
@@ -45,8 +46,36 @@ const styles = (theme) => ({
     },
     button: {
         width: '100%',
-        maxWidth: 230
-    }
+        maxWidth: 230,
+        // display: 'flex',
+        // alignItems: 'center'
+    },
+    error: {
+        marginTop: theme.spacing(2),
+        color: '#FF4545'
+    },
+    info: {
+        marginTop: theme.spacing(2),
+    },
+    info2: {
+        fontWeight: 'bold',
+        color: '#3F3F48'
+    },
+    spinner: {
+        position: 'relative',
+        marginRight: theme.spacing(1),
+        marginTop: theme.spacing(0.5),
+        width: 18,
+    },
+    spinnerTop: {
+        color: '#eee',
+    },
+    spinnerBottom: {
+        color: '#a4a4a4',
+        animationDuration: '550ms',
+        position: 'absolute',
+        left: 0,
+    },
 })
 
 class IntroContainer extends React.Component {
@@ -69,6 +98,19 @@ class IntroContainer extends React.Component {
             store
         } = this.props
 
+        const requesting = store.get('spaceRequesting')
+        const error = store.get('spaceError')
+        const box = store.get('box')
+
+        let text = 'Connect wallet'
+        if (requesting) {
+            if (!box) {
+                text = 'Connecting to 3box'
+            } else {
+                text = 'Loading data'
+            }
+        }
+
         return <div className={classes.container}>
             <Typography className={classes.title} variant='h2'>
                 Bitcoin, Zcash and Bitcoin Cash on&nbsp;Ethereum.
@@ -84,15 +126,43 @@ class IntroContainer extends React.Component {
                     To mint or release assets, connect your&nbsp;wallet.
                 </Typography>
             </Grid>
-            <Grid container justify='center'>
+            <Grid container justify='flex-start' direction='column' alignItems='center'>
                 <Button onClick={initLocalWeb3}
+                    disabled={requesting}
                     className={classes.button}
                     size='large'
                     color='primary'
                     disableRipple
                     variant='contained'>
-                    Connect Wallet
+                    {requesting && <div className={classes.spinner}>
+                          <CircularProgress
+                            variant="determinate"
+                            value={100}
+                            className={classes.spinnerTop}
+                            size={18}
+                            thickness={4}
+                          />
+                          <CircularProgress
+                            variant="indeterminate"
+                            disableShrink
+                            className={classes.spinnerBottom}
+                            size={18}
+                            thickness={4}
+                          />
+                    </div>}
+                    {text}
                 </Button>
+                {!requesting && error && <Typography variant='caption' className={classes.error}>
+                    Connection to 3box failed.
+                </Typography>}
+                {requesting && <React.Fragment>
+                  <Typography variant='caption' className={classes.info}>
+                      Connecting to decentalized storage, this may take a minute.
+                  </Typography>
+                  <Typography variant='caption' className={classes.info2}>
+                      Please approve any 3box messages that appear in your wallet.
+                  </Typography>
+                </React.Fragment>}
             </Grid>
         </div>
     }

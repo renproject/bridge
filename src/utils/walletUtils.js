@@ -1,5 +1,6 @@
 import Web3 from "web3";
 import GatewayJS from '@renproject/gateway'
+import Box from '3box'
 
 import DetectNetwork from "web3-detect-network";
 import Web3Modal from 'web3modal'
@@ -205,26 +206,6 @@ export const initLocalWeb3 = async function() {
     const selectedNetwork = store.get('selectedNetwork')
 
     const providerOptions = {
-        // authereum: {
-        //     package: Authereum, // required
-        //     options: {
-        //         networkName: 'kovan'
-        //     }
-        // },
-        // torus: {
-        //     package: Torus, // required
-        //     options: {
-        //         network: {
-        //             host: 'kovan'
-        //         }
-        //     }
-        // },
-        // fortmatic: {
-        //     package: Fortmatic, // required
-        //     options: {
-        //         key: "pk_test_D12A04424946656D" // required
-        //     }
-        // }
     }
 
     const web3Modal = new Web3Modal({
@@ -252,29 +233,38 @@ export const initLocalWeb3 = async function() {
         return
     }
 
-    store.set('localWeb3', web3)
-    store.set('localWeb3Address', accounts[0])
-    store.set('localWeb3Network', network)
+    // store.set('localWeb3', web3)
+    // store.set('localWeb3Address', accounts[0])
+    // store.set('localWeb3Network', network)
 
     try {
-        // // recover transactions from 3box
-        // const box = await Box.openBox(accounts[0], currentProvider)
-        // const space = await box.openSpace("wbtc-cafe")
-        // const txData = await space.public.get('convert.transactions')
-        //
-        // const transactions = txData ? JSON.parse(txData) : []
-        // store.set('convert.transactions', transactions)
-        // store.set('space', space)
-        // window.space = space
+        // recover transactions from 3box
+        store.set('spaceRequesting', true)
+        // console.log('opening box')
+        const box = await Box.openBox(accounts[0], currentProvider)
+        store.set('box', box)
+        const space = await box.openSpace("ren-bridge")
+        // console.log('space', space)
 
-        // recover transactions from localStorage
-        const txData = window.localStorage.getItem('convert.transactions')
-        const transactions = txData ? JSON.parse(txData) : []
-        store.set('convert.transactions', transactions)
+        // // grab 3box txs on connect
+        // const data = await space.private.get('convert.transactions')
+        // console.log('space txs', JSON.parse(data))
+        // const boxTransactions = data ? JSON.parse(data) : []
 
-        // watchWalletData()
-        updateBalance()
-        recoverTrades()
+        store.set('space', space)
+        window.space = space
+
+        store.set('localWeb3', web3)
+        store.set('localWeb3Address', accounts[0])
+        store.set('localWeb3Network', network)
+        store.set('spaceRequesting', false)
+
+        // sometimes 3box data isn't immediately there, so recover
+        // after a slight delay
+        setTimeout(() => {
+            recoverTrades()
+            updateBalance()
+        }, 100)
 
         // listen for changes
         currentProvider.on('accountsChanged', async () => {
@@ -293,6 +283,7 @@ export const initLocalWeb3 = async function() {
         })
     } catch(e) {
         store.set('spaceError', true)
+        store.set('spaceRequesting', false)
     }
 
     return
@@ -330,7 +321,7 @@ export const abbreviateAddress = function(walletAddress) {
 
 export const modifyNumericInput = function(value, string, input) {
     const valStr = String(value)
-    console.log(value, string, input, valStr)
+    // console.log(value, string, input, valStr)
     if (string === '.') {
         setTimeout(() => {
           input.value = '0.'

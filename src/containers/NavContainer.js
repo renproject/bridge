@@ -161,57 +161,19 @@ class NavContainer extends React.Component {
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <Grid container justify='flex-end' alignItems='center'>
-                        {/*<AssetChooserContainer />*/}
-                            {/*<Button
-                                variant="outlined"
-                                className={classes.networkButton}
-                                ref={this.anchorRef}
-                                aria-controls={showNetworkMenu ? 'menu-list-grow' : undefined}
-                                aria-haspopup="true"
-                                onClick={this.toggleNeworkMenu.bind(this)}
-                              >
-                                <WifiIcon />&nbsp;{selectedNetwork}
-                              </Button>
-                              <Popper open={showNetworkMenu} anchorEl={this.anchorRef.current} role={undefined} transition disablePortal>
-                                {({ TransitionProps, placement }) => (
-                                  <Grow
-                                    {...TransitionProps}
-                                    style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
-                                  >
-                                    <Paper>
-                                      <ClickAwayListener onClickAway={this.toggleNeworkMenu.bind(this)}>
-                                        <MenuList autoFocusItem={showNetworkMenu} id="menu-list-grow">
-                                          <MenuItem onClick={() => { setNetwork.bind(this)('testnet') }}>Testnet</MenuItem>
-                                          <MenuItem onClick={() => { setNetwork.bind(this)('mainnet') }}>Mainnet</MenuItem>
-                                        </MenuList>
-                                      </ClickAwayListener>
-                                    </Paper>
-                                  </Grow>
-                                )}
-                              </Popper>*/}
-
-                              {/*<Button onClick={() => {
-                                  store.set('showAboutModal', true)
-                              }} size='small' className={classes.aboutButton}>
-                                <span>How it works<span className={classes.hideMobile}></span></span>
-                              </Button>*/}
-                              {/*walletAddress && <div className={classes.faq}>
-                                  <Typography variant='caption'>Balance: {balance} WBTC</Typography>
-                              </div>*/}
-                              {<Button disableRipple={walletAddress.length}
-                                color={''}
-                                onClick={() => {
-                                    if (!walletAddress) {
-                                        initLocalWeb3()
-                                    }
-                                }} variant="outlined" className={classNames(classes.accountButton, walletAddress && classes.disabled)}>
-                                {walletAddress ? <div>
-                                  <div className={classes.circle}></div>
-                                  {/*<span className={classes.walletLabel}>Metamask</span>*/}
-                                  <span>{(walletAddress.slice(0,7) + '...' + walletAddress.slice(walletAddress.length - 5))}</span>
-                                </div> : <span>Connect Wallet<span className={classes.hideMobile}></span></span>}
-                              </Button>}
-
+                        {<Button disableRipple={walletAddress.length}
+                          color={''}
+                          onClick={() => {
+                              if (!walletAddress) {
+                                  initLocalWeb3()
+                              }
+                          }} variant="outlined" className={classNames(classes.accountButton, walletAddress && classes.disabled)}>
+                          {walletAddress ? <div>
+                            <div className={classes.circle}></div>
+                            {/*<span className={classes.walletLabel}>Metamask</span>*/}
+                            <span>{(walletAddress.slice(0,7) + '...' + walletAddress.slice(walletAddress.length - 5))}</span>
+                          </div> : <span>Connect Wallet<span className={classes.hideMobile}></span></span>}
+                        </Button>}
                     </Grid>
                 </Grid>
               </Grid>}

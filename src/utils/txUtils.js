@@ -43,65 +43,77 @@ export const removeWindowBlocker = function() {
     window.removeEventListener('beforeunload', windowBlocker);
 }
 
-export const addTx = (tx) => {
+export const addTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    let txs = store.get(storeString)
-    txs.push(tx)
-    store.set(storeString, txs)
+    const space = store.get('space')
 
-    // const space = store.get('space')
-    // // console.log('space', space)
-    //
-    // if (space) {
-    //     space.public.set(storeString, JSON.stringify(txs))
-    // }
+    const txs = JSON.parse(await space.private.get(storeString)) || []
+    const newTxs = txs.concat([tx])
 
-    // use localStorage
-    localStorage.setItem(storeString, JSON.stringify(txs))
+    // update state
+    store.set(storeString, newTxs)
+
+    // update 3box
+
+    if (space) {
+        space.private.set(storeString, JSON.stringify(newTxs))
+    }
+
+    // update localStorage just in case
+    localStorage.setItem(storeString, JSON.stringify(newTxs))
 
     // for debugging
-    window.txs = txs
+    window.txs = newTxs
 }
 
-export const updateTx = (newTx) => {
+export const updateTx = async (newTx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    const txs = store.get(storeString).map(t => {
+    const space = store.get('space')
+
+    const txs = JSON.parse(await space.private.get(storeString)) || []
+
+    const newTxs = txs.map(t => {
         if (t.id === newTx.id) {
-            // const newTx = Object.assign(t, props)
             return newTx
         }
         return t
     })
-    store.set(storeString, txs)
 
-    // const space = store.get('space')
-    // if (space) {
-    //     space.public.set(storeString, JSON.stringify(txs))
-    // }
+    // update state
+    store.set(storeString, newTxs)
+
+    // update 3box
+    if (space) {
+        space.private.set(storeString, JSON.stringify(newTxs))
+    }
 
     // use localStorage
-    localStorage.setItem(storeString, JSON.stringify(txs))
+    localStorage.setItem(storeString, JSON.stringify(newTxs))
 
     // for debugging
     window.txs = txs
 }
 
-export const removeTx = (tx) => {
+export const removeTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    let txs = store.get(storeString).filter(t => (t.id !== tx.id))
-    // console.log(txs)
-    store.set(storeString, txs)
+    const space = store.get('space')
 
-    // const space = store.get('space')
-    // if (space) {
-    //     space.public.set(storeString, JSON.stringify(txs))
-    // }
+    const txs = JSON.parse(await space.private.get(storeString)) || []
+    const newTxs = txs.filter(t => (t.id !== tx.id))
 
-    // use localStorage
-    localStorage.setItem(storeString, JSON.stringify(txs))
+    // update local state
+    store.set(storeString, newTxs)
+
+    // update 3box
+    if (space) {
+        space.private.set(storeString, JSON.stringify(newTxs))
+    }
+
+    // update localStorage just in case
+    localStorage.setItem(storeString, JSON.stringify(newTxs))
 
     // for debugging
     window.txs = txs
@@ -119,11 +131,13 @@ export const gatherFeeData = async function() {
 
     const amountInSats = GatewayJS.utils.value(amount, "btc").sats().toNumber()
 
-    const fee = Number((Number(amount) * 0.001) + 0.00035).toFixed(6)
+    const renVMFee = Number((Number(amount) * 0.001)).toFixed(6)
+    const fixedFee = 0.00035
     // console.log(amount, fee, Number(amount-fee))
-    const total = Number(amount-fee) > 0 ? Number(amount-fee).toFixed(6) : '0.000000'
+    const total = Number(amount-renVMFee-fixedFee) > 0 ? Number(amount-renVMFee-fixedFee).toFixed(6) : '0.000000'
 
-    store.set('convert.networkFee', fee)
+    store.set('convert.renVMFee', renVMFee)
+    store.set('convert.networkFee', fixedFee)
     store.set('convert.conversionTotal', total)
 }
 
@@ -150,9 +164,34 @@ export const initGJSDeposit = async function(tx) {
         web3Provider: localWeb3.currentProvider
     }
 
-    // console.log('initGJSDeposit', data)
-
-    gjs.open(data);
+    const preOpenTrades = Array.from((await gjs.getGateways()).values())
+    // console.log('before open', preOpenTrades)
+    let trade = null
+    const open = gjs.open(data);
+    open.result()
+        .on("status", async (status) => {
+            console.log(`[GOT STATUS] ${status}`)
+            if (status === GatewayJS.LockAndMintStatus.Committed) {
+                const postOpenTrades = Array.from((await gjs.getGateways()).values())
+                // console.log('after open', postOpenTrades)
+                if (preOpenTrades.length !== postOpenTrades.length) {
+                    const preOpenIds = preOpenTrades.map(t => t.id)
+                    postOpenTrades.map(pot => {
+                        // if unique, add to 3box
+                        if (preOpenIds.indexOf(pot.id)) {
+                            addTx(pot)
+                            trade = pot
+                        }
+                    })
+                }
+            }
+        })
+        .catch(error => {
+            if (error.message === "Transfer cancelled by user") {
+                // remove from 3box
+                removeTx(trade)
+            }
+        })
 
     store.set('confirmTx', null)
     store.set('confrirmAction', '')
@@ -182,34 +221,101 @@ export const initGJSWithdraw = async function(tx) {
         web3Provider: localWeb3.currentProvider
     }
 
-    // console.log('initGJSWithdraw', data)
+    const preOpenTrades = Array.from((await gjs.getGateways()).values())
+    // console.log('before open', preOpenTrades)
+    let trade = null
+    const open = gjs.open(data);
+    open.result()
+        .on("status", async (status) => {
+            console.log(`[GOT STATUS] ${status}`)
+            if (status === GatewayJS.BurnAndReleaseStatus.Committed) {
+                const postOpenTrades = Array.from((await gjs.getGateways()).values())
+                // console.log('after open', postOpenTrades)
+                if (preOpenTrades.length !== postOpenTrades.length) {
+                    const preOpenIds = preOpenTrades.map(t => t.id)
+                    postOpenTrades.map(pot => {
+                        // if unique, add to 3box
+                        if (preOpenIds.indexOf(pot.id)) {
+                            addTx(pot)
+                            trade = pot
+                        }
+                    })
+                }
+            }
+        })
+        .catch(error => {
+            if (error.message === "Transfer cancelled by user") {
+                // remove from 3box
+                removeTx(trade)
+            }
+        })
+}
 
-    gjs.open(data);
+export const isGatewayJSTxComplete = function(status) {
+    return status === GatewayJS.LockAndMintStatus.ConfirmedOnEthereum || status === GatewayJS.BurnAndReleaseStatus.ReturnedFromRenVM
+}
+
+export const reOpenTx = async function(trade) {
+    const store = getStore()
+    const gjs = store.get('gjs')
+    const localWeb3 = store.get('localWeb3')
+    const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade)
+    // console.log(gateway, GatewayJS.LockAndMintStatus)
+    // gateway.close()
+    // gateway.cancel();
+    gateway.result()
+        .on("status", (status) => {
+            const completed = isGatewayJSTxComplete(status)
+            if (completed) {
+                // remove from 3box
+                removeTx(trade)
+            }
+            console.log(`[GOT STATUS] ${status}`, gateway, trade)
+        })
+        .then(console.log)
+        .catch(error => {
+            if (error.message === "Transfer cancelled by user") {
+                // remove from 3box
+                removeTx(trade)
+            }
+        });
 }
 
 export const recoverTrades = async function() {
     const store = getStore()
     const gjs = store.get('gjs')
-    const localWeb3 = store.get('localWeb3')
-    // console.log(store.getState())
+    const space = store.get('space')
 
     // Re-open incomplete trades
     const previousGateways = await gjs.getGateways();
-    for (const trade of Array.from(previousGateways.values())) {
-        // console.log('trade', trade)
-        if (trade.status === GatewayJS.LockAndMintStatus.ConfirmedOnEthereum || trade.status === GatewayJS.BurnAndReleaseStatus.ReturnedFromRenVM) { continue; }
-        const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade)
-        // console.log(gateway)
-        // gateway.close()
-        // gateway.cancel();
-        gateway.result()
-            .on("status", (status) => console.log(`[GOT STATUS] ${status}`))
-            .then(console.log)
-            .catch(console.error);
+    const previousTrades = Array.from(previousGateways.values())
+    // console.log('previousTrades', previousTrades)
+    for (const trade of previousTrades) {
+
+        const tradeCompleted = isGatewayJSTxComplete(trade.status)
+        // console.log('trade', trade, tradeCompleted)
+        if (tradeCompleted) {
+          continue;
+        }
+        reOpenTx(trade)
     }
+
+    const boxData = await space.private.get('convert.transactions')
+    const boxTrades = boxData ? JSON.parse(boxData) : []
+
+    // console.log('boxTrades', boxData, boxTrades)
+
+    // if 3box has transactions not found locally, reopen those
+    const previousTradeIds = previousTrades.map(t => t.id)
+    boxTrades.map(btx => {
+        if (!isGatewayJSTxComplete(btx.status) &&  previousTradeIds.indexOf(btx.id) < 0) {
+            reOpenTx(btx)
+        }
+    })
 }
 
 window.GatewayJS = GatewayJS
+window.reOpenTx = reOpenTx
 
 export default {
     addTx,
