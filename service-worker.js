@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/ren-gateway/precache-manifest.fb856f2b3962a4927d9411df52447a31.js"
+  "/ren-gateway/precache-manifest.1c495f7132f96e25e157d5439d8e77a6.js"
 );
 
 self.addEventListener('message', (event) => {
