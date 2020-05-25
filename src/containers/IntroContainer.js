@@ -19,7 +19,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 const styles = (theme) => ({
     container: {
         textAlign: 'center',
-        paddingTop: theme.spacing(3),
+        paddingTop: theme.spacing(2),
         [theme.breakpoints.down('sm')]: {
             maxWidth: '100%'
         }
@@ -76,6 +76,17 @@ const styles = (theme) => ({
         position: 'absolute',
         left: 0,
     },
+    disclosure: {
+        width: '100%',
+        maxWidth: 500,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        padding: theme.spacing(2),
+        border: '1px solid #DCE0E3',
+        fontSize: 14,
+        borderRadius: 4,
+        marginBottom: theme.spacing(6)
+    }
 })
 
 class IntroContainer extends React.Component {
@@ -112,6 +123,13 @@ class IntroContainer extends React.Component {
         }
 
         return <div className={classes.container}>
+            <Grid container>
+              <div className={classes.disclosure}>
+                  <Typography variant='p'>
+                      RenVM is new technology and security audits don't completely eliminate risks. Please don’t supply assets you can’t afford to&nbsp;lose.
+                  </Typography>
+              </div>
+            </Grid>
             <Typography className={classes.title} variant='h2'>
                 Bitcoin, Zcash and Bitcoin Cash on&nbsp;Ethereum.
             </Typography>

@@ -1,9 +1,5 @@
 import React from 'react';
-import { ethers } from 'ethers'
-import EthCrypto from 'eth-crypto'
 import { createStore, withStore } from '@spyna/react-store'
-import ApolloClient, { gql, InMemoryCache } from 'apollo-boost'
-import { ApolloProvider, Query } from 'react-apollo'
 import queryString from 'query-string'
 import { storeListener } from './services/storeService'
 
@@ -14,7 +10,7 @@ import IntroContainer from './containers/IntroContainer'
 import NetworkModalContainer from './containers/NetworkModalContainer'
 
 
-import { setNetwork } from './utils/walletUtils'
+import { setNetwork, updateFees } from './utils/walletUtils'
 
 import RenVM from './assets/renvm-powered.svg';
 import Twitter from './assets/twitter.svg';
@@ -112,6 +108,7 @@ const initialState = {
     bchusd: 0,
     ethBalance: 0,
     gjs: null,
+    fees: null,
 
     // navigation
     selectedTab: 1,
@@ -160,6 +157,7 @@ class AppWrapper extends React.Component {
         store.set('queryParams', params)
 
         setNetwork(params.network === 'testnet' ? 'testnet' : 'mainnet')
+        updateFees()
     }
 
     render() {
@@ -192,7 +190,7 @@ class AppWrapper extends React.Component {
                       <Container size='lg'>
                         <Grid container alignItems='center' justify='space-between'>
                             <Typography className={classes.footerLinks} variant='caption'>
-                              <a target='_blank' href={'https://renproject.io/renvm'}>What is RenVM?</a> <a target='_blank' href={'https://docs.renproject.io/darknodes/faq/renbridge-faq'}>FAQs</a> <a target='_blank' href={'https://docs.renproject.io/developers/'}>Docs</a>
+                              <a target='_blank' href={'https://renproject.io/'}>Ren Project Site</a> <a target='_blank' href={'https://renproject.io/renvm'}>About RenVM</a> <a target='_blank' href={'https://docs.renproject.io/darknodes/faq/renbridge-faq'}>FAQs</a> <a target='_blank' href={'https://docs.renproject.io/developers/'}>Docs</a>
                             </Typography>
                             <Typography className={classes.footerLinks} variant='caption'>
                               <a target='_blank' href={'https://twitter.com/renprotocol'}><img className={classes.footerLogo} src={Twitter} /></a>

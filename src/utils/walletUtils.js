@@ -101,6 +101,30 @@ export const resetWallet = async function() {
     store.set('convert.transactions', [])
 }
 
+export const updateFees = async function() {
+    const store = getStore()
+    try {
+        const fees = await fetch('https://lightnode-mainnet.herokuapp.com', {
+            method: 'POST', // or 'PUT'
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: 67,
+              jsonrpc: "2.0",
+              method: "ren_queryFees",
+              params: {}
+            })
+        })
+        const data = (await fees.json()).result
+        console.log(data)
+        // console.log('renvm fees', await fees.json())
+        store.set('fees', data)
+    } catch(e) {
+        console.log(e)
+    }
+}
+
 export const updateMarketData = async function() {
     const store = getStore()
 
@@ -133,15 +157,6 @@ export const updateMarketData = async function() {
     } catch(e) {
         console.log(e)
     }
-
-    try {
-        // console.log(store.get('gjs').send('ren_queryFees', {}))
-        // const fees = await GatewayJS.renVM.sendMessage('ren_queryFees', {})
-        // console.log(fees)
-    } catch(e) {
-        console.log(e)
-    }
-
 }
 
 

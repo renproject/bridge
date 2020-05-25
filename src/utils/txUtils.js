@@ -123,16 +123,22 @@ export const txExists = function(tx) {
     return getStore().get('convert.transactions').filter(t => t.id === tx.id).length > 0
 }
 
-export const gatherFeeData = async function() {
+export const gatherFeeData = async function(type) {
     const store = getStore()
     const amount = store.get('convert.amount')
+    const fees = store.get('fees')
+    const selectedAsset = store.get('selectedAsset')
+    const selectedDirection = store.get('convert.selectedDirection')
+    const fixedFeeKey = selectedDirection ? 'release' : 'lock'
+    const dynamicFeeKey = selectedDirection ? 'burn' : 'mint'
 
     if (!amount) return
 
     const amountInSats = GatewayJS.utils.value(amount, "btc").sats().toNumber()
 
-    const renVMFee = Number((Number(amount) * 0.001)).toFixed(6)
-    const fixedFee = 0.00035
+    const renVMFee = Number((Number(amount) * Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000))).toFixed(6)
+    // const fixedFee = 0.00035
+    const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / (10 ** 8))
     // console.log(amount, fee, Number(amount-fee))
     const total = Number(amount-renVMFee-fixedFee) > 0 ? Number(amount-renVMFee-fixedFee).toFixed(6) : '0.000000'
 
