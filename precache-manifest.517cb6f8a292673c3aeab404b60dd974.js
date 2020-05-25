@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "851d271827e07ea135ab7d960b592ef1",
+    "revision": "9c12fe2d99ae92af88808dffc188fa24",
     "url": "/ren-gateway/index.html"
   },
   {
-    "revision": "6ae96f3ce7d6b0f8c203",
+    "revision": "67b6168d082d6a3abff4",
     "url": "/ren-gateway/static/css/main.08499955.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/ren-gateway/static/js/2.c0b7d782.chunk.js"
   },
   {
-    "revision": "6ae96f3ce7d6b0f8c203",
-    "url": "/ren-gateway/static/js/main.9fe63bc7.chunk.js"
+    "revision": "67b6168d082d6a3abff4",
+    "url": "/ren-gateway/static/js/main.ca314e0c.chunk.js"
   },
   {
     "revision": "858df56fbac976c89781",
