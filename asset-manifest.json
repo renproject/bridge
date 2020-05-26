@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/static/css/main.08499955.chunk.css",
-    "main.js": "/static/js/main.f96a40b9.chunk.js",
-    "main.js.map": "/static/js/main.f96a40b9.chunk.js.map",
+    "main.js": "/static/js/main.5e6c8b54.chunk.js",
+    "main.js.map": "/static/js/main.5e6c8b54.chunk.js.map",
     "runtime~main.js": "/static/js/runtime~main.d32a1adf.js",
     "runtime~main.js.map": "/static/js/runtime~main.d32a1adf.js.map",
     "static/js/2.35d85225.chunk.js": "/static/js/2.35d85225.chunk.js",
     "static/js/2.35d85225.chunk.js.map": "/static/js/2.35d85225.chunk.js.map",
     "index.html": "/index.html",
-    "precache-manifest.ea913f3cc65c640e3e06e648b66f8cb5.js": "/precache-manifest.ea913f3cc65c640e3e06e648b66f8cb5.js",
+    "precache-manifest.807d916a589a18eaa124c0137047ac28.js": "/precache-manifest.807d916a589a18eaa124c0137047ac28.js",
     "service-worker.js": "/service-worker.js",
     "static/css/main.08499955.chunk.css.map": "/static/css/main.08499955.chunk.css.map",
     "static/media/back-arrow.svg": "/static/media/back-arrow.0560c22c.svg",
@@ -30,6 +30,6 @@
     "static/media/wallet-icon.svg": "/static/media/wallet-icon.61ee59fe.svg",
     "static/media/wbtc-logo.svg": "/static/media/wbtc-logo.4c022ae6.svg",
     "static/media/wbtc.png": "/static/media/wbtc.af995ef6.png",
-    "static/media/zec.jpg": "/static/media/zec.7037fa89.jpg"
+    "static/media/zec.svg": "/static/media/zec.0b2a9fe6.svg"
   }
 }
