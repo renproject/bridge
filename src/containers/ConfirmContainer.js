@@ -46,7 +46,7 @@ const styles = (theme) => ({
         boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)',
         maxWidth: 400,
         width: '100%',
-        margin: '0px auto',
+        margin: '0px auto ' + theme.spacing(1) + 'px',
         [theme.breakpoints.down('sm')]: {
             maxWidth: '100%'
         }
@@ -231,6 +231,23 @@ const styles = (theme) => ({
     },
     amountCell: {
         wordBreak: 'break-word'
+    },
+    disclosure: {
+        width: '100%',
+        maxWidth: 370,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        textAlign: 'center',
+        boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)',
+        padding: theme.spacing(2),
+        color: theme.palette.primary.main,
+        border: '1px solid ' + theme.palette.primary.main,
+        fontSize: 12,
+        borderRadius: 4,
+        marginBottom: theme.spacing(3),
+        [theme.breakpoints.down('sm')]: {
+            maxWidth: '100%',
+        },
     }
 })
 
@@ -334,115 +351,124 @@ class ConfirmContainer extends React.Component {
             size = 'smallest'
         }
 
-        return <div className={classes.container}>
-            <div className={classes.headerText}>
-                <img className={classes.back}
-                  src={BackArrow}
-                  onClick={() => {
-                      store.set('confirmTx', null)
-                      store.set('confirmAction', '')
-                  }}/>
-                <Typography variant='overline' className={classes.navTitle}>
-                    {isDeposit ? 'Minting' : 'Releasing'}
-                </Typography>
+        return <React.Fragment>
+            <Grid container>
+              <div className={classes.disclosure}>
+                  <Typography variant='p'>
+                      RenVM is new technology and security audits don't completely eliminate risks. Please don’t supply assets you can’t afford to&nbsp;lose.
+                  </Typography>
+              </div>
+            </Grid>
+            <div className={classes.container}>
+              <div className={classes.headerText}>
+                  <img className={classes.back}
+                    src={BackArrow}
+                    onClick={() => {
+                        store.set('confirmTx', null)
+                        store.set('confirmAction', '')
+                    }}/>
+                  <Typography variant='overline' className={classes.navTitle}>
+                      {isDeposit ? 'Minting' : 'Releasing'}
+                  </Typography>
 
-                <Typography variant='h4' className={classNames(classes.titleAmount, classes[size])}>
-                    {confirmTx.amount} {SYMBOL_MAP[sourceAsset]}
-                </Typography>
+                  <Typography variant='h4' className={classNames(classes.titleAmount, classes[size])}>
+                      {confirmTx.amount} {SYMBOL_MAP[sourceAsset]}
+                  </Typography>
 
-                <Typography variant='p' className={classes.usdAmount}>
-                    = {Numeral(usdValue).format('$0,0.00')}
-                </Typography>
-            </div>
-            <div className={classes.actionsContainer}>
-                <Grid className={classes.actions}>
-                    <Grid container justify='center'>
-                        <Grid item xs={12}>
-                            <Grid className={classes.optionsContainer} container direction='column'>
-                                <Grid container className={classes.option}>
-                                    <Grid item xs={6}>
-                                        {isDeposit ? 'Minting' : 'Releasing'}
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <img src={MINI_ICON_MAP[sourceAsset]}/>{SYMBOL_MAP[sourceAsset]}
-                                    </Grid>
-                                </Grid>
-                                <Grid container className={classes.option}>
-                                    <Grid item xs={6}>
-                                        Destination
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <img src={WalletIcon}/>
-                                        {abbreviateAddress(confirmTx.destAddress)}
-                                    </Grid>
-                                </Grid>
+                  <Typography variant='p' className={classes.usdAmount}>
+                      = {Numeral(usdValue).format('$0,0.00')}
+                  </Typography>
+              </div>
+              <div className={classes.actionsContainer}>
+                  <Grid className={classes.actions}>
+                      <Grid container justify='center'>
+                          <Grid item xs={12}>
+                              <Grid className={classes.optionsContainer} container direction='column'>
+                                  <Grid container className={classes.option}>
+                                      <Grid item xs={6}>
+                                          {isDeposit ? 'Minting' : 'Releasing'}
+                                      </Grid>
+                                      <Grid item xs={6}>
+                                          <img src={MINI_ICON_MAP[sourceAsset]}/>{SYMBOL_MAP[sourceAsset]}
+                                      </Grid>
+                                  </Grid>
+                                  <Grid container className={classes.option}>
+                                      <Grid item xs={6}>
+                                          Destination
+                                      </Grid>
+                                      <Grid item xs={6}>
+                                          <img src={WalletIcon}/>
+                                          {abbreviateAddress(confirmTx.destAddress)}
+                                      </Grid>
+                                  </Grid>
 
-                                <Grid container className={classes.option}>
-                                    <Grid item xs={6}>
-                                        RenVM Fee
-                                    </Grid>
-                                    <Grid item xs={6} className={classes.amountCell}>
-                                        <img src={MINI_ICON_MAP[sourceAsset]}/>{renVMFee} {SYMBOL_MAP[sourceAsset]}
-                                    </Grid>
-                                </Grid>
+                                  <Grid container className={classes.option}>
+                                      <Grid item xs={6}>
+                                          RenVM Fee
+                                      </Grid>
+                                      <Grid item xs={6} className={classes.amountCell}>
+                                          <img src={MINI_ICON_MAP[sourceAsset]}/>{renVMFee} {SYMBOL_MAP[sourceAsset]}
+                                      </Grid>
+                                  </Grid>
 
-                                <Grid container className={classes.option}>
-                                    <Grid item xs={6}>
-                                        {NAME_MAP[selectedAsset]} Network Fee
-                                    </Grid>
-                                    <Grid item xs={6} className={classes.amountCell}>
-                                        <img src={MINI_ICON_MAP[selectedAsset]}/>{networkFee} {SYMBOL_MAP[selectedAsset]}
-                                    </Grid>
-                                </Grid>
+                                  <Grid container className={classes.option}>
+                                      <Grid item xs={6}>
+                                          {NAME_MAP[selectedAsset]} Network Fee
+                                      </Grid>
+                                      <Grid item xs={6} className={classes.amountCell}>
+                                          <img src={MINI_ICON_MAP[selectedAsset]}/>{networkFee} {SYMBOL_MAP[selectedAsset]}
+                                      </Grid>
+                                  </Grid>
 
-                            </Grid>
-                        </Grid>
+                              </Grid>
+                          </Grid>
 
-                    </Grid>
+                      </Grid>
 
-                    <div className={classes.totalContainer}>
-                        <Grid container className={classNames(classes.totalOption)}>
-                            <Grid item xs={6}>
-                                You will receive
-                            </Grid>
-                            <Grid item xs={6} className={classes.amountCell}>
-                                <img src={MINI_ICON_MAP[destAsset]}/>{total} {SYMBOL_MAP[destAsset]}
-                            </Grid>
-                        </Grid>
-                    </div>
+                      <div className={classes.totalContainer}>
+                          <Grid container className={classNames(classes.totalOption)}>
+                              <Grid item xs={6}>
+                                  You will receive
+                              </Grid>
+                              <Grid item xs={6} className={classes.amountCell}>
+                                  <img src={MINI_ICON_MAP[destAsset]}/>{total} {SYMBOL_MAP[destAsset]}
+                              </Grid>
+                          </Grid>
+                      </div>
 
-                    <Grid container justify='center' className={classes.actionButtonContainer}>
-                        {selectedDirection === 0 && <Grid item xs={12}>
-                            <Button
-                                disabled={!canConvertTo}
-                                variant={'contained'}
-                                color='primary'
-                                size="large"
-                                disableRipple
-                                fullWidth
-                                className={classNames(classes.margin, classes.actionButton)}
-                                onClick={this.confirmDeposit.bind(this)}>
-                                Confirm
-                            </Button>
-                        </Grid>}
-                        {selectedDirection === 1 && <Grid item xs={12}>
-                            <Button
-                                disabled={false}
-                                variant={'contained'}
-                                color='primary'
-                                size="large"
-                                disableRipple
-                                fullWidth
-                                className={classNames(classes.margin, classes.actionButton)}
-                                onClick={this.confirmWithdraw.bind(this)}>
-                                Confirm
-                            </Button>
-                        </Grid>}
-                    </Grid>
+                      <Grid container justify='center' className={classes.actionButtonContainer}>
+                          {selectedDirection === 0 && <Grid item xs={12}>
+                              <Button
+                                  disabled={!canConvertTo}
+                                  variant={'contained'}
+                                  color='primary'
+                                  size="large"
+                                  disableRipple
+                                  fullWidth
+                                  className={classNames(classes.margin, classes.actionButton)}
+                                  onClick={this.confirmDeposit.bind(this)}>
+                                  Confirm
+                              </Button>
+                          </Grid>}
+                          {selectedDirection === 1 && <Grid item xs={12}>
+                              <Button
+                                  disabled={false}
+                                  variant={'contained'}
+                                  color='primary'
+                                  size="large"
+                                  disableRipple
+                                  fullWidth
+                                  className={classNames(classes.margin, classes.actionButton)}
+                                  onClick={this.confirmWithdraw.bind(this)}>
+                                  Confirm
+                              </Button>
+                          </Grid>}
+                      </Grid>
 
-                </Grid>
-            </div>
-        </div>
+                  </Grid>
+              </div>
+          </div>
+        </React.Fragment>
     }
 }
 

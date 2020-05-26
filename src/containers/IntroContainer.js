@@ -75,17 +75,6 @@ const styles = (theme) => ({
         animationDuration: '550ms',
         position: 'absolute',
         left: 0,
-    },
-    disclosure: {
-        width: '100%',
-        maxWidth: 500,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        padding: theme.spacing(2),
-        border: '1px solid #DCE0E3',
-        fontSize: 14,
-        borderRadius: 4,
-        marginBottom: theme.spacing(6)
     }
 })
 
@@ -123,13 +112,6 @@ class IntroContainer extends React.Component {
         }
 
         return <div className={classes.container}>
-            <Grid container>
-              <div className={classes.disclosure}>
-                  <Typography variant='p'>
-                      RenVM is new technology and security audits don't completely eliminate risks. Please don’t supply assets you can’t afford to&nbsp;lose.
-                  </Typography>
-              </div>
-            </Grid>
             <Typography className={classes.title} variant='h2'>
                 Bitcoin, Zcash and Bitcoin Cash on&nbsp;Ethereum.
             </Typography>
@@ -171,7 +153,7 @@ class IntroContainer extends React.Component {
                     {text}
                 </Button>
                 {!requesting && error && <Typography variant='caption' className={classes.error}>
-                    Connection to 3box failed.
+                    Connection failed. Please note: hardware wallets are not supported at this&nbsp;time.
                 </Typography>}
                 {requesting && <React.Fragment>
                   <Typography variant='caption' className={classes.info}>

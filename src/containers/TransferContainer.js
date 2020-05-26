@@ -53,7 +53,7 @@ const styles = (theme) => ({
         boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)',
         maxWidth: 400,
         width: '100%',
-        margin: '0px auto',
+        margin: '0px auto ' + theme.spacing(1) + 'px',
         [theme.breakpoints.down('sm')]: {
             maxWidth: '100%',
         },
@@ -222,6 +222,23 @@ const styles = (theme) => ({
         color: '#FF4545',
         fontSize: 12,
         margin: '0px auto'
+    },
+    disclosure: {
+        width: '100%',
+        maxWidth: 370,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        textAlign: 'center',
+        boxShadow: '0px 1px 2px rgba(0, 27, 58, 0.05)',
+        padding: theme.spacing(2),
+        color: theme.palette.primary.main,
+        border: '1px solid ' + theme.palette.primary.main,
+        fontSize: 12,
+        borderRadius: 4,
+        marginBottom: theme.spacing(3),
+        [theme.breakpoints.down('sm')]: {
+            maxWidth: '100%',
+        },
     }
 })
 
@@ -417,7 +434,15 @@ class TransferContainer extends React.Component {
 
         // console.log(store.getState())
 
-        return <div className={classes.container}>
+        return <React.Fragment>
+          <Grid container>
+            <div className={classes.disclosure}>
+                <Typography variant='p'>
+                    RenVM is new technology and security audits don't completely eliminate risks. Please don’t supply assets you can’t afford to&nbsp;lose.
+                </Typography>
+            </div>
+          </Grid>
+          <div className={classes.container}>
             {<Grid container className={classes.transferActionTabs}>
                 <ToggleButtonGroup
                     size='small'
@@ -632,6 +657,7 @@ class TransferContainer extends React.Component {
                 </Grid>
             </div>}
         </div>
+      </React.Fragment>
     }
 }
 

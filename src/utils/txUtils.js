@@ -165,7 +165,7 @@ export const initGJSDeposit = async function(tx) {
     const data = {
         sendToken: GatewayJS.Tokens[selectedAsset.toUpperCase()].Mint,
         // every source asset for now uses the same unit number as BTC
-        suggestedAmount: GatewayJS.utils.value(amount, "btc").sats().toString(),
+        sendAmount: GatewayJS.utils.value(amount, "btc").sats().toString(),
         sendTo: localWeb3Address,
         web3Provider: localWeb3.currentProvider
     }

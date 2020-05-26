@@ -16,7 +16,6 @@ import RENBTC from '../assets/renBTC.svg'
 import RENZEC from '../assets/renZEC.svg'
 import RENBCH from '../assets/renBCH.svg'
 
-
 import {
     RENBTC_MAIN,
     RENBTC_TEST,
@@ -117,7 +116,7 @@ export const updateFees = async function() {
             })
         })
         const data = (await fees.json()).result
-        console.log(data)
+        // console.log(data)
         // console.log('renvm fees', await fees.json())
         store.set('fees', data)
     } catch(e) {
@@ -220,21 +219,41 @@ export const initLocalWeb3 = async function() {
     store.set('spaceError', false)
     const selectedNetwork = store.get('selectedNetwork')
 
-    const providerOptions = {
-    }
-
+    // web3 modal
+    const providerOptions = {}
     const web3Modal = new Web3Modal({
         network: selectedNetwork === 'testnet' ? "kovan" : 'mainnet', // optional
         cacheProvider: false, // optional
         providerOptions // required
     })
+    const web3Provider = await web3Modal.connect()
 
-    // console.log('web3Modal', web3Modal)
+    // manual connect to injected web3
+    // let web3Provider;
+    //
+    // if (window.ethereum) {
+    //     web3Provider = window.ethereum;
+    //     try {
+    //         // Request account access
+    //         await window.ethereum.enable();
+    //     } catch (error) {
+    //         console.log(error)
+    //         return
+    //     }
+    // }
+    // // Legacy dApp browsers...
+    // else if (window.web3) {
+    //     web3Provider = window.web3.currentProvider;
+    // }
+    // // If no injected web3 instance is detected, fall back to Ganache
+    // else {
+    //     return
+    // }
 
-    const provider = await web3Modal.connect()
-    const web3 = new Web3(provider)
+    const web3 = new Web3(web3Provider)
     const currentProvider = web3.currentProvider
     const accounts = await web3.eth.getAccounts()
+    // console.log('accounts', accounts)
     let network = ''
     if (currentProvider.networkVersion === '1') {
         network = 'mainnet'
@@ -248,24 +267,24 @@ export const initLocalWeb3 = async function() {
         return
     }
 
-    // store.set('localWeb3', web3)
-    // store.set('localWeb3Address', accounts[0])
-    // store.set('localWeb3Network', network)
-
     try {
         // recover transactions from 3box
         store.set('spaceRequesting', true)
-        // console.log('opening box')
+        // console.log(currentProvider, accounts)
         const box = await Box.openBox(accounts[0], currentProvider)
+
+        // alternate
+        // const provider = await Box.get3idConnectProvider()
+        // const box = await Box.create(provider)
+        // const auth = await box.auth(["ren-bridge"], {
+        //     address: accounts[0]
+        // })
+        // console.log(auth)
+
         store.set('box', box)
+        // console.log(box)
         const space = await box.openSpace("ren-bridge")
         // console.log('space', space)
-
-        // // grab 3box txs on connect
-        // const data = await space.private.get('convert.transactions')
-        // console.log('space txs', JSON.parse(data))
-        // const boxTransactions = data ? JSON.parse(data) : []
-
         store.set('space', space)
         window.space = space
 
@@ -297,6 +316,7 @@ export const initLocalWeb3 = async function() {
             initLocalWeb3()
         })
     } catch(e) {
+        console.log(e)
         store.set('spaceError', true)
         store.set('spaceRequesting', false)
     }
