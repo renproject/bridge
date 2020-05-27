@@ -190,7 +190,7 @@ class AppWrapper extends React.Component {
                       <Container size='lg'>
                         <Grid container alignItems='center' justify='space-between'>
                             <Typography className={classes.footerLinks} variant='caption'>
-                              <a target='_blank' href={'https://renproject.io/'}>Ren Project Site</a> <a target='_blank' href={'https://renproject.io/renvm'}>About RenVM</a> <a target='_blank' href={'https://docs.renproject.io/darknodes/faq/renbridge-faq'}>FAQs</a> <a target='_blank' href={'https://docs.renproject.io/developers/'}>Docs</a>
+                              <a target='_blank' href={'https://renproject.io/'}>Ren Project Site</a> <a target='_blank' href={'https://renproject.io/renvm'}>About RenVM</a> <a target='_blank' href={'https://docs.renproject.io/darknodes/faq/renbridge-faq'}>FAQs</a> <a target='_blank' href={'https://docs.renproject.io/developers/'}>Docs</a> <a target='_blank' href={'https://github.com/renproject/ren/wiki/Introduction'}>Wiki</a>
                             </Typography>
                             <Typography className={classes.footerLinks} variant='caption'>
                               <a target='_blank' href={'https://twitter.com/renprotocol'}><img className={classes.footerLogo} src={Twitter} /></a>

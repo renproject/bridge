@@ -7,7 +7,7 @@ import Web3Modal from 'web3modal'
 
 import BTC from '../assets/btc.png'
 import ETH from '../assets/eth.png'
-import ZEC from '../assets/zec.jpg'
+import ZEC from '../assets/zec.svg'
 import BCH from '../assets/bch.png'
 import DAI from '../assets/dai.png'
 import USDC from '../assets/usdc.png'

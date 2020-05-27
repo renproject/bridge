@@ -234,6 +234,7 @@ const styles = (theme) => ({
         color: theme.palette.primary.main,
         border: '1px solid ' + theme.palette.primary.main,
         fontSize: 12,
+        lineHeight: '17px',
         borderRadius: 4,
         marginBottom: theme.spacing(3),
         [theme.breakpoints.down('sm')]: {

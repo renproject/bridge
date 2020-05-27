@@ -244,6 +244,7 @@ const styles = (theme) => ({
         border: '1px solid ' + theme.palette.primary.main,
         fontSize: 12,
         borderRadius: 4,
+        lineHeight: '17px',
         marginBottom: theme.spacing(3),
         [theme.breakpoints.down('sm')]: {
             maxWidth: '100%',
