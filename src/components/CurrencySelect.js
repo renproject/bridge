@@ -101,14 +101,12 @@ class CurrencySelect extends React.Component {
     render() {
         const {
             classes,
-            onCurrencyChange,
             items,
             className,
             active
         } = this.props
 
         const {
-            currency,
             open
         } = this.state
 

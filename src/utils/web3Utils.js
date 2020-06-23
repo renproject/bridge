@@ -1,5 +1,3 @@
-import { getStore } from '../services/storeService'
-
 export const BTC_GATEWAY_TEST = '0x55363c0dBf97Ff9C0e31dAfe0fC99d3e9ce50b8A'
 export const BTC_GATEWAY_MAIN = '0xe4b679400F0f267212D5D812B95f58C83243EE71'
 

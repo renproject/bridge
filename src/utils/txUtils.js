@@ -165,7 +165,7 @@ export const txExists = function(tx) {
     return getStore().get('convert.transactions').filter(t => t.id === tx.id).length > 0
 }
 
-export const gatherFeeData = async function(type) {
+export const gatherFeeData = async function() {
     const store = getStore()
     const amount = store.get('convert.amount')
     const fees = store.get('fees')
@@ -176,12 +176,8 @@ export const gatherFeeData = async function(type) {
 
     if (!amount) return
 
-    const amountInSats = GatewayJS.utils.value(amount, "btc").sats().toNumber()
-
     const renVMFee = Number((Number(amount) * Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000))).toFixed(6)
-    // const fixedFee = 0.00035
     const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / (10 ** 8))
-    // console.log(amount, fee, Number(amount-fee))
     const total = Number(amount-renVMFee-fixedFee) > 0 ? Number(amount-renVMFee-fixedFee).toFixed(6) : '0.000000'
 
     store.set('convert.renVMFee', renVMFee)
@@ -193,8 +189,6 @@ export const gatherFeeData = async function(type) {
 export const initGJSDeposit = async function(tx) {
     const {
       amount,
-      params,
-      destAddress,
     } = tx
     const store = getStore()
     const {
@@ -213,7 +207,7 @@ export const initGJSDeposit = async function(tx) {
     }
 
     const preOpenTrades = Array.from((await gjs.getGateways()).values())
-    // console.log('before open', preOpenTrades)
+
     let trade = null
     const open = gjs.open(data);
     open.result()
@@ -221,7 +215,7 @@ export const initGJSDeposit = async function(tx) {
             console.log(`[GOT STATUS] ${status}`)
             if (status === GatewayJS.LockAndMintStatus.Committed) {
                 const postOpenTrades = Array.from((await gjs.getGateways()).values())
-                // console.log('after open', postOpenTrades)
+
                 if (preOpenTrades.length !== postOpenTrades.length) {
                     const preOpenIds = preOpenTrades.map(t => t.id)
                     postOpenTrades.map(pot => {
@@ -248,14 +242,12 @@ export const initGJSDeposit = async function(tx) {
 export const initGJSWithdraw = async function(tx) {
     const {
       amount,
-      params,
       destAddress,
     } = tx
     const store = getStore()
     const {
         gjs,
         localWeb3,
-        localWeb3Address,
         selectedAsset,
     } = store.getState()
 
@@ -268,7 +260,7 @@ export const initGJSWithdraw = async function(tx) {
     }
 
     const preOpenTrades = Array.from((await gjs.getGateways()).values())
-    // console.log('before open', preOpenTrades)
+
     let trade = null
     const open = gjs.open(data);
     open.result()
@@ -276,7 +268,7 @@ export const initGJSWithdraw = async function(tx) {
             console.log(`[GOT STATUS] ${status}`)
             if (status === GatewayJS.BurnAndReleaseStatus.Committed) {
                 const postOpenTrades = Array.from((await gjs.getGateways()).values())
-                // console.log('after open', postOpenTrades)
+
                 if (preOpenTrades.length !== postOpenTrades.length) {
                     const preOpenIds = preOpenTrades.map(t => t.id)
                     postOpenTrades.map(pot => {
@@ -306,9 +298,7 @@ export const reOpenTx = async function(trade) {
     const gjs = store.get('gjs')
     const localWeb3 = store.get('localWeb3')
     const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade)
-    // console.log(gateway, GatewayJS.LockAndMintStatus)
-    // gateway.close()
-    // gateway.cancel();
+
     gateway.result()
         .on("status", (status) => {
             const completed = isGatewayJSTxComplete(status)
