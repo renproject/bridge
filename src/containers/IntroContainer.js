@@ -173,7 +173,7 @@ class IntroContainer extends React.Component {
                 </Typography>}
                 {requesting && <React.Fragment>
                   <Typography variant='caption' className={classes.info}>
-                      Connecting to decentalized storage, this may take a minute.
+                      Connecting to decentralized storage, this may take a minute.
                   </Typography>
                   <Typography variant='caption' className={classes.info2}>
                       Please approve any 3box messages that appear in your wallet.
