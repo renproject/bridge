@@ -78,7 +78,10 @@ const styles = () => ({
             width: '100%',
             marginTop: theme.spacing(2)
       },
-      display: 'inline-block'
+      display: 'inline-block',
+      [theme.breakpoints.down('sm')]: {
+          display: 'none'
+      }
     },
     title: {
       // marginBottom: theme.spacing(0.5),

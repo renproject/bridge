@@ -42,11 +42,17 @@ const styles = (theme) => ({
     },
     message: {
         // marginTop: theme.spacing(3),
-        marginBottom: theme.spacing(4)
+        marginBottom: theme.spacing(4),
+        [theme.breakpoints.down('sm')]: {
+            display: 'none'
+        }
     },
     button: {
         width: '100%',
         maxWidth: 230,
+        [theme.breakpoints.down('sm')]: {
+            display: 'none'
+        }
         // display: 'flex',
         // alignItems: 'center'
     },
@@ -75,6 +81,12 @@ const styles = (theme) => ({
         animationDuration: '550ms',
         position: 'absolute',
         left: 0,
+    },
+    mobileMessage: {
+        display: 'none',
+        [theme.breakpoints.down('sm')]: {
+            display: 'block'
+        }
     }
 })
 
@@ -152,6 +164,10 @@ class IntroContainer extends React.Component {
                     </div>}
                     {text}
                 </Button>
+                <Typography variant='p' className={classes.mobileMessage}>
+                    RenBridge is currently only supported on desktop&nbsp;browsers.
+                </Typography>
+
                 {!requesting && error && <Typography variant='caption' className={classes.error}>
                     Connection failed. Please note: hardware wallets are not supported at this&nbsp;time.
                 </Typography>}
