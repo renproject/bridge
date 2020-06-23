@@ -32,6 +32,7 @@ import { getStore } from '../services/storeService'
 
 import erc20ABI from "./erc20ABI.json";
 
+// used for montoring balances
 let walletDataInterval = null
 
 export const ASSETS = ['BTC', 'WBTC']
@@ -88,15 +89,17 @@ export const MINI_ICON_MAP = {
     renbch: RENBCH
 }
 
-export const resetWallet = async function() {
-    const store = getStore()
-    store.set('localWeb3', null)
-    store.set('localWeb3Address', '')
-    store.set('localWeb3Network', '')
-    store.set('space', null)
-    store.set('convert.transactions', [])
+export const abbreviateAddress = function(walletAddress) {
+    if (!walletAddress || typeof walletAddress !== 'string') {
+        return ''
+    } else {
+        return (walletAddress.slice(0,5) + '...' + walletAddress.slice(walletAddress.length - 5))
+    }
 }
 
+/**
+ * Get External Data for Fees, Balances, etc.
+ */
 export const updateFees = async function() {
     const store = getStore()
     try {
@@ -113,8 +116,6 @@ export const updateFees = async function() {
             })
         })
         const data = (await fees.json()).result
-        // console.log(data)
-        // console.log('renvm fees', await fees.json())
         store.set('fees', data)
     } catch(e) {
         console.log(e)
@@ -154,7 +155,6 @@ export const updateMarketData = async function() {
         console.log(e)
     }
 }
-
 
 export const updateBalance = async function() {
     const store = getStore()
@@ -205,6 +205,9 @@ export const initDataWeb3 = async function() {
    store.set('dataWeb3', new Web3(`https://${network === 'testnet' ? 'kovan' : 'mainnet'}.infura.io/v3/7be66f167c2e4a05981e2ffc4653dec2`))
 }
 
+/**
+ * Connecting to Local Web3 Wallet
+ */
 export const initLocalWeb3 = async function() {
     const store = getStore()
     store.set('walletConnecting', true)
@@ -382,17 +385,4 @@ export const setNetwork = async function(network) {
     setAddresses.bind(this)()
 }
 
-export const abbreviateAddress = function(walletAddress) {
-    if (!walletAddress || typeof walletAddress !== 'string') {
-        return ''
-    } else {
-        return (walletAddress.slice(0,5) + '...' + walletAddress.slice(walletAddress.length - 5))
-    }
-}
-
-export default {
-    resetWallet,
-    setNetwork,
-    updateBalance,
-    abbreviateAddress
-}
+export default {}

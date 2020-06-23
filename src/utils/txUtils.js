@@ -30,6 +30,9 @@ export const removeWindowBlocker = function() {
     window.removeEventListener('beforeunload', windowBlocker);
 }
 
+/**
+ * Create/Update/Delete Transactions on Firebase and 3box
+ */
 export const addTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
@@ -165,6 +168,9 @@ export const txExists = function(tx) {
     return getStore().get('convert.transactions').filter(t => t.id === tx.id).length > 0
 }
 
+/**
+ * Calculate Fees for a Transaction
+ */
 export const gatherFeeData = async function() {
     const store = getStore()
     const amount = store.get('convert.amount')
@@ -185,7 +191,9 @@ export const gatherFeeData = async function() {
     store.set('convert.conversionTotal', total)
 }
 
-// transfers
+/**
+ * Mint and Burn
+ */
 export const initGJSDeposit = async function(tx) {
     const {
       amount,
@@ -289,6 +297,9 @@ export const initGJSWithdraw = async function(tx) {
         })
 }
 
+/**
+ * Recover and Continue Transactions
+ */
 export const isGatewayJSTxComplete = function(status) {
     return status === GatewayJS.LockAndMintStatus.ConfirmedOnEthereum || status === GatewayJS.BurnAndReleaseStatus.ReturnedFromRenVM
 }
@@ -375,8 +386,4 @@ window.getStore = getStore
 window.GatewayJS = GatewayJS
 window.reOpenTx = reOpenTx
 
-export default {
-    addTx,
-    updateTx,
-    removeTx,
-}
+export default {}
