@@ -1,10 +1,8 @@
 import React from 'react';
 import Numeral from 'numeral'
 import NumberFormat from 'react-number-format'
-import theme from '../theme/theme'
 import classNames from 'classnames'
 import { withStyles } from '@material-ui/styles';
-import Typography from '@material-ui/core/Typography';
 
 const styles = () => ({
     container: {
@@ -67,20 +65,6 @@ class BigCurrencyInput extends React.PureComponent {
       }
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   const nextData = {
-  //       symbol: nextProps.symbol,
-  //       value: nextProps.value,
-  //   }
-  //
-  //   const currentData = {
-  //       symbol: this.props.symbol,
-  //       value: this.props.value
-  //   }
-  //
-  //   return nextData !== currentData
-  // }
-
   render() {
     const {
         classes,
@@ -89,11 +73,9 @@ class BigCurrencyInput extends React.PureComponent {
         symbol,
         usdValue,
         value,
-        inputRef,
         placeholder
     } = this.props
 
-    const asset = symbol || ''
     const val = value ? String(value) : ''
     const ref = this.ref
     const change = onChange || (() => {})
@@ -108,8 +90,6 @@ class BigCurrencyInput extends React.PureComponent {
     } else if (chars.length > 9){
         size = 'smallest'
     }
-
-    // console.log(value, val)
 
     return <div className={classNames(classes.container, classes[size])}>
         <NumberFormat value={val}

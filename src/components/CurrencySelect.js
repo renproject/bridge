@@ -1,15 +1,8 @@
 import React from 'react';
 import theme from '../theme/theme'
-import classNames from 'classnames'
 import { withStyles } from '@material-ui/styles';
-
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
@@ -35,7 +28,6 @@ const styles = () => ({
         paddingBottom: theme.spacing(1),
         '& div': {
             display: 'flex',
-            // fontSize: 14
         },
         justifyContent: 'flex-start'
     },
@@ -43,7 +35,6 @@ const styles = () => ({
         display: 'flex',
         '& div': {
             display: 'flex',
-            // fontSize: 14
         },
         '& MuiInput-underline:before': {
             display: 'none'
