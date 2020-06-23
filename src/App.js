@@ -4,11 +4,8 @@ import queryString from 'query-string'
 import firebase from 'firebase'
 import { storeListener } from './services/storeService'
 import {
-    RENBTC_MAIN,
     RENBTC_TEST,
-    RENZEC_MAIN,
     RENZEC_TEST,
-    RENBCH_MAIN,
     RENBCH_TEST,
 } from './utils/web3Utils'
 import { setNetwork, updateFees } from './utils/walletUtils'
@@ -17,18 +14,15 @@ import TransferContainer from './containers/TransferContainer'
 import ConfirmContainer from './containers/ConfirmContainer'
 import IntroContainer from './containers/IntroContainer'
 import NetworkModalContainer from './containers/NetworkModalContainer'
-import RenVM from './assets/renvm-powered.svg';
 import Twitter from './assets/twitter.svg';
 import Github from './assets/github.svg';
 import Reddit from './assets/reddit.svg';
 import Telegram from './assets/telegram.svg';
 import { withStyles, ThemeProvider } from '@material-ui/styles';
 import theme from './theme/theme'
-import classNames from 'classnames'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
-import Table from '@material-ui/core/Table';
 
 // Instanitate Firebase
 firebase.initializeApp({
@@ -39,16 +33,13 @@ firebase.initializeApp({
 
 const styles = () => ({
   container: {
-    // maxWidth: 450
     minHeight: '100vh'
   },
   contentContainer: {
-    // paddingTop: theme.spacing(3),
     flex: 1,
     [theme.breakpoints.down('sm')]: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2)
-        // marginTop: theme.spacing(2)
     }
   },
   footerContainer: {
@@ -68,8 +59,6 @@ const styles = () => ({
     height: 12,
     width: 'auto',
     marginLeft: theme.spacing(0.5),
-    // border: '1px solid ' + theme.palette.divider,
-    // borderRadius: 4
   },
   transfersContainer: {
     padding: theme.spacing(3)
@@ -170,8 +159,6 @@ class AppWrapper extends React.Component {
         const localWeb3Address = store.get('localWeb3Address')
         const confirmAction = store.get('confirmAction')
         const confirmTx = store.get('confirmTx')
-
-        // console.log(store.getState())
 
         return (
           <ThemeProvider theme={theme}>
