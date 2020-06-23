@@ -1,20 +1,13 @@
 import React from 'react';
 import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
-import theme from '../theme/theme'
-import classNames from 'classnames'
-import DetectNetwork from "web3-detect-network";
 import { initLocalWeb3 } from '../utils/walletUtils'
-import { removeTx } from '../utils/txUtils'
-
-import Web3 from "web3";
 
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import MetaMask from '../assets/metamask-intro.svg'
 import CircularProgress from '@material-ui/core/CircularProgress';
-
 
 const styles = (theme) => ({
     container: {
@@ -110,6 +103,7 @@ class IntroContainer extends React.Component {
             store
         } = this.props
 
+        const walletConnecting = store.get('walletConnecting')
         const requesting = store.get('spaceRequesting')
         const error = store.get('spaceError')
         const box = store.get('box')
@@ -140,7 +134,7 @@ class IntroContainer extends React.Component {
             </Grid>
             <Grid container justify='flex-start' direction='column' alignItems='center'>
                 <Button onClick={initLocalWeb3}
-                    disabled={requesting}
+                    disabled={walletConnecting || requesting}
                     className={classes.button}
                     size='large'
                     color='primary'
@@ -173,7 +167,7 @@ class IntroContainer extends React.Component {
                 </Typography>}
                 {requesting && <React.Fragment>
                   <Typography variant='caption' className={classes.info}>
-                      Connecting to decentalized storage, this may take a minute.
+                      Connecting to decentralized storage, this may take a minute.
                   </Typography>
                   <Typography variant='caption' className={classes.info2}>
                       Please approve any 3box messages that appear in your wallet.

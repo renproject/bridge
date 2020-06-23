@@ -1,36 +1,8 @@
 import React from 'react';
 import { createStore, withStore } from '@spyna/react-store'
 import queryString from 'query-string'
+import firebase from 'firebase'
 import { storeListener } from './services/storeService'
-
-import NavContainer from './containers/NavContainer'
-import TransferContainer from './containers/TransferContainer'
-import ConfirmContainer from './containers/ConfirmContainer'
-import IntroContainer from './containers/IntroContainer'
-import NetworkModalContainer from './containers/NetworkModalContainer'
-
-
-import { setNetwork, updateFees } from './utils/walletUtils'
-
-import RenVM from './assets/renvm-powered.svg';
-import Twitter from './assets/twitter.svg';
-import Github from './assets/github.svg';
-import Reddit from './assets/reddit.svg';
-import Telegram from './assets/telegram.svg';
-
-
-import { withStyles, ThemeProvider } from '@material-ui/styles';
-import theme from './theme/theme'
-import classNames from 'classnames'
-
-import Container from '@material-ui/core/Container'
-import Grid from '@material-ui/core/Grid'
-import Typography from '@material-ui/core/Typography'
-import Table from '@material-ui/core/Table';
-
-// import RenSDK from "@renproject/ren";
-// import GatewayJS from '@renproject/gateway'
-
 import {
     RENBTC_MAIN,
     RENBTC_TEST,
@@ -39,6 +11,31 @@ import {
     RENBCH_MAIN,
     RENBCH_TEST,
 } from './utils/web3Utils'
+import { setNetwork, updateFees } from './utils/walletUtils'
+import NavContainer from './containers/NavContainer'
+import TransferContainer from './containers/TransferContainer'
+import ConfirmContainer from './containers/ConfirmContainer'
+import IntroContainer from './containers/IntroContainer'
+import NetworkModalContainer from './containers/NetworkModalContainer'
+import RenVM from './assets/renvm-powered.svg';
+import Twitter from './assets/twitter.svg';
+import Github from './assets/github.svg';
+import Reddit from './assets/reddit.svg';
+import Telegram from './assets/telegram.svg';
+import { withStyles, ThemeProvider } from '@material-ui/styles';
+import theme from './theme/theme'
+import classNames from 'classnames'
+import Container from '@material-ui/core/Container'
+import Grid from '@material-ui/core/Grid'
+import Typography from '@material-ui/core/Typography'
+import Table from '@material-ui/core/Table';
+
+// Instanitate Firebase
+firebase.initializeApp({
+  apiKey: 'AIzaSyB-QdW7ESq1OXkqyReLy0U8cU89AcfuZtk',
+  authDomain: window.location.hostname,
+  projectId: 'renbridge-89c3f'
+})
 
 const styles = () => ({
   container: {
@@ -85,8 +82,6 @@ const initialState = {
     renZECAddress: RENZEC_TEST,
     renBCHAddress: RENBCH_TEST,
 
-    // btcShifterAddress: BTC_SHIFTER_TEST,
-    // adapterAddress: ADAPTER_TEST,
     selectedNetwork: 'mainnet',
     queryParams: {},
 
@@ -99,6 +94,7 @@ const initialState = {
     space: null,
     spaceError: false,
     spaceRequesting: false,
+    walletConnecting: false,
     loadingBalances: true,
     renBTCBalance: 0,
     renZECBalance: 0,
@@ -109,6 +105,12 @@ const initialState = {
     ethBalance: 0,
     gjs: null,
     fees: null,
+
+    // firebase
+    db: firebase.firestore(),
+    fsUser: null,
+    fsSignature: null,
+    fsEnabled: false,
 
     // navigation
     selectedTab: 1,

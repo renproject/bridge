@@ -1,19 +1,6 @@
-import { withStore } from '@spyna/react-store'
+import firebase from 'firebase'
 import GatewayJS from "@renproject/gateway";
-import BigNumber from "bignumber.js";
-import adapterABI from "../utils/adapterCurveABI.json";
-import zbtcABI from "../utils/erc20ABI.json";
-import curveABI from "../utils/curveABI.json";
 import { getStore } from '../services/storeService'
-import {
-    BTC_GATEWAY_MAIN,
-    BTC_GATEWAY_TEST,
-    ZEC_GATEWAY_MAIN,
-    ZEC_GATEWAY_TEST,
-    BCH_GATEWAY_MAIN,
-    BCH_GATEWAY_TEST,
-    CURVE_TEST
-} from './web3Utils'
 
 export const MIN_TX_AMOUNTS = {
     btc: 0.00035001,
@@ -47,6 +34,15 @@ export const addTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
     const space = store.get('space')
+    const db = store.get('db')
+    const fsEnabled = store.get('fsEnabled')
+    const localWeb3Address = store.get('localWeb3Address')
+    const fsSignature = store.get('fsSignature')
+
+    // add timestamps
+    const timestamp = firebase.firestore.Timestamp.fromDate(new Date(Date.now()))
+    tx.created = timestamp
+    tx.updated = timestamp
 
     const txs = JSON.parse(await space.private.get(storeString)) || []
     const newTxs = txs.concat([tx])
@@ -54,14 +50,28 @@ export const addTx = async (tx) => {
     // update state
     store.set(storeString, newTxs)
 
-    // update 3box
+    // update localStorage just in case
+    localStorage.setItem(storeString, JSON.stringify(newTxs))
 
+    // update 3box
     if (space) {
         space.private.set(storeString, JSON.stringify(newTxs))
     }
 
-    // update localStorage just in case
-    localStorage.setItem(storeString, JSON.stringify(newTxs))
+    // update firebase
+    if (fsEnabled) {
+        try {
+            db.collection("transactions").doc(tx.id).set({
+                user: localWeb3Address.toLowerCase(),
+                walletSignature: fsSignature,
+                id: tx.id,
+                updated: timestamp,
+                data: JSON.stringify(tx)
+            })
+        } catch(e) {
+            console.log(e)
+        }
+    }
 
     // for debugging
     window.txs = newTxs
@@ -71,6 +81,11 @@ export const updateTx = async (newTx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
     const space = store.get('space')
+    const db = store.get('db')
+    const fsEnabled = store.get('fsEnabled')
+
+    // update timestamp
+    newTx.updated = firebase.firestore.Timestamp.fromDate(new Date(Date.now()))
 
     const txs = JSON.parse(await space.private.get(storeString)) || []
 
@@ -84,13 +99,27 @@ export const updateTx = async (newTx) => {
     // update state
     store.set(storeString, newTxs)
 
+    // use localStorage
+    localStorage.setItem(storeString, JSON.stringify(newTxs))
+
     // update 3box
     if (space) {
         space.private.set(storeString, JSON.stringify(newTxs))
     }
 
-    // use localStorage
-    localStorage.setItem(storeString, JSON.stringify(newTxs))
+    // update firebase
+    if (fsEnabled) {
+        try {
+            db.collection("transactions")
+                .doc(newTx.id)
+                .update({
+                    data: JSON.stringify(newTx),
+                    updated: newTx.updated
+                })
+        } catch(e) {
+            console.log(e)
+        }
+    }
 
     // for debugging
     window.txs = txs
@@ -100,6 +129,8 @@ export const removeTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
     const space = store.get('space')
+    const db = store.get('db')
+    const fsEnabled = store.get('fsEnabled')
 
     const txs = JSON.parse(await space.private.get(storeString)) || []
     const newTxs = txs.filter(t => (t.id !== tx.id))
@@ -107,13 +138,24 @@ export const removeTx = async (tx) => {
     // update local state
     store.set(storeString, newTxs)
 
+    // update localStorage just in case
+    localStorage.setItem(storeString, JSON.stringify(newTxs))
+
     // update 3box
     if (space) {
         space.private.set(storeString, JSON.stringify(newTxs))
     }
 
-    // update localStorage just in case
-    localStorage.setItem(storeString, JSON.stringify(newTxs))
+    // update firebase
+    if (fsEnabled) {
+        try {
+            db.collection("transactions")
+                .doc(tx.id)
+                .delete()
+        } catch(e) {
+            console.log(e)
+        }
+    }
 
     // for debugging
     window.txs = txs
@@ -217,8 +259,6 @@ export const initGJSWithdraw = async function(tx) {
         selectedAsset,
     } = store.getState()
 
-    const adapterAddress = BTC_GATEWAY_TEST
-
     const data = {
         sendToken: GatewayJS.Tokens[selectedAsset.toUpperCase()].Burn,
         // every source asset for now uses the same unit number as BTC
@@ -291,35 +331,57 @@ export const recoverTrades = async function() {
     const store = getStore()
     const gjs = store.get('gjs')
     const space = store.get('space')
+    const fsSignature = store.get('fsSignature')
+    const db = store.get('db')
 
     // Re-open incomplete trades
-    const previousGateways = await gjs.getGateways();
-    const previousTrades = Array.from(previousGateways.values())
-    // console.log('previousTrades', previousTrades)
-    for (const trade of previousTrades) {
-
+    const localGateways = await gjs.getGateways();
+    const localTrades = Array.from(localGateways.values())
+    for (const trade of localTrades) {
         const tradeCompleted = isGatewayJSTxComplete(trade.status)
-        // console.log('trade', trade, tradeCompleted)
         if (tradeCompleted) {
           continue;
         }
         reOpenTx(trade)
     }
 
+    // Get 3box transactions
     const boxData = await space.private.get('convert.transactions')
     const boxTrades = boxData ? JSON.parse(boxData) : []
 
-    // console.log('boxTrades', boxData, boxTrades)
+    // Get firebase transactions
+    const fsDataSnapshot = await db.collection("transactions")
+        .where("walletSignature", "==", fsSignature).get()
+    let fsTrades = []
+    if (!fsDataSnapshot.empty) {
+        fsDataSnapshot.forEach(doc => {
+            const tx = JSON.parse(doc.data().data)
+            fsTrades.push(tx)
+        })
+    }
+    const fsTradeIds = fsTrades.map(f => f.id)
 
-    // if 3box has transactions not found locally, reopen those
-    const previousTradeIds = previousTrades.map(t => t.id)
+    // if firebase has transactions not found locally, reopen those
+    const localTradeIds = localTrades.map(t => t.id)
+    fsTrades.map(ftx => {
+        if (!isGatewayJSTxComplete(ftx.status)
+            && localTradeIds.indexOf(ftx.id) < 0) {
+            reOpenTx(ftx)
+        }
+    })
+
+    // if 3box has transactions not found locally or in firebase, reopen those
+    // remove this when we fully switch away from 3box
     boxTrades.map(btx => {
-        if (!isGatewayJSTxComplete(btx.status) &&  previousTradeIds.indexOf(btx.id) < 0) {
+        if (!isGatewayJSTxComplete(btx.status)
+            && localTradeIds.indexOf(btx.id) < 0
+            && fsTradeIds.indexOf(btx.id) < 0) {
             reOpenTx(btx)
         }
     })
 }
 
+window.getStore = getStore
 window.GatewayJS = GatewayJS
 window.reOpenTx = reOpenTx
 

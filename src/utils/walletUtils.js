@@ -1,9 +1,8 @@
 import Web3 from "web3";
 import GatewayJS from '@renproject/gateway'
 import Box from '3box'
-
-import DetectNetwork from "web3-detect-network";
 import Web3Modal from 'web3modal'
+import firebase from 'firebase'
 
 import BTC from '../assets/btc.png'
 import ETH from '../assets/eth.png'
@@ -26,8 +25,6 @@ import {
 } from './web3Utils'
 
 import {
-    initMonitoring,
-    // gatherFeeData,
     recoverTrades
 } from './txUtils'
 
@@ -210,6 +207,7 @@ export const initDataWeb3 = async function() {
 
 export const initLocalWeb3 = async function() {
     const store = getStore()
+    store.set('walletConnecting', true)
 
     // already connected
     if (store.get('localWeb3Address')) {
@@ -228,37 +226,18 @@ export const initLocalWeb3 = async function() {
     })
     const web3Provider = await web3Modal.connect()
 
-    // manual connect to injected web3
-    // let web3Provider;
-    //
-    // if (window.ethereum) {
-    //     web3Provider = window.ethereum;
-    //     try {
-    //         // Request account access
-    //         await window.ethereum.enable();
-    //     } catch (error) {
-    //         console.log(error)
-    //         return
-    //     }
-    // }
-    // // Legacy dApp browsers...
-    // else if (window.web3) {
-    //     web3Provider = window.web3.currentProvider;
-    // }
-    // // If no injected web3 instance is detected, fall back to Ganache
-    // else {
-    //     return
-    // }
-
     const web3 = new Web3(web3Provider)
     const currentProvider = web3.currentProvider
     const accounts = await web3.eth.getAccounts()
-    // console.log('accounts', accounts)
+    const address = accounts[0]
+    const addressLowerCase = address.toLowerCase()
+    const db = store.get('db')
+
+    // set app network based on web3 network
     let network = ''
     if (currentProvider.networkVersion === '1') {
         network = 'mainnet'
-    } else if (currentProvider.networkVersion === '42' ||
-      (currentProvider.authereum && currentProvider.authereum.networkId === 42)) {
+    } else if (currentProvider.networkVersion === '42') {
         network = 'testnet'
     }
 
@@ -268,18 +247,80 @@ export const initLocalWeb3 = async function() {
     }
 
     try {
+        ///////////////////////////////////////////////////////
+        // Firebase Sign In or Sign Up
+        //////////////////////////////////////////////////////
+
+        let signature = ''
+
+        // get from local storage if user has signed in already
+        const localSigMap = localStorage.getItem('sigMap')
+        const localSigMapData = localSigMap ? JSON.parse(localSigMap) : {}
+        if (localSigMapData[addressLowerCase]) {
+            signature = localSigMapData[addressLowerCase]
+        } else {
+            // get unique wallet signature for firebase backup
+            const sig = await web3.eth.personal.sign(web3.utils.utf8ToHex("Signing in to RenBridge"), addressLowerCase)
+            signature = web3.utils.sha3(sig)
+            localSigMapData[addressLowerCase] = signature
+            localStorage.setItem('sigMap', JSON.stringify(localSigMapData))
+        }
+
+        store.set('fsSignature', signature)
+
+        // auth with firestore
+        const bridgeId = `${addressLowerCase}@renproject.io`
+        const currentFsUser = firebase.auth().currentUser
+        let fsUser
+
+        if (!currentFsUser || currentFsUser.email !== bridgeId) {
+            try {
+                fsUser = (await firebase.auth()
+                    .signInWithEmailAndPassword(bridgeId, signature)).user
+            } catch(e) {
+                console.log(e)
+                console.log('new user')
+                fsUser = (await firebase.auth()
+                    .createUserWithEmailAndPassword(bridgeId, signature)).user
+            }
+        } else {
+            fsUser = currentFsUser
+        }
+
+        store.set('fsUser', fsUser)
+
+        // update user collection
+        const doc = await db.collection("users").doc(fsUser.uid)
+        const docData = await doc.get()
+
+        if (docData.exists) {
+            const data = docData.data()
+            if (data.signatures.indexOf(signature) < 0) {
+                // add a new signature if needed
+                await doc.update({
+                    signatures: data.signatures.concat([signature]),
+                    updated: firebase.firestore.Timestamp.fromDate(new Date(Date.now()))
+                })
+            }
+        } else {
+            // create user
+            await doc.set({
+                uid: fsUser.uid,
+                updated: firebase.firestore.Timestamp.fromDate(new Date(Date.now())),
+                signatures: [signature]
+            })
+        }
+
+        store.set('fsEnabled', true)
+
+        ///////////////////////////////////////////////////////
+        // Recover Transactions
+        //////////////////////////////////////////////////////
+
         // recover transactions from 3box
         store.set('spaceRequesting', true)
         // console.log(currentProvider, accounts)
         const box = await Box.openBox(accounts[0], currentProvider)
-
-        // alternate
-        // const provider = await Box.get3idConnectProvider()
-        // const box = await Box.create(provider)
-        // const auth = await box.auth(["ren-bridge"], {
-        //     address: accounts[0]
-        // })
-        // console.log(auth)
 
         store.set('box', box)
         // console.log(box)
@@ -292,33 +333,28 @@ export const initLocalWeb3 = async function() {
         store.set('localWeb3Address', accounts[0])
         store.set('localWeb3Network', network)
         store.set('spaceRequesting', false)
+        store.set('walletConnecting', false)
 
-        // sometimes 3box data isn't immediately there, so recover
-        // after a slight delay
-        setTimeout(() => {
-            recoverTrades()
-            updateBalance()
-        }, 100)
+        recoverTrades()
+        updateBalance()
 
         // listen for changes
         currentProvider.on('accountsChanged', async () => {
-            resetWallet()
-            initLocalWeb3()
+            window.location.reload()
         })
 
         currentProvider.on('chainChanged', async () => {
-            resetWallet()
-            initLocalWeb3()
+            window.location.reload()
         })
 
         currentProvider.on('networkChanged', async () => {
-            resetWallet()
-            initLocalWeb3()
+            window.location.reload()
         })
     } catch(e) {
         console.log(e)
         store.set('spaceError', true)
         store.set('spaceRequesting', false)
+        store.set('walletConnecting', false)
     }
 
     return
@@ -353,34 +389,6 @@ export const abbreviateAddress = function(walletAddress) {
         return (walletAddress.slice(0,5) + '...' + walletAddress.slice(walletAddress.length - 5))
     }
 }
-
-export const modifyNumericInput = function(value, string, input) {
-    const valStr = String(value)
-    // console.log(value, string, input, valStr)
-    if (string === '.') {
-        setTimeout(() => {
-          input.value = '0.'
-        }, 1)
-    } else if (string === '.0') {
-        setTimeout(() => {
-          input.setValue(0.0)
-          input.value = '0.0'
-        }, 1)
-    } else if (valStr.length === 3 && valStr.charAt(1) === '.'){
-        setTimeout(() => {
-          if (input.createTextRange) {
-              var part = input.createTextRange();
-              part.move("character", 3);
-              part.select();
-          } else if (input.setSelectionRange) {
-              input.setSelectionRange(3, 3);
-          }
-          input.focus();
-        }, 1)
-    }
-}
-
-// window.setWbtcAllowance = setWbtcAllowance
 
 export default {
     resetWallet,
