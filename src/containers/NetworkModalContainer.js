@@ -31,7 +31,6 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         marginBottom: theme.spacing(2),
-        // fontWeight: 'bold'
     },
     titleContainer: {
       marginBottom: theme.spacing(3),

@@ -10,7 +10,6 @@ import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 
-
 const styles = () => ({
     navContainer: {
         paddingTop: theme.spacing(4),
@@ -20,17 +19,11 @@ const styles = () => ({
             paddingTop: theme.spacing(2),
             paddingBottom: theme.spacing(2),
         }
-        // borderBottom: '1px solid ' + theme.palette.divider,
-        // backgroundColor: '#fff'
     },
     logo: {
         height: 46,
         width: 'auto',
         marginRight: theme.spacing(1),
-        // [theme.breakpoints.down('xs')]: {
-        //     height: 17,
-        //     width: 20,
-        // }
     },
     cafe: {
         fontFamily: 'Alex Brush',
@@ -60,25 +53,18 @@ const styles = () => ({
       }
     },
     title: {
-      // marginBottom: theme.spacing(0.5),
       fontSize: 16,
       textAlign: 'center'
-        // [theme.breakpoints.down('xs')]: {
-        //     // fontSize: 16
-        //     display: 'none'
-        // }
     },
     faq: {
         marginRight: theme.spacing(2)
     },
     hideMobile: {
         [theme.breakpoints.down('xs')]: {
-            // fontSize: 16
             display: 'none'
         }
     },
     disabled: {
-        // pointerEvents: 'none',
         cursor: 'auto'
     },
     circle: {

@@ -34,7 +34,6 @@ const styles = (theme) => ({
         }
     },
     message: {
-        // marginTop: theme.spacing(3),
         marginBottom: theme.spacing(4),
         [theme.breakpoints.down('sm')]: {
             display: 'none'
@@ -46,8 +45,6 @@ const styles = (theme) => ({
         [theme.breakpoints.down('sm')]: {
             display: 'none'
         }
-        // display: 'flex',
-        // alignItems: 'center'
     },
     error: {
         marginTop: theme.spacing(2),

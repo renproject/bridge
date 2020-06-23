@@ -1,42 +1,23 @@
 import React from 'react';
 import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
-import theme from '../theme/theme'
 import classNames from 'classnames'
 import Numeral from 'numeral'
-import sb from "satoshi-bitcoin"
-import AddressValidator from "wallet-address-validator";
 import {
     addTx,
     updateTx,
     removeTx,
-    initMonitoring,
-    initConvertToEthereum,
-    initConvertFromEthereum,
-    initTransfer,
-    gatherFeeData,
     initGJSDeposit,
     initGJSWithdraw
 } from '../utils/txUtils'
-import { MINI_ICON_MAP, SYMBOL_MAP, NAME_MAP, initLocalWeb3, setWbtcAllowance, abbreviateAddress } from '../utils/walletUtils'
-import Web3 from "web3";
-import { ethers } from 'ethers';
+import { MINI_ICON_MAP, SYMBOL_MAP, NAME_MAP, abbreviateAddress } from '../utils/walletUtils'
+
 
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-
-import CurrencyInput from '../components/CurrencyInput';
-import BigCurrencyInput from '../components/BigCurrencyInput';
-import ActionLink from '../components/ActionLink';
 import BackArrow from '../assets/back-arrow.svg';
 import WalletIcon from '../assets/wallet-icon.svg'
-
-import adapterABI from "../utils/adapterABI.json";
 
 const styles = (theme) => ({
     container: {
@@ -297,50 +278,19 @@ class ConfirmContainer extends React.Component {
             store
         } = this.props
 
-        const walletAddress = store.get('walletAddress')
-        const transactions = store.get('transactions')
-        const selectedNetwork = store.get('selectedNetwork')
-        const selectedTab  = store.get('selectedTab')
-        const selectedTransferTab  = store.get('selectedTransferTab')
         const selectedAsset  = store.get('selectedAsset')
-        const showAboutModal = store.get('showAboutModal')
-
-        const depositAmount = store.get('depositAmount')
-        const withdrawAmount = store.get('withdrawAmount')
-        const withdrawAddressValid = store.get('withdrawAddressValid')
-        const transferAmount = store.get('transferAmount')
-        const transferAddressValid = store.get('transferAddressValid')
-
         const selectedDirection  = store.get('convert.selectedDirection')
-
-        const localWeb3Address = store.get('localWeb3Address')
-        const space = store.get('space')
-        const renBTCBalance = store.get('renBTCBalance')
-
         const amount = store.get('convert.amount')
-        const exchangeRate = store.get('convert.exchangeRate')
         const renVMFee = store.get('convert.renVMFee')
         const networkFee = store.get('convert.networkFee')
         const total = store.get('convert.conversionTotal')
-
-        const allowance = store.get('convert.adapterWbtcAllowance')
-        const hasAllowance = Number(amount) <= Number(allowance)
-        const allowanceRequesting = store.get('convert.adapterWbtcAllowanceRequesting')
-
-        const convertAddressValid = store.get('convert.destinationValid')
         const canConvertTo = amount > 0.00010001
-        const canConvertFrom = Number(total) > 0.00010001 && amount <= Number(renBTCBalance)
-
-
         const confirmAction = store.get('confirmAction')
         const isDeposit = confirmAction === 'deposit'
         const confirmTx = store.get('confirmTx')
-
         const sourceAsset = confirmTx.sourceAsset
         const destAsset = confirmTx.destAsset
-
         const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(2)
-
         const chars = String(amount).replace('.', '')
 
         let size = 'large'
