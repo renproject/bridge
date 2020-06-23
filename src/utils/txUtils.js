@@ -16,12 +16,12 @@ import {
 } from './web3Utils'
 
 export const MIN_TX_AMOUNTS = {
-    btc: 0.00035001,
-    zec: 0.00035001,
-    bch: 0.00035001,
-    renbtc: 0.00035001,
-    renzec: 0.00035001,
-    renbch: 0.00035001
+    btc: 0.00035036,
+    zec: 0.00035036,
+    bch: 0.00035036,
+    renbtc: 0.00035036,
+    renzec: 0.00035036,
+    renbch: 0.00035036
 }
 
 export const windowBlocker = function(event) {
@@ -74,12 +74,10 @@ export const updateTx = async (newTx) => {
 
     const txs = JSON.parse(await space.private.get(storeString)) || []
 
-    const newTxs = txs.map(t => {
-        if (t.id === newTx.id) {
-            return newTx
-        }
-        return t
-    })
+    const filtered = txs.filter(t => t.id !== newTx.id)
+    const newTxs = filtered.concat([newTx])
+
+    console.log('newTxs', newTxs)
 
     // update state
     store.set(storeString, newTxs)
@@ -192,6 +190,12 @@ export const initGJSDeposit = async function(tx) {
                 }
             }
         })
+        .on("transferUpdated", (transfer) => {
+            console.log(`[GOT TRANSFER]`, transfer)
+            if (!transfer.archived) {
+                updateTx(transfer)
+            }
+        })
         .catch(error => {
             if (error.message === "Transfer cancelled by user") {
                 // remove from 3box
@@ -249,6 +253,12 @@ export const initGJSWithdraw = async function(tx) {
                 }
             }
         })
+        .on("transferUpdated", (transfer) => {
+            console.log(`[GOT TRANSFER]`, transfer)
+            if (!transfer.archived) {
+                updateTx(transfer)
+            }
+        })
         .catch(error => {
             if (error.message === "Transfer cancelled by user") {
                 // remove from 3box
@@ -277,6 +287,12 @@ export const reOpenTx = async function(trade) {
                 removeTx(trade)
             }
             console.log(`[GOT STATUS] ${status}`, gateway, trade)
+        })
+        .on("transferUpdated", (transfer) => {
+            console.log(`[GOT TRANSFER]`, transfer)
+            if (!transfer.archived) {
+                updateTx(transfer)
+            }
         })
         .then(console.log)
         .catch(error => {
