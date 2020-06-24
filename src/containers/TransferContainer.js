@@ -265,7 +265,7 @@ class TransferContainer extends React.Component {
         const { store } = this.props
         const selectedAsset  = store.get('selectedAsset')
         const amount = store.get('convert.amount')
-        const amountValid = Number(amount) > MIN_TX_AMOUNTS[selectedAsset]
+        const amountValid = Number(amount) >= MIN_TX_AMOUNTS[selectedAsset]
 
         if (!amount || !amountValid) {
             store.set('convert.showAmountError', true)
@@ -284,7 +284,7 @@ class TransferContainer extends React.Component {
         const selectedAsset  = store.get('selectedAsset')
         const selectedFormat  = store.get('convert.selectedFormat')
         const balance = store.get(SYMBOL_MAP[selectedFormat] + 'Balance')
-        const amountValid = Number(amount) > MIN_TX_AMOUNTS[selectedAsset] && amount <= Number(balance)
+        const amountValid = Number(amount) >= MIN_TX_AMOUNTS[selectedAsset] && amount <= Number(balance)
 
         if (showAddressError) {
             store.set('convert.showDestinationError', true)
@@ -389,6 +389,14 @@ class TransferContainer extends React.Component {
         const balance = store.get(SYMBOL_MAP[selectedFormat] + 'Balance')
         const amount = store.get('convert.amount')
         const total = store.get('convert.conversionTotal')
+
+        const allowance = store.get('convert.adapterWbtcAllowance')
+        const hasAllowance = Number(amount) <= Number(allowance)
+        const allowanceRequesting = store.get('convert.adapterWbtcAllowanceRequesting')
+
+        const convertAddressValid = store.get('convert.destinationValid')
+        const canConvertTo = amount >= MIN_TX_AMOUNTS[selectedAsset]
+        const canConvertFrom = Number(amount) >= MIN_TX_AMOUNTS[selectedAsset] && amount <= Number(balance) && convertAddressValid
         const showAmountError = store.get('convert.showAmountError')
         const showDestinationError = store.get('convert.showDestinationError')
         const destAsset = selectedDirection ? selectedAsset : selectedFormat

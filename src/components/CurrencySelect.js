@@ -42,7 +42,7 @@ const styles = () => ({
     },
     icon: {
         width: 32,
-        height: 'auto',
+        height: 32,
         marginRight: 10,
     },
     button: {
