@@ -180,7 +180,9 @@ export const gatherFeeData = async function() {
     const fixedFeeKey = selectedDirection ? 'release' : 'lock'
     const dynamicFeeKey = selectedDirection ? 'burn' : 'mint'
 
-    if (!amount) return
+    if (!amount) {
+        return
+    }
 
     const renVMFee = Number((Number(amount) * Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000))).toFixed(6)
     const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / (10 ** 8))
