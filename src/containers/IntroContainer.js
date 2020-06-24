@@ -42,9 +42,9 @@ const styles = (theme) => ({
     button: {
         width: '100%',
         maxWidth: 230,
-        [theme.breakpoints.down('sm')]: {
-            display: 'none'
-        }
+        // [theme.breakpoints.down('sm')]: {
+        //     display: 'none'
+        // }
     },
     error: {
         marginTop: theme.spacing(2),
@@ -74,9 +74,9 @@ const styles = (theme) => ({
     },
     mobileMessage: {
         display: 'none',
-        [theme.breakpoints.down('sm')]: {
-            display: 'block'
-        }
+        // [theme.breakpoints.down('sm')]: {
+        //     display: 'block'
+        // }
     }
 })
 

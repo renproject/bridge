@@ -36,7 +36,8 @@ export const removeWindowBlocker = function() {
 export const addTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    const space = store.get('space')
+
+    // const space = store.get('space')
     const db = store.get('db')
     const fsEnabled = store.get('fsEnabled')
     const localWeb3Address = store.get('localWeb3Address')
@@ -47,7 +48,7 @@ export const addTx = async (tx) => {
     tx.created = timestamp
     tx.updated = timestamp
 
-    const txs = JSON.parse(await space.private.get(storeString)) || []
+    const txs = store.get(storeString)
     const newTxs = txs.concat([tx])
 
     // update state
@@ -56,10 +57,10 @@ export const addTx = async (tx) => {
     // update localStorage just in case
     localStorage.setItem(storeString, JSON.stringify(newTxs))
 
-    // update 3box
-    if (space) {
-        space.private.set(storeString, JSON.stringify(newTxs))
-    }
+    // // update 3box
+    // if (space) {
+    //     space.private.set(storeString, JSON.stringify(newTxs))
+    // }
 
     // update firebase
     if (fsEnabled) {
@@ -83,19 +84,19 @@ export const addTx = async (tx) => {
 export const updateTx = async (newTx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    const space = store.get('space')
+    // const space = store.get('space')
     const db = store.get('db')
     const fsEnabled = store.get('fsEnabled')
 
     // update timestamp
     newTx.updated = firebase.firestore.Timestamp.fromDate(new Date(Date.now()))
 
-    const txs = JSON.parse(await space.private.get(storeString)) || []
+    const txs = store.get(storeString)
 
     const filtered = txs.filter(t => t.id !== newTx.id)
     const newTxs = filtered.concat([newTx])
 
-    console.log('newTxs', newTxs)
+    // console.log('newTxs', newTxs)
 
     // update state
     store.set(storeString, newTxs)
@@ -103,10 +104,10 @@ export const updateTx = async (newTx) => {
     // use localStorage
     localStorage.setItem(storeString, JSON.stringify(newTxs))
 
-    // update 3box
-    if (space) {
-        space.private.set(storeString, JSON.stringify(newTxs))
-    }
+    // // update 3box
+    // if (space) {
+    //     space.private.set(storeString, JSON.stringify(newTxs))
+    // }
 
     // update firebase
     if (fsEnabled) {
@@ -129,11 +130,11 @@ export const updateTx = async (newTx) => {
 export const removeTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    const space = store.get('space')
+    // const space = store.get('space')
     const db = store.get('db')
     const fsEnabled = store.get('fsEnabled')
 
-    const txs = JSON.parse(await space.private.get(storeString)) || []
+    const txs = store.get(storeString)
     const newTxs = txs.filter(t => (t.id !== tx.id))
 
     // update local state
@@ -142,10 +143,10 @@ export const removeTx = async (tx) => {
     // update localStorage just in case
     localStorage.setItem(storeString, JSON.stringify(newTxs))
 
-    // update 3box
-    if (space) {
-        space.private.set(storeString, JSON.stringify(newTxs))
-    }
+    // // update 3box
+    // if (space) {
+    //     space.private.set(storeString, JSON.stringify(newTxs))
+    // }
 
     // update firebase
     if (fsEnabled) {
@@ -238,7 +239,7 @@ export const initGJSDeposit = async function(tx) {
         })
         .on("transferUpdated", (transfer) => {
             console.log(`[GOT TRANSFER]`, transfer)
-            if (!transfer.archived) {
+            if (!transfer.archived && transfer.status !== GatewayJS.LockAndMintStatus.Committed) {
                 updateTx(transfer)
             }
         })
@@ -297,7 +298,7 @@ export const initGJSWithdraw = async function(tx) {
         })
         .on("transferUpdated", (transfer) => {
             console.log(`[GOT TRANSFER]`, transfer)
-            if (!transfer.archived) {
+            if (!transfer.archived && transfer.status !== GatewayJS.BurnAndReleaseStatus.Committed) {
                 updateTx(transfer)
             }
         })
@@ -364,9 +365,9 @@ export const recoverTrades = async function() {
         reOpenTx(trade)
     }
 
-    // Get 3box transactions
-    const boxData = await space.private.get('convert.transactions')
-    const boxTrades = boxData ? JSON.parse(boxData) : []
+    // // Get 3box transactions
+    // const boxData = await space.private.get('convert.transactions')
+    // const boxTrades = boxData ? JSON.parse(boxData) : []
 
     // Get firebase transactions
     const fsDataSnapshot = await db.collection("transactions")
@@ -389,15 +390,15 @@ export const recoverTrades = async function() {
         }
     })
 
-    // if 3box has transactions not found locally or in firebase, reopen those
-    // remove this when we fully switch away from 3box
-    boxTrades.map(btx => {
-        if (!isGatewayJSTxComplete(btx.status)
-            && localTradeIds.indexOf(btx.id) < 0
-            && fsTradeIds.indexOf(btx.id) < 0) {
-            reOpenTx(btx)
-        }
-    })
+    // // if 3box has transactions not found locally or in firebase, reopen those
+    // // remove this when we fully switch away from 3box
+    // boxTrades.map(btx => {
+    //     if (!isGatewayJSTxComplete(btx.status)
+    //         && localTradeIds.indexOf(btx.id) < 0
+    //         && fsTradeIds.indexOf(btx.id) < 0) {
+    //         reOpenTx(btx)
+    //     }
+    // })
 }
 
 window.getStore = getStore

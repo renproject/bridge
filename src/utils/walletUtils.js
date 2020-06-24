@@ -320,17 +320,17 @@ export const initLocalWeb3 = async function() {
         // Recover Transactions
         //////////////////////////////////////////////////////
 
-        // recover transactions from 3box
-        store.set('spaceRequesting', true)
-        // console.log(currentProvider, accounts)
-        const box = await Box.openBox(accounts[0], currentProvider)
-
-        store.set('box', box)
-        // console.log(box)
-        const space = await box.openSpace("ren-bridge")
-        // console.log('space', space)
-        store.set('space', space)
-        window.space = space
+        // // recover transactions from 3box
+        // store.set('spaceRequesting', true)
+        // // console.log(currentProvider, accounts)
+        // const box = await Box.openBox(accounts[0], currentProvider)
+        //
+        // store.set('box', box)
+        // // console.log(box)
+        // const space = await box.openSpace("ren-bridge")
+        // // console.log('space', space)
+        // store.set('space', space)
+        // window.space = space
 
         store.set('localWeb3', web3)
         store.set('localWeb3Address', accounts[0])

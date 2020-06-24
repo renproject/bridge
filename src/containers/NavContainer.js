@@ -48,9 +48,9 @@ const styles = () => ({
             marginTop: theme.spacing(2)
       },
       display: 'inline-block',
-      [theme.breakpoints.down('sm')]: {
-          display: 'none'
-      }
+      // [theme.breakpoints.down('sm')]: {
+      //     display: 'none'
+      // }
     },
     title: {
       fontSize: 16,
