@@ -160,7 +160,7 @@ class IntroContainer extends React.Component {
                 </Typography>
 
                 {!requesting && error && <Typography variant='caption' className={classes.error}>
-                    Connection failed. Please note: hardware wallets are not supported at this&nbsp;time.
+                    Connection failed.
                 </Typography>}
                 {requesting && <React.Fragment>
                   <Typography variant='caption' className={classes.info}>
