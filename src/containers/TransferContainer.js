@@ -1,17 +1,13 @@
 import React from 'react';
 import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
-import theme from '../theme/theme'
 import classNames from 'classnames'
-import sb from "satoshi-bitcoin"
 import AddressValidator from "wallet-address-validator";
 import bchaddr from 'bchaddrjs'
 import {
     addTx,
     updateTx,
     removeTx,
-    initGJSDeposit,
-    initGJSWithdraw,
     gatherFeeData,
     MIN_TX_AMOUNTS
 } from '../utils/txUtils'
@@ -20,28 +16,19 @@ import {
   SYMBOL_MAP,
   NETWORK_MAP,
   NAME_MAP,
-  initLocalWeb3,
-  setWbtcAllowance,
   abbreviateAddress,
-  updateBalance,
-  modifyNumericInput
+  updateBalance
 } from '../utils/walletUtils'
-import Web3 from "web3";
-import { ethers } from 'ethers';
 
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import Input from '@material-ui/core/Input';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-
-import CurrencyInput from '../components/CurrencyInput';
 import CurrencySelect from '../components/CurrencySelect';
 import BigCurrencyInput from '../components/BigCurrencyInput';
 import ActionLink from '../components/ActionLink';
-import adapterABI from "../utils/adapterABI.json";
 
 import WalletIcon from '../assets/wallet-icon.svg'
 
@@ -292,7 +279,6 @@ class TransferContainer extends React.Component {
     validateWithdraw() {
         const { store } = this.props
         const amount = store.get('convert.amount')
-        const address = store.get('convert.destination')
         const convertAddressValid = store.get('convert.destinationValid')
         const showAddressError = !convertAddressValid
         const selectedAsset  = store.get('selectedAsset')
@@ -366,7 +352,6 @@ class TransferContainer extends React.Component {
             id: 'tx-' + Math.floor(Math.random() * (10 ** 16)),
             type: 'convert',
             instant: false,
-            // awaiting: 'eth-settle',
             sourceAsset: format,
             sourceNetwork: NETWORK_MAP[format],
             sourceNetworkVersion: network,
@@ -393,29 +378,16 @@ class TransferContainer extends React.Component {
             store
         } = this.props
 
-        const walletAddress = store.get('walletAddress')
-        const transactions = store.get('transactions')
         const selectedNetwork = store.get('selectedNetwork')
         const selectedTab  = store.get('selectedTab')
-        const selectedTransferTab  = store.get('selectedTransferTab')
         const selectedAsset  = store.get('selectedAsset')
-        const showAboutModal = store.get('showAboutModal')
-
 
         // 0 = mint, 1 = release
         const selectedDirection  = store.get('convert.selectedDirection')
         const selectedFormat = store.get('convert.selectedFormat')
-
         const localWeb3Address = store.get('localWeb3Address')
-        const space = store.get('space')
         const balance = store.get(SYMBOL_MAP[selectedFormat] + 'Balance')
-        const address = store.get('convert.destination')
-        const addressValid = store.get('convert.destinationValid')
-        const addressFocused = store.get('convert.destinationInputFocused')
-
         const amount = store.get('convert.amount')
-        const exchangeRate = store.get('convert.exchangeRate')
-        const fee = store.get('convert.networkFee')
         const total = store.get('convert.conversionTotal')
 
         const allowance = store.get('convert.adapterWbtcAllowance')
@@ -427,13 +399,8 @@ class TransferContainer extends React.Component {
         const canConvertFrom = Number(amount) >= MIN_TX_AMOUNTS[selectedAsset] && amount <= Number(balance) && convertAddressValid
         const showAmountError = store.get('convert.showAmountError')
         const showDestinationError = store.get('convert.showDestinationError')
-
-        const sourceAsset = selectedDirection ? selectedFormat : selectedAsset
         const destAsset = selectedDirection ? selectedAsset : selectedFormat
-
         const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(2)
-
-        // console.log(store.getState())
 
         return <React.Fragment>
           <Grid container>

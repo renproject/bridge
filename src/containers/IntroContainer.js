@@ -1,20 +1,13 @@
 import React from 'react';
 import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
-import theme from '../theme/theme'
-import classNames from 'classnames'
-import DetectNetwork from "web3-detect-network";
 import { initLocalWeb3 } from '../utils/walletUtils'
-import { removeTx } from '../utils/txUtils'
-
-import Web3 from "web3";
 
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import MetaMask from '../assets/metamask-intro.svg'
 import CircularProgress from '@material-ui/core/CircularProgress';
-
 
 const styles = (theme) => ({
     container: {
@@ -41,7 +34,6 @@ const styles = (theme) => ({
         }
     },
     message: {
-        // marginTop: theme.spacing(3),
         marginBottom: theme.spacing(4),
         [theme.breakpoints.down('sm')]: {
             display: 'none'
@@ -50,11 +42,9 @@ const styles = (theme) => ({
     button: {
         width: '100%',
         maxWidth: 230,
-        [theme.breakpoints.down('sm')]: {
-            display: 'none'
-        }
-        // display: 'flex',
-        // alignItems: 'center'
+        // [theme.breakpoints.down('sm')]: {
+        //     display: 'none'
+        // }
     },
     error: {
         marginTop: theme.spacing(2),
@@ -84,9 +74,9 @@ const styles = (theme) => ({
     },
     mobileMessage: {
         display: 'none',
-        [theme.breakpoints.down('sm')]: {
-            display: 'block'
-        }
+        // [theme.breakpoints.down('sm')]: {
+        //     display: 'block'
+        // }
     }
 })
 
@@ -110,6 +100,7 @@ class IntroContainer extends React.Component {
             store
         } = this.props
 
+        const walletConnecting = store.get('walletConnecting')
         const requesting = store.get('spaceRequesting')
         const error = store.get('spaceError')
         const box = store.get('box')
@@ -140,7 +131,7 @@ class IntroContainer extends React.Component {
             </Grid>
             <Grid container justify='flex-start' direction='column' alignItems='center'>
                 <Button onClick={initLocalWeb3}
-                    disabled={requesting}
+                    disabled={walletConnecting || requesting}
                     className={classes.button}
                     size='large'
                     color='primary'
@@ -169,7 +160,7 @@ class IntroContainer extends React.Component {
                 </Typography>
 
                 {!requesting && error && <Typography variant='caption' className={classes.error}>
-                    Connection failed. Please note: hardware wallets are not supported at this&nbsp;time.
+                    Connection failed.
                 </Typography>}
                 {requesting && <React.Fragment>
                   <Typography variant='caption' className={classes.info}>

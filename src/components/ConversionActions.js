@@ -1,7 +1,6 @@
 import React from 'react';
 import theme from '../theme/theme'
 import { withStyles } from '@material-ui/styles';
-import Typography from '@material-ui/core/Typography';
 import { removeTx, initConvertFromEthereum } from '../utils/txUtils'
 import { getStore } from '../services/storeService'
 

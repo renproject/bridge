@@ -81,7 +81,6 @@ class CurrencyInput extends React.Component {
     render() {
         const {
             classes,
-            onCurrencyChange,
             onAmountChange,
             items
         } = this.props
@@ -90,8 +89,6 @@ class CurrencyInput extends React.Component {
             currency,
             open
         } = this.state
-
-        // console.log(currency)
 
         const selected = currency || items[0]
 
