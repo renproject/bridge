@@ -24,11 +24,13 @@ import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
 
+require('dotenv').config()
+
 // Instanitate Firebase
 firebase.initializeApp({
-  apiKey: 'AIzaSyB-QdW7ESq1OXkqyReLy0U8cU89AcfuZtk',
+  apiKey: process.env.REACT_APP_FB_KEY,
   authDomain: window.location.hostname,
-  projectId: 'renbridge-89c3f'
+  projectId: 'ren-bridge'
 })
 
 const styles = () => ({
