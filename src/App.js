@@ -1,57 +1,47 @@
 import React from 'react';
 import { createStore, withStore } from '@spyna/react-store'
 import queryString from 'query-string'
+import firebase from 'firebase'
 import { storeListener } from './services/storeService'
-
+import {
+    RENBTC_TEST,
+    RENZEC_TEST,
+    RENBCH_TEST,
+} from './utils/web3Utils'
+import { setNetwork, updateFees } from './utils/walletUtils'
 import NavContainer from './containers/NavContainer'
 import TransferContainer from './containers/TransferContainer'
 import ConfirmContainer from './containers/ConfirmContainer'
 import IntroContainer from './containers/IntroContainer'
 import NetworkModalContainer from './containers/NetworkModalContainer'
-
-
-import { setNetwork, updateFees } from './utils/walletUtils'
-
-import RenVM from './assets/renvm-powered.svg';
 import Twitter from './assets/twitter.svg';
 import Github from './assets/github.svg';
 import Reddit from './assets/reddit.svg';
 import Telegram from './assets/telegram.svg';
-
-
 import { withStyles, ThemeProvider } from '@material-ui/styles';
 import theme from './theme/theme'
-import classNames from 'classnames'
-
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
-import Table from '@material-ui/core/Table';
 
-// import RenSDK from "@renproject/ren";
-// import GatewayJS from '@renproject/gateway'
+require('dotenv').config()
 
-import {
-    RENBTC_MAIN,
-    RENBTC_TEST,
-    RENZEC_MAIN,
-    RENZEC_TEST,
-    RENBCH_MAIN,
-    RENBCH_TEST,
-} from './utils/web3Utils'
+// Instanitate Firebase
+firebase.initializeApp({
+  apiKey: process.env.REACT_APP_FB_KEY,
+  authDomain: window.location.hostname,
+  projectId: 'ren-bridge'
+})
 
 const styles = () => ({
   container: {
-    // maxWidth: 450
     minHeight: '100vh'
   },
   contentContainer: {
-    // paddingTop: theme.spacing(3),
     flex: 1,
     [theme.breakpoints.down('sm')]: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2)
-        // marginTop: theme.spacing(2)
     }
   },
   footerContainer: {
@@ -71,8 +61,6 @@ const styles = () => ({
     height: 12,
     width: 'auto',
     marginLeft: theme.spacing(0.5),
-    // border: '1px solid ' + theme.palette.divider,
-    // borderRadius: 4
   },
   transfersContainer: {
     padding: theme.spacing(3)
@@ -85,8 +73,6 @@ const initialState = {
     renZECAddress: RENZEC_TEST,
     renBCHAddress: RENBCH_TEST,
 
-    // btcShifterAddress: BTC_SHIFTER_TEST,
-    // adapterAddress: ADAPTER_TEST,
     selectedNetwork: 'mainnet',
     queryParams: {},
 
@@ -99,6 +85,7 @@ const initialState = {
     space: null,
     spaceError: false,
     spaceRequesting: false,
+    walletConnecting: false,
     loadingBalances: true,
     renBTCBalance: 0,
     renZECBalance: 0,
@@ -109,6 +96,12 @@ const initialState = {
     ethBalance: 0,
     gjs: null,
     fees: null,
+
+    // firebase
+    db: firebase.firestore(),
+    fsUser: null,
+    fsSignature: null,
+    fsEnabled: false,
 
     // navigation
     selectedTab: 1,
@@ -168,8 +161,6 @@ class AppWrapper extends React.Component {
         const localWeb3Address = store.get('localWeb3Address')
         const confirmAction = store.get('confirmAction')
         const confirmTx = store.get('confirmTx')
-
-        // console.log(store.getState())
 
         return (
           <ThemeProvider theme={theme}>

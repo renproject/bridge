@@ -2,14 +2,8 @@ import React from 'react';
 import { withStore } from '@spyna/react-store'
 import { withStyles } from '@material-ui/styles';
 import theme from '../theme/theme'
-import classNames from 'classnames'
-// import RenSDK from "@renproject/ren";
-import DetectNetwork from "web3-detect-network";
 
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -37,7 +31,6 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         marginBottom: theme.spacing(2),
-        // fontWeight: 'bold'
     },
     titleContainer: {
       marginBottom: theme.spacing(3),

@@ -1,19 +1,6 @@
-import { withStore } from '@spyna/react-store'
+import firebase from 'firebase'
 import GatewayJS from "@renproject/gateway";
-import BigNumber from "bignumber.js";
-import adapterABI from "../utils/adapterCurveABI.json";
-import zbtcABI from "../utils/erc20ABI.json";
-import curveABI from "../utils/curveABI.json";
 import { getStore } from '../services/storeService'
-import {
-    BTC_GATEWAY_MAIN,
-    BTC_GATEWAY_TEST,
-    ZEC_GATEWAY_MAIN,
-    ZEC_GATEWAY_TEST,
-    BCH_GATEWAY_MAIN,
-    BCH_GATEWAY_TEST,
-    CURVE_TEST
-} from './web3Utils'
 
 export const MIN_TX_AMOUNTS = {
     btc: 0.00035036,
@@ -43,25 +30,52 @@ export const removeWindowBlocker = function() {
     window.removeEventListener('beforeunload', windowBlocker);
 }
 
+/**
+ * Create/Update/Delete Transactions on Firebase and 3box
+ */
 export const addTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    const space = store.get('space')
 
-    const txs = JSON.parse(await space.private.get(storeString)) || []
+    // const space = store.get('space')
+    const db = store.get('db')
+    const fsEnabled = store.get('fsEnabled')
+    const localWeb3Address = store.get('localWeb3Address')
+    const fsSignature = store.get('fsSignature')
+
+    // add timestamps
+    const timestamp = firebase.firestore.Timestamp.fromDate(new Date(Date.now()))
+    tx.created = timestamp
+    tx.updated = timestamp
+
+    const txs = store.get(storeString)
     const newTxs = txs.concat([tx])
 
     // update state
     store.set(storeString, newTxs)
 
-    // update 3box
-
-    if (space) {
-        space.private.set(storeString, JSON.stringify(newTxs))
-    }
-
     // update localStorage just in case
     localStorage.setItem(storeString, JSON.stringify(newTxs))
+
+    // // update 3box
+    // if (space) {
+    //     space.private.set(storeString, JSON.stringify(newTxs))
+    // }
+
+    // update firebase
+    if (fsEnabled) {
+        try {
+            db.collection("transactions").doc(tx.id).set({
+                user: localWeb3Address.toLowerCase(),
+                walletSignature: fsSignature,
+                id: tx.id,
+                updated: timestamp,
+                data: JSON.stringify(tx)
+            })
+        } catch(e) {
+            console.log(e)
+        }
+    }
 
     // for debugging
     window.txs = newTxs
@@ -70,25 +84,44 @@ export const addTx = async (tx) => {
 export const updateTx = async (newTx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    const space = store.get('space')
+    // const space = store.get('space')
+    const db = store.get('db')
+    const fsEnabled = store.get('fsEnabled')
 
-    const txs = JSON.parse(await space.private.get(storeString)) || []
+    // update timestamp
+    newTx.updated = firebase.firestore.Timestamp.fromDate(new Date(Date.now()))
+
+    const txs = store.get(storeString)
 
     const filtered = txs.filter(t => t.id !== newTx.id)
     const newTxs = filtered.concat([newTx])
 
-    console.log('newTxs', newTxs)
+    // console.log('newTxs', newTxs)
 
     // update state
     store.set(storeString, newTxs)
 
-    // update 3box
-    if (space) {
-        space.private.set(storeString, JSON.stringify(newTxs))
-    }
-
     // use localStorage
     localStorage.setItem(storeString, JSON.stringify(newTxs))
+
+    // // update 3box
+    // if (space) {
+    //     space.private.set(storeString, JSON.stringify(newTxs))
+    // }
+
+    // update firebase
+    if (fsEnabled) {
+        try {
+            db.collection("transactions")
+                .doc(newTx.id)
+                .update({
+                    data: JSON.stringify(newTx),
+                    updated: newTx.updated
+                })
+        } catch(e) {
+            console.log(e)
+        }
+    }
 
     // for debugging
     window.txs = txs
@@ -97,21 +130,34 @@ export const updateTx = async (newTx) => {
 export const removeTx = async (tx) => {
     const store = getStore()
     const storeString = 'convert.transactions'
-    const space = store.get('space')
+    // const space = store.get('space')
+    const db = store.get('db')
+    const fsEnabled = store.get('fsEnabled')
 
-    const txs = JSON.parse(await space.private.get(storeString)) || []
+    const txs = store.get(storeString)
     const newTxs = txs.filter(t => (t.id !== tx.id))
 
     // update local state
     store.set(storeString, newTxs)
 
-    // update 3box
-    if (space) {
-        space.private.set(storeString, JSON.stringify(newTxs))
-    }
-
     // update localStorage just in case
     localStorage.setItem(storeString, JSON.stringify(newTxs))
+
+    // // update 3box
+    // if (space) {
+    //     space.private.set(storeString, JSON.stringify(newTxs))
+    // }
+
+    // update firebase
+    if (fsEnabled) {
+        try {
+            db.collection("transactions")
+                .doc(tx.id)
+                .delete()
+        } catch(e) {
+            console.log(e)
+        }
+    }
 
     // for debugging
     window.txs = txs
@@ -121,7 +167,10 @@ export const txExists = function(tx) {
     return getStore().get('convert.transactions').filter(t => t.id === tx.id).length > 0
 }
 
-export const gatherFeeData = async function(type) {
+/**
+ * Calculate Fees for a Transaction
+ */
+export const gatherFeeData = async function() {
     const store = getStore()
     const amount = store.get('convert.amount')
     const fees = store.get('fees')
@@ -130,14 +179,12 @@ export const gatherFeeData = async function(type) {
     const fixedFeeKey = selectedDirection ? 'release' : 'lock'
     const dynamicFeeKey = selectedDirection ? 'burn' : 'mint'
 
-    if (!amount) return
-
-    const amountInSats = GatewayJS.utils.value(amount, "btc").sats().toNumber()
+    if (!amount) {
+        return
+    }
 
     const renVMFee = Number((Number(amount) * Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000))).toFixed(6)
-    // const fixedFee = 0.00035
     const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / (10 ** 8))
-    // console.log(amount, fee, Number(amount-fee))
     const total = Number(amount-renVMFee-fixedFee) > 0 ? Number(amount-renVMFee-fixedFee).toFixed(6) : '0.000000'
 
     store.set('convert.renVMFee', renVMFee)
@@ -145,12 +192,12 @@ export const gatherFeeData = async function(type) {
     store.set('convert.conversionTotal', total)
 }
 
-// transfers
+/**
+ * Mint and Burn
+ */
 export const initGJSDeposit = async function(tx) {
     const {
       amount,
-      params,
-      destAddress,
     } = tx
     const store = getStore()
     const {
@@ -169,7 +216,7 @@ export const initGJSDeposit = async function(tx) {
     }
 
     const preOpenTrades = Array.from((await gjs.getGateways()).values())
-    // console.log('before open', preOpenTrades)
+
     let trade = null
     const open = gjs.open(data);
     open.result()
@@ -177,7 +224,7 @@ export const initGJSDeposit = async function(tx) {
             console.log(`[GOT STATUS] ${status}`)
             if (status === GatewayJS.LockAndMintStatus.Committed) {
                 const postOpenTrades = Array.from((await gjs.getGateways()).values())
-                // console.log('after open', postOpenTrades)
+
                 if (preOpenTrades.length !== postOpenTrades.length) {
                     const preOpenIds = preOpenTrades.map(t => t.id)
                     postOpenTrades.map(pot => {
@@ -192,7 +239,7 @@ export const initGJSDeposit = async function(tx) {
         })
         .on("transferUpdated", (transfer) => {
             console.log(`[GOT TRANSFER]`, transfer)
-            if (!transfer.archived) {
+            if (!transfer.archived && transfer.status !== GatewayJS.LockAndMintStatus.Committed) {
                 updateTx(transfer)
             }
         })
@@ -210,18 +257,14 @@ export const initGJSDeposit = async function(tx) {
 export const initGJSWithdraw = async function(tx) {
     const {
       amount,
-      params,
       destAddress,
     } = tx
     const store = getStore()
     const {
         gjs,
         localWeb3,
-        localWeb3Address,
         selectedAsset,
     } = store.getState()
-
-    const adapterAddress = BTC_GATEWAY_TEST
 
     const data = {
         sendToken: GatewayJS.Tokens[selectedAsset.toUpperCase()].Burn,
@@ -232,7 +275,7 @@ export const initGJSWithdraw = async function(tx) {
     }
 
     const preOpenTrades = Array.from((await gjs.getGateways()).values())
-    // console.log('before open', preOpenTrades)
+
     let trade = null
     const open = gjs.open(data);
     open.result()
@@ -240,7 +283,7 @@ export const initGJSWithdraw = async function(tx) {
             console.log(`[GOT STATUS] ${status}`)
             if (status === GatewayJS.BurnAndReleaseStatus.Committed) {
                 const postOpenTrades = Array.from((await gjs.getGateways()).values())
-                // console.log('after open', postOpenTrades)
+
                 if (preOpenTrades.length !== postOpenTrades.length) {
                     const preOpenIds = preOpenTrades.map(t => t.id)
                     postOpenTrades.map(pot => {
@@ -255,7 +298,7 @@ export const initGJSWithdraw = async function(tx) {
         })
         .on("transferUpdated", (transfer) => {
             console.log(`[GOT TRANSFER]`, transfer)
-            if (!transfer.archived) {
+            if (!transfer.archived && transfer.status !== GatewayJS.BurnAndReleaseStatus.Committed) {
                 updateTx(transfer)
             }
         })
@@ -267,6 +310,9 @@ export const initGJSWithdraw = async function(tx) {
         })
 }
 
+/**
+ * Recover and Continue Transactions
+ */
 export const isGatewayJSTxComplete = function(status) {
     return status === GatewayJS.LockAndMintStatus.ConfirmedOnEthereum || status === GatewayJS.BurnAndReleaseStatus.ReturnedFromRenVM
 }
@@ -276,9 +322,7 @@ export const reOpenTx = async function(trade) {
     const gjs = store.get('gjs')
     const localWeb3 = store.get('localWeb3')
     const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade)
-    // console.log(gateway, GatewayJS.LockAndMintStatus)
-    // gateway.close()
-    // gateway.cancel();
+
     gateway.result()
         .on("status", (status) => {
             const completed = isGatewayJSTxComplete(status)
@@ -307,40 +351,58 @@ export const recoverTrades = async function() {
     const store = getStore()
     const gjs = store.get('gjs')
     const space = store.get('space')
+    const fsSignature = store.get('fsSignature')
+    const db = store.get('db')
 
     // Re-open incomplete trades
-    const previousGateways = await gjs.getGateways();
-    const previousTrades = Array.from(previousGateways.values())
-    // console.log('previousTrades', previousTrades)
-    for (const trade of previousTrades) {
-
+    const localGateways = await gjs.getGateways();
+    const localTrades = Array.from(localGateways.values())
+    for (const trade of localTrades) {
         const tradeCompleted = isGatewayJSTxComplete(trade.status)
-        // console.log('trade', trade, tradeCompleted)
         if (tradeCompleted) {
           continue;
         }
         reOpenTx(trade)
     }
 
-    const boxData = await space.private.get('convert.transactions')
-    const boxTrades = boxData ? JSON.parse(boxData) : []
+    // // Get 3box transactions
+    // const boxData = await space.private.get('convert.transactions')
+    // const boxTrades = boxData ? JSON.parse(boxData) : []
 
-    // console.log('boxTrades', boxData, boxTrades)
+    // Get firebase transactions
+    const fsDataSnapshot = await db.collection("transactions")
+        .where("walletSignature", "==", fsSignature).get()
+    let fsTrades = []
+    if (!fsDataSnapshot.empty) {
+        fsDataSnapshot.forEach(doc => {
+            const tx = JSON.parse(doc.data().data)
+            fsTrades.push(tx)
+        })
+    }
+    const fsTradeIds = fsTrades.map(f => f.id)
 
-    // if 3box has transactions not found locally, reopen those
-    const previousTradeIds = previousTrades.map(t => t.id)
-    boxTrades.map(btx => {
-        if (!isGatewayJSTxComplete(btx.status) &&  previousTradeIds.indexOf(btx.id) < 0) {
-            reOpenTx(btx)
+    // if firebase has transactions not found locally, reopen those
+    const localTradeIds = localTrades.map(t => t.id)
+    fsTrades.map(ftx => {
+        if (!isGatewayJSTxComplete(ftx.status)
+            && localTradeIds.indexOf(ftx.id) < 0) {
+            reOpenTx(ftx)
         }
     })
+
+    // // if 3box has transactions not found locally or in firebase, reopen those
+    // // remove this when we fully switch away from 3box
+    // boxTrades.map(btx => {
+    //     if (!isGatewayJSTxComplete(btx.status)
+    //         && localTradeIds.indexOf(btx.id) < 0
+    //         && fsTradeIds.indexOf(btx.id) < 0) {
+    //         reOpenTx(btx)
+    //     }
+    // })
 }
 
+window.getStore = getStore
 window.GatewayJS = GatewayJS
 window.reOpenTx = reOpenTx
 
-export default {
-    addTx,
-    updateTx,
-    removeTx,
-}
+export default {}
