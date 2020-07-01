@@ -7,6 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import MetaMask from '../assets/metamask-intro.svg'
+import Mew from '../assets/mew.svg'
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = (theme) => ({
@@ -31,7 +32,21 @@ const styles = (theme) => ({
         '& img': {
             width: 92,
             height: 'auto',
-        }
+            paddingLeft: theme.spacing(1),
+            paddingRight: theme.spacing(1),
+            cursor: 'pointer',
+            opacity: 0.6,
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+                opacity: 0.8
+            },
+            '&.selected': {
+                opacity: 1
+            }
+        },
+    },
+    selectedWallet: {
+        opacity: '1 !important'
     },
     message: {
         marginBottom: theme.spacing(4),
@@ -104,8 +119,9 @@ class IntroContainer extends React.Component {
         const requesting = store.get('spaceRequesting')
         const error = store.get('spaceError')
         const box = store.get('box')
+        const walletType = store.get('selectedWalletType')
 
-        let text = 'Connect wallet'
+        let text = 'Connect ' + (walletType === 'injected' ? 'MetaMask' : 'MEW')
         if (requesting) {
             if (!box) {
                 text = 'Connecting to 3box'
@@ -122,7 +138,12 @@ class IntroContainer extends React.Component {
                 The safe, fast and most secure way to bring cross-chain assets to&nbsp;Ethereum.
             </Typography>
             <Grid className={classes.metamask} container justify='center'>
-                <img src={MetaMask} />
+                <img src={MetaMask}
+                    className={walletType === 'injected' ? 'selected' : ''}
+                    onClick={() => store.set('selectedWalletType', 'injected')}/>
+                <img src={Mew}
+                    className={walletType === 'mew-connect' ? 'selected' : ''}
+                    onClick={() => store.set('selectedWalletType', 'mew-connect')}/>
             </Grid>
             <Grid container justify='center'>
                 <Typography className={classes.message} variant='p'>
@@ -130,7 +151,9 @@ class IntroContainer extends React.Component {
                 </Typography>
             </Grid>
             <Grid container justify='flex-start' direction='column' alignItems='center'>
-                <Button onClick={initLocalWeb3}
+                <Button onClick={() => {
+                        initLocalWeb3(walletType)
+                    }}
                     disabled={walletConnecting || requesting}
                     className={classes.button}
                     size='large'

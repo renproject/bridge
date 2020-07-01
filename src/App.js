@@ -96,6 +96,7 @@ const initialState = {
     ethBalance: 0,
     gjs: null,
     fees: null,
+    selectedWalletType: 'injected',
 
     // firebase
     db: firebase.firestore(),
