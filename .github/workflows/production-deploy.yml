@@ -20,7 +20,7 @@ jobs:
     - uses: actions/setup-node@v2.1.0
     - name: Install dependencies
       run: yarn --network-concurrency 1
-    - run: yarn build
+    - run: CI=false yarn build
     - uses: nwtgck/actions-netlify@v1.1.5
       with:
         publish-dir: build
