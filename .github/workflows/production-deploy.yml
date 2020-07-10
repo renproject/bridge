@@ -21,9 +21,9 @@ jobs:
     - name: Install dependencies
       run: yarn --network-concurrency 1
     - run: CI=false yarn build
-    - uses: nwtgck/actions-netlify@v1.1.5
+    - uses: netlify/actions/cli@master
       with:
-        publish-dir: build
+        args: deploy --dir=./build
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}      
