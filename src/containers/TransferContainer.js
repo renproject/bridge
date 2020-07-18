@@ -1,6 +1,6 @@
 import React from 'react';
 import { withStore } from '@spyna/react-store'
-import { withStyles } from '@material-ui/styles';
+import { withStyles, makeStyles } from '@material-ui/styles';
 import classNames from 'classnames'
 import AddressValidator from "wallet-address-validator";
 import bchaddr from 'bchaddrjs'
@@ -20,6 +20,7 @@ import {
   updateBalance
 } from '../utils/walletUtils'
 
+import Tooltip from '@material-ui/core/Tooltip';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -229,6 +230,14 @@ const styles = (theme) => ({
         },
     }
 })
+const DarkTooltip = withStyles((theme) => ({
+    arrow: {
+        color: theme.palette.common.black,
+    },
+    tooltip: {
+        backgroundColor: theme.palette.common.black,
+    },
+}))(Tooltip);
 
 class TransferContainer extends React.Component {
 
@@ -480,7 +489,13 @@ class TransferContainer extends React.Component {
                                             Destination
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <img src={WalletIcon}/>{abbreviateAddress(localWeb3Address)}
+
+                                          <DarkTooltip placement='top' title={localWeb3Address} arrow>
+                                            <div>
+                                          <img src={WalletIcon}/>{abbreviateAddress(localWeb3Address)}
+
+                             </div>
+                                          </DarkTooltip>
                                         </Grid>
                                     </Grid>
                                     <Grid container className={classes.option}>
