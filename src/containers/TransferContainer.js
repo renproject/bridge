@@ -20,7 +20,6 @@ import {
   updateBalance
 } from '../utils/walletUtils'
 
-import Tooltip from '@material-ui/core/Tooltip';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -29,6 +28,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import CurrencySelect from '../components/CurrencySelect';
 import BigCurrencyInput from '../components/BigCurrencyInput';
+import DarkTooltip from '../components/DarkTooltip';
 import ActionLink from '../components/ActionLink';
 
 import WalletIcon from '../assets/wallet-icon.svg'
@@ -230,14 +230,6 @@ const styles = (theme) => ({
         },
     }
 })
-const DarkTooltip = withStyles((theme) => ({
-    arrow: {
-        color: theme.palette.common.black,
-    },
-    tooltip: {
-        backgroundColor: theme.palette.common.black,
-    },
-}))(Tooltip);
 
 class TransferContainer extends React.Component {
 
