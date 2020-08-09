@@ -1,6 +1,8 @@
 /*
 # Not allowed in iframes
-  X-Frame-Options: DENY
+# this is disabled to allow gateway-js to work. we should investigate fixing
+# https://stackoverflow.com/questions/25098021/securityerror-blocked-a-frame-with-origin-from-accessing-a-cross-origin-frame
+#  X-Frame-Options: DENY
 # Helps prevent loding external scripts if inline scripting is allwoed
   X-XSS-Protection: 1; mode=block
 # Restrict js scripts to only load from the same host
