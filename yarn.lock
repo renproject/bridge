@@ -2514,10 +2514,10 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
-"@myetherwallet/mewconnect-web-client@2.1.1-RC.4.5":
-  version "2.1.1-RC.4.5"
-  resolved "https://registry.yarnpkg.com/@myetherwallet/mewconnect-web-client/-/mewconnect-web-client-2.1.1-RC.4.5.tgz#89b49d31bcbcdf1ceda0025c3a39ba5ca3eed8b1"
-  integrity sha512-/r/02a7cfrReNTrbo/OlobA6NG7Y9HIvmjAlNL39DSNZX9d446fu/W7LRLFabjoAMvPrgdTPXqW5mwS3DvahrQ==
+"@myetherwallet/mewconnect-web-client@2.1.1-RC.4.6":
+  version "2.1.1-RC.4.6"
+  resolved "https://registry.yarnpkg.com/@myetherwallet/mewconnect-web-client/-/mewconnect-web-client-2.1.1-RC.4.6.tgz#ee9bac1995df9c14ff63a9618accb736bcf9b274"
+  integrity sha512-G6/Z+IJ1+brMIgGaI+MVBG+CmlZ/SV9MCKDqhPmNLscnIpiKU7xBoXQeMNOKDx3houku4xRyRzc8LD6D51xt5w==
   dependencies:
     bignumber.js "^9.0.0"
     browser-or-node "^1.2.1"
