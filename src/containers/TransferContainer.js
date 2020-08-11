@@ -224,6 +224,9 @@ const styles = (theme) => ({
         lineHeight: '17px',
         borderRadius: 4,
         marginBottom: theme.spacing(3),
+        '& a': {
+            color: 'inherit'
+        },
         [theme.breakpoints.down('sm')]: {
             maxWidth: '100%',
         },
@@ -407,6 +410,9 @@ class TransferContainer extends React.Component {
             <div className={classes.disclosure}>
                 <Typography variant='p'>
                     RenVM is new technology and security audits don't completely eliminate risks. Please don’t supply assets you can’t afford to&nbsp;lose.
+                    <br />
+                    <br />
+                    <b>If you are new to RenBridge, please watch <a target="_blank" href="https://www.youtube.com/watch?v=kO0672RJL-Q&feature=youtu.be">this</a> tutorial before&nbsp;continuing.</b>
                 </Typography>
             </div>
           </Grid>
