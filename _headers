@@ -1,14 +1,17 @@
 /*
 # Not allowed in iframes
-  X-Frame-Options: DENY
+# this is disabled to allow gateway-js to work. we should investigate fixing
+# https://stackoverflow.com/questions/25098021/securityerror-blocked-a-frame-with-origin-from-accessing-a-cross-origin-frame
+#  X-Frame-Options: DENY
 # Helps prevent loding external scripts if inline scripting is allwoed
-  X-XSS-Protection: 1; mode=block
+# Also seems to dislike gateway-js
+# X-XSS-Protection: 1; mode=block
 # Restrict js scripts to only load from the same host
 # unsafe-inline largely makes this moot,
 # but is required for metamask to work in Firefox,
 # this should be tracked until resolved
-  Content-Security-Policy: script-src 'self' 'unsafe-inline'
+  Content-Security-Policy: script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:
 # Always follow mime-types provided from server
   X-Content-Type-Options: "nosniff" always
 # Don't include referrer headers to external links
-  Referrer-Policy: no-referrer
+# Referrer-Policy: no-referrer
