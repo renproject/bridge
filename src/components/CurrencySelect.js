@@ -1,153 +1,169 @@
-import React from 'react';
-import theme from '../theme/theme'
-import { withStyles } from '@material-ui/styles';
-import Grid from '@material-ui/core/Grid';
-import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import React from "react";
+import theme from "../theme/theme";
+import { withStyles } from "@material-ui/styles";
+import Grid from "@material-ui/core/Grid";
+import MenuItem from "@material-ui/core/MenuItem";
+import Button from "@material-ui/core/Button";
+import Menu from "@material-ui/core/Menu";
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 
-import { MINI_ICON_MAP, NAME_MAP } from '../utils/walletUtils'
+import { MINI_ICON_MAP, NAME_MAP } from "../utils/walletUtils";
 
 const styles = () => ({
-    amountField: {
-        width: '100%',
+  amountField: {
+    width: "100%",
+  },
+  endAdornment: {
+    "& p": {},
+  },
+  item: {
+    display: "flex",
+    fontSize: 14,
+    alignItems: "center",
+    minWidth: 55,
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    "& div": {
+      display: "flex",
     },
-    endAdornment: {
-        '& p': {
-        }
+    justifyContent: "flex-start",
+  },
+  select: {
+    display: "flex",
+    "& div": {
+      display: "flex",
     },
-    item: {
-        display: 'flex',
-        fontSize: 14,
-        alignItems: 'center',
-        minWidth: 55,
-        paddingLeft: theme.spacing(2),
-        paddingRight: theme.spacing(2),
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
-        '& div': {
-            display: 'flex',
-        },
-        justifyContent: 'flex-start'
+    "& MuiInput-underline:before": {
+      display: "none",
     },
-    select: {
-        display: 'flex',
-        '& div': {
-            display: 'flex',
-        },
-        '& MuiInput-underline:before': {
-            display: 'none'
-        }
+  },
+  icon: {
+    width: 32,
+    height: 32,
+    marginRight: 10,
+  },
+  button: {
+    fontSize: 14,
+    color: "#585861",
+    display: "flex",
+    justifyContent: "flex-start",
+  },
+  arrow: {
+    flex: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    "& svg": {
+      width: 22,
+      height: "auto",
+      marginLeft: theme.spacing(0.75),
     },
-    icon: {
-        width: 32,
-        height: 32,
-        marginRight: 10,
-    },
-    button: {
-        fontSize: 14,
-        color: '#585861',
-        display: 'flex',
-        justifyContent: 'flex-start'
-    },
-    arrow: {
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        '& svg': {
-            width: 22,
-            height: 'auto',
-            marginLeft: theme.spacing(0.75)
-        }
-    },
-    balance: {
-        fontSize: 12,
-        marginTop: -2,
-        color: '#585861'
-    },
-    menu: {
-
-    }
-})
+  },
+  balance: {
+    fontSize: 12,
+    marginTop: -2,
+    color: "#585861",
+  },
+  menu: {},
+});
 
 class CurrencySelect extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            currency: '',
-            open: false
-        }
-        this.anchorEl = React.createRef();
+  constructor(props) {
+    super(props);
+    this.state = {
+      currency: "",
+      open: false,
+    };
+    this.anchorEl = React.createRef();
+  }
+
+  handleOpen() {
+    this.setState({
+      open: true,
+    });
+  }
+
+  handleClose(event) {
+    // console.log(event, event.target, event.target.value)
+    const value = event.target.value;
+    if (value) {
+      this.props.onCurrencyChange(value);
+      this.setState({ currency: value });
     }
+    this.setState({ open: false });
+  }
 
-    handleOpen() {
-        this.setState({
-            open: true
-        })
-    }
+  render() {
+    const { classes, items, className, active } = this.props;
 
-    handleClose(event) {
-        // console.log(event, event.target, event.target.value)
-        const value = event.target.value
-        if (value) {
-            this.props.onCurrencyChange(value)
-            this.setState({ currency: value })
-        }
-        this.setState({ open: false })
-    }
+    const { open } = this.state;
 
-    render() {
-        const {
-            classes,
-            items,
-            className,
-            active
-        } = this.props
+    const selected = active || items[0];
 
-        const {
-            open
-        } = this.state
-
-        const selected = active || items[0]
-
-        return <div className={className || ''}>
-            <Button fullWidth className={classes.button} ref={this.anchorEl} aria-controls="menu" aria-haspopup="true" onClick={this.handleOpen.bind(this)}>
-                <img src={MINI_ICON_MAP[selected.toLowerCase()]} className={classes.icon} />
-                <span>{selected}</span>
-                <div className={classes.arrow}>
-                  <ArrowDropDown />
-                </div>
-            </Button>
-            <Menu
-               id="menu"
-               anchorEl={this.anchorEl.current}
-               keepMounted
-               className={classes.menu}
-               open={open}
-               onClose={this.handleClose.bind(this)}
-             >
-               {items.map((i, index) => {
-                 const balance = this.props[`${i}Balance`]
-
-                 return <MenuItem className={classes.item} onClick={() => {
-                     this.handleClose.bind(this)({
-                        target: {
-                            value: i
-                        }
-                     })
-                   }} key={index} value={i}>
-                       <div><img src={MINI_ICON_MAP[i.toLowerCase()]} className={classes.icon} /></div>
-                       <Grid container direction='column' alignItems='flex-start'>
-                         <span>{i}</span>
-                         <span className={classes.balance}>{balance ? `${balance} ${i}` : NAME_MAP[i.toLowerCase()]}</span>
-                       </Grid>
-                   </MenuItem>
-                 })}
-             </Menu>
+    return (
+      <div className={className || ""}>
+        <Button
+          fullWidth
+          className={classes.button}
+          ref={this.anchorEl}
+          aria-controls="menu"
+          aria-haspopup="true"
+          onClick={this.handleOpen.bind(this)}
+        >
+          <img
+            src={MINI_ICON_MAP[selected.toLowerCase()]}
+            className={classes.icon}
+          />
+          <span>{selected}</span>
+          <div className={classes.arrow}>
+            <ArrowDropDown />
           </div>
-    }
+        </Button>
+        <Menu
+          id="menu"
+          anchorEl={this.anchorEl.current}
+          keepMounted
+          className={classes.menu}
+          open={open}
+          onClose={this.handleClose.bind(this)}
+        >
+          {items.map((i, index) => {
+            const balance = this.props[`${i}Balance`];
+
+            return (
+              <MenuItem
+                className={classes.item}
+                onClick={() => {
+                  this.handleClose.bind(this)({
+                    target: {
+                      value: i,
+                    },
+                  });
+                }}
+                key={index}
+                value={i}
+              >
+                <div>
+                  <img
+                    src={MINI_ICON_MAP[i.toLowerCase()]}
+                    className={classes.icon}
+                  />
+                </div>
+                <Grid container direction="column" alignItems="flex-start">
+                  <span>{i}</span>
+                  <span className={classes.balance}>
+                    {balance ? `${balance} ${i}` : NAME_MAP[i.toLowerCase()]}
+                  </span>
+                </Grid>
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      </div>
+    );
+  }
 }
 
 export default withStyles(styles)(CurrencySelect);
