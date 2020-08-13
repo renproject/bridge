@@ -17,6 +17,8 @@ import {
   abbreviateAddress,
 } from "../utils/walletUtils";
 
+import DarkTooltip from "../components/DarkTooltip";
+
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
@@ -357,8 +359,16 @@ class ConfirmContainer extends React.Component {
                         Destination
                       </Grid>
                       <Grid item xs={6}>
-                        <img src={WalletIcon} />
-                        {abbreviateAddress(confirmTx.destAddress)}
+                        <DarkTooltip
+                          placement="top"
+                          title={confirmTx.destAddress}
+                          arrow
+                        >
+                          <div>
+                            <img src={WalletIcon} />
+                            {abbreviateAddress(confirmTx.destAddress)}
+                          </div>
+                        </DarkTooltip>
                       </Grid>
                     </Grid>
 

@@ -29,6 +29,7 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import CurrencySelect from "../components/CurrencySelect";
 import BigCurrencyInput from "../components/BigCurrencyInput";
 import ActionLink from "../components/ActionLink";
+import DarkTooltip from "../components/DarkTooltip";
 
 import WalletIcon from "../assets/wallet-icon.svg";
 
@@ -506,8 +507,16 @@ class TransferContainer extends React.Component {
                               Destination
                             </Grid>
                             <Grid item xs={6}>
-                              <img src={WalletIcon} />
-                              {abbreviateAddress(localWeb3Address)}
+                              <DarkTooltip
+                                placement="top"
+                                title={localWeb3Address}
+                                arrow
+                              >
+                                <div>
+                                  <img src={WalletIcon} />
+                                  {abbreviateAddress(localWeb3Address)}
+                                </div>
+                              </DarkTooltip>
                             </Grid>
                           </Grid>
                           <Grid container className={classes.option}>
