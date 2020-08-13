@@ -105,6 +105,7 @@ class NavContainer extends React.Component {
         } = this.props
 
         const walletAddress = store.get('localWeb3Address')
+        const walletType = store.get('selectedWalletType')
 
         return <Grid item xs={12} className={classes.navContainer}>
             <Container size='lg'>
@@ -120,7 +121,7 @@ class NavContainer extends React.Component {
                           color={''}
                           onClick={() => {
                               if (!walletAddress) {
-                                  initLocalWeb3()
+                                  initLocalWeb3(walletType)
                               }
                           }} variant="outlined" className={classNames(classes.accountButton, walletAddress && classes.disabled)}>
                           {walletAddress ? <div>

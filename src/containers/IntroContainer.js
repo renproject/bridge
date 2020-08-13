@@ -6,7 +6,8 @@ import { initLocalWeb3 } from '../utils/walletUtils'
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import MetaMask from '../assets/metamask-intro.svg'
+import MetaMask from '../assets/metamask-fox.svg'
+import Mew from '../assets/mew.svg'
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = (theme) => ({
@@ -28,10 +29,40 @@ const styles = (theme) => ({
     metamask: {
         paddingTop: theme.spacing(6),
         paddingBottom: theme.spacing(3),
+        '& div': {
+            background: '#fff',
+            borderRadius: '50%',
+            border: '1px solid transparent',
+            width: 90,
+            height: 90,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            // opacity: 0.6,
+            transition: 'all 0.2s ease-in-out',
+            marginLeft: theme.spacing(1),
+            marginRight: theme.spacing(1),
+            boxShadow: '0px 3px 3px -2px rgba(0,0,0,0.1),0px 3px 4px 0px rgba(0,0,0,0.07),0px 1px 8px 0px rgba(0,0,0,0.06)',
+            '&:hover': {
+                // opacity: 0.8
+                boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.1),0px 5px 8px 0px rgba(0,0,0,0.07),0px 1px 14px 0px rgba(0,0,0,0.06)'
+            },
+            '&.selected': {
+                opacity: 1,
+                borderColor: theme.palette.primary.light,
+                boxShadow: theme.shadows[0]
+            }
+        },
         '& img': {
-            width: 92,
+            width: 35,
             height: 'auto',
-        }
+            // paddingLeft: theme.spacing(1),
+            // paddingRight: theme.spacing(1),
+        },
+    },
+    selectedWallet: {
+        opacity: '1 !important'
     },
     message: {
         marginBottom: theme.spacing(4),
@@ -104,8 +135,9 @@ class IntroContainer extends React.Component {
         const requesting = store.get('spaceRequesting')
         const error = store.get('spaceError')
         const box = store.get('box')
+        const walletType = store.get('selectedWalletType')
 
-        let text = 'Connect wallet'
+        let text = 'Connect ' + (walletType === 'injected' ? 'MetaMask' : 'MEW wallet')
         if (requesting) {
             if (!box) {
                 text = 'Connecting to 3box'
@@ -122,7 +154,14 @@ class IntroContainer extends React.Component {
                 The safe, fast and most secure way to bring cross-chain assets to&nbsp;Ethereum.
             </Typography>
             <Grid className={classes.metamask} container justify='center'>
-                <img src={MetaMask} />
+                <div className={walletType === 'injected' ? 'selected' : ''}
+                    onClick={() => store.set('selectedWalletType', 'injected')}>
+                    <img src={MetaMask} />
+                </div>
+                <div className={walletType === 'mew-connect' ? 'selected' : ''}
+                    onClick={() => store.set('selectedWalletType', 'mew-connect')}>
+                    <img src={Mew} />
+                </div>
             </Grid>
             <Grid container justify='center'>
                 <Typography className={classes.message} variant='p'>
@@ -130,7 +169,9 @@ class IntroContainer extends React.Component {
                 </Typography>
             </Grid>
             <Grid container justify='flex-start' direction='column' alignItems='center'>
-                <Button onClick={initLocalWeb3}
+                <Button onClick={() => {
+                        initLocalWeb3(walletType)
+                    }}
                     disabled={walletConnecting || requesting}
                     className={classes.button}
                     size='large'

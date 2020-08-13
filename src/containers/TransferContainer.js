@@ -596,7 +596,7 @@ class TransferContainer extends React.Component {
                     <Grid container justify='center' className={classes.actionButtonContainer}>
                         {selectedDirection === 0 && <Grid item xs={12}>
                             <Button
-                                disabled={false}
+                                disabled={!total || parseFloat(total) < 0.0000001}
                                 variant={'contained'}
                                 disableRipple
                                 color='primary'
@@ -609,7 +609,7 @@ class TransferContainer extends React.Component {
                         </Grid>}
                         {selectedDirection === 1 && <Grid item xs={12}>
                             <Button
-                                disabled={false}
+                                disabled={!total || parseFloat(total) < 0.0000001}
                                 variant={'contained'}
                                 disableRipple
                                 color='primary'
