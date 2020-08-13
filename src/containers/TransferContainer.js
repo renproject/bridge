@@ -1,6 +1,6 @@
 import React from 'react';
 import { withStore } from '@spyna/react-store'
-import { withStyles } from '@material-ui/styles';
+import { withStyles, makeStyles } from '@material-ui/styles';
 import classNames from 'classnames'
 import AddressValidator from "wallet-address-validator";
 import bchaddr from 'bchaddrjs'
@@ -28,6 +28,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import CurrencySelect from '../components/CurrencySelect';
 import BigCurrencyInput from '../components/BigCurrencyInput';
+import DarkTooltip from '../components/DarkTooltip';
 import ActionLink from '../components/ActionLink';
 
 import WalletIcon from '../assets/wallet-icon.svg'
@@ -480,7 +481,13 @@ class TransferContainer extends React.Component {
                                             Destination
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <img src={WalletIcon}/>{abbreviateAddress(localWeb3Address)}
+
+                                          <DarkTooltip placement='top' title={localWeb3Address} arrow>
+                                            <div>
+                                          <img src={WalletIcon}/>{abbreviateAddress(localWeb3Address)}
+
+                             </div>
+                                          </DarkTooltip>
                                         </Grid>
                                     </Grid>
                                     <Grid container className={classes.option}>
