@@ -2514,10 +2514,10 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
-"@myetherwallet/mewconnect-web-client@2.1.1-RC.4.6":
-  version "2.1.1-RC.4.6"
-  resolved "https://registry.yarnpkg.com/@myetherwallet/mewconnect-web-client/-/mewconnect-web-client-2.1.1-RC.4.6.tgz#ee9bac1995df9c14ff63a9618accb736bcf9b274"
-  integrity sha512-G6/Z+IJ1+brMIgGaI+MVBG+CmlZ/SV9MCKDqhPmNLscnIpiKU7xBoXQeMNOKDx3houku4xRyRzc8LD6D51xt5w==
+"@myetherwallet/mewconnect-web-client@2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@myetherwallet/mewconnect-web-client/-/mewconnect-web-client-2.1.2.tgz#50295b2fb3e9868e81982eefc647a82148a44ee3"
+  integrity sha512-L4YsEAIIrtTFGNFKxYuCNVwfm3+lgY8D3eAY5nq/n5t52QAEUnj91YcQhtwXY6oLBRFCbcm03nJrU2nOMowfWA==
   dependencies:
     bignumber.js "^9.0.0"
     browser-or-node "^1.2.1"
@@ -2783,10 +2783,6 @@
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@resolver-engine/imports-fs/-/imports-fs-0.2.2.tgz#5a81ef3285dbf0411ab3b15205080a1ad7622d9e"
   integrity sha512-gFCgMvCwyppjwq0UzIjde/WI+yDs3oatJhozG9xdjJdewwtd7LiF0T5i9lrHAUtqrQbqoFE4E+ZMRVHWpWHpKQ==
-  dependencies:
-    "@resolver-engine/fs" "^0.2.1"
-    "@resolver-engine/imports" "^0.2.2"
-    debug "^3.1.0"
 
 "@resolver-engine/imports@^0.2.2":
   version "0.2.2"
