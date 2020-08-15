@@ -15,7 +15,7 @@ jobs:
     - name: Install dependencies
       run: yarn --network-concurrency 1
     - name: Lint
-      run: yarn eslint ./src
+      run: yarn lint
   test:
     runs-on: ubuntu-latest
     steps:
