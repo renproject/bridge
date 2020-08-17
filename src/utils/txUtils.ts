@@ -11,7 +11,7 @@ export const MIN_TX_AMOUNTS = {
   renbch: 0.00035036,
 };
 
-export const windowBlocker = function (event) {
+export const windowBlocker = function (event: any) {
   // Cancel the event as stated by the standard.
   event.preventDefault();
 
@@ -34,7 +34,7 @@ export const removeWindowBlocker = function () {
 /**
  * Create/Update/Delete Transactions on Firebase and 3box
  */
-export const addTx = async (tx) => {
+export const addTx = async (tx: any) => {
   const store = getStore();
   const storeString = "convert.transactions";
 
@@ -79,12 +79,9 @@ export const addTx = async (tx) => {
       console.log(e);
     }
   }
-
-  // for debugging
-  window.txs = newTxs;
 };
 
-export const updateTx = async (newTx) => {
+export const updateTx = async (newTx: any) => {
   const store = getStore();
   const storeString = "convert.transactions";
   // const space = store.get('space')
@@ -96,7 +93,7 @@ export const updateTx = async (newTx) => {
 
   const txs = store.get(storeString);
 
-  const filtered = txs.filter((t) => t.id !== newTx.id);
+  const filtered = txs.filter((t: any) => t.id !== newTx.id);
   const newTxs = filtered.concat([newTx]);
 
   // console.log('newTxs', newTxs)
@@ -125,12 +122,9 @@ export const updateTx = async (newTx) => {
       console.log(e);
     }
   }
-
-  // for debugging
-  window.txs = txs;
 };
 
-export const removeTx = async (tx) => {
+export const removeTx = async (tx: any) => {
   const store = getStore();
   const storeString = "convert.transactions";
   // const space = store.get('space')
@@ -138,7 +132,7 @@ export const removeTx = async (tx) => {
   const fsEnabled = store.get("fsEnabled");
 
   const txs = store.get(storeString);
-  const newTxs = txs.filter((t) => t.id !== tx.id);
+  const newTxs = txs.filter((t: any) => t.id !== tx.id);
 
   // update local state
   store.set(storeString, newTxs);
@@ -159,16 +153,13 @@ export const removeTx = async (tx) => {
       console.log(e);
     }
   }
-
-  // for debugging
-  window.txs = txs;
 };
 
-export const txExists = function (tx) {
+export const txExists = function (tx: any) {
   return (
     getStore()
       .get("convert.transactions")
-      .filter((t) => t.id === tx.id).length > 0
+      .filter((t: any) => t.id === tx.id).length > 0
   );
 };
 
@@ -193,8 +184,8 @@ export const gatherFeeData = async function () {
   ).toFixed(6);
   const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / 10 ** 8);
   const total =
-    Number(amount - renVMFee - fixedFee) > 0
-      ? Number(amount - renVMFee - fixedFee).toFixed(6)
+    Number(amount - Number(renVMFee) - fixedFee) > 0
+      ? Number(amount - Number(renVMFee) - fixedFee).toFixed(6)
       : "0.000000";
 
   store.set("convert.renVMFee", renVMFee);
@@ -205,13 +196,16 @@ export const gatherFeeData = async function () {
 /**
  * Mint and Burn
  */
-export const initGJSDeposit = async function (tx) {
+export const initGJSDeposit = async function (tx: any) {
   const { amount } = tx;
-  const store = getStore();
+  const store = getStore() as any;
   const { gjs, localWeb3, localWeb3Address, selectedAsset } = store.getState();
 
   const data = {
-    sendToken: GatewayJS.Tokens[selectedAsset.toUpperCase()].Mint,
+    sendToken:
+      GatewayJS.Tokens[
+        selectedAsset.toUpperCase() as keyof typeof GatewayJS.Tokens
+      ].Mint,
     // every source asset for now uses the same unit number as BTC
     sendAmount: GatewayJS.utils.value(amount, "btc").sats().toString(),
     sendTo: localWeb3Address,
@@ -220,18 +214,18 @@ export const initGJSDeposit = async function (tx) {
 
   const preOpenTrades = Array.from((await gjs.getGateways()).values());
 
-  let trade = null;
+  let trade: any = null;
   const open = gjs.open(data);
   open
     .result()
-    .on("status", async (status) => {
+    .on("status", async (status: any) => {
       console.log(`[GOT STATUS] ${status}`);
       if (status === GatewayJS.LockAndMintStatus.Committed) {
         const postOpenTrades = Array.from((await gjs.getGateways()).values());
 
         if (preOpenTrades.length !== postOpenTrades.length) {
-          const preOpenIds = preOpenTrades.map((t) => t.id);
-          postOpenTrades.map((pot) => {
+          const preOpenIds = preOpenTrades.map((t: any) => t.id);
+          postOpenTrades.map((pot: any) => {
             // if unique, add to 3box
             if (preOpenIds.indexOf(pot.id)) {
               addTx(pot);
@@ -241,7 +235,7 @@ export const initGJSDeposit = async function (tx) {
         }
       }
     })
-    .on("transferUpdated", (transfer) => {
+    .on("transferUpdated", (transfer: any) => {
       console.log(`[GOT TRANSFER]`, transfer);
       if (
         !transfer.archived &&
@@ -250,7 +244,7 @@ export const initGJSDeposit = async function (tx) {
         updateTx(transfer);
       }
     })
-    .catch((error) => {
+    .catch((error: any) => {
       if (error.message === "Transfer cancelled by user") {
         // remove from 3box
         removeTx(trade);
@@ -261,13 +255,16 @@ export const initGJSDeposit = async function (tx) {
   store.set("confrirmAction", "");
 };
 
-export const initGJSWithdraw = async function (tx) {
+export const initGJSWithdraw = async function (tx: any) {
   const { amount, destAddress } = tx;
-  const store = getStore();
+  const store = getStore() as any;
   const { gjs, localWeb3, selectedAsset } = store.getState();
 
   const data = {
-    sendToken: GatewayJS.Tokens[selectedAsset.toUpperCase()].Burn,
+    sendToken:
+      GatewayJS.Tokens[
+        selectedAsset.toUpperCase() as keyof typeof GatewayJS.Tokens
+      ].Burn,
     // every source asset for now uses the same unit number as BTC
     sendAmount: GatewayJS.utils.value(amount, "btc").sats().toString(),
     sendTo: destAddress,
@@ -276,18 +273,18 @@ export const initGJSWithdraw = async function (tx) {
 
   const preOpenTrades = Array.from((await gjs.getGateways()).values());
 
-  let trade = null;
+  let trade: any = null;
   const open = gjs.open(data);
   open
     .result()
-    .on("status", async (status) => {
+    .on("status", async (status: any) => {
       console.log(`[GOT STATUS] ${status}`);
       if (status === GatewayJS.BurnAndReleaseStatus.Committed) {
         const postOpenTrades = Array.from((await gjs.getGateways()).values());
 
         if (preOpenTrades.length !== postOpenTrades.length) {
-          const preOpenIds = preOpenTrades.map((t) => t.id);
-          postOpenTrades.map((pot) => {
+          const preOpenIds = preOpenTrades.map((t: any) => t.id);
+          postOpenTrades.map((pot: any) => {
             // if unique, add to 3box
             if (preOpenIds.indexOf(pot.id)) {
               addTx(pot);
@@ -297,7 +294,7 @@ export const initGJSWithdraw = async function (tx) {
         }
       }
     })
-    .on("transferUpdated", (transfer) => {
+    .on("transferUpdated", (transfer: any) => {
       console.log(`[GOT TRANSFER]`, transfer);
       if (
         !transfer.archived &&
@@ -306,7 +303,7 @@ export const initGJSWithdraw = async function (tx) {
         updateTx(transfer);
       }
     })
-    .catch((error) => {
+    .catch((error: any) => {
       if (error.message === "Transfer cancelled by user") {
         // remove from 3box
         removeTx(trade);
@@ -317,14 +314,14 @@ export const initGJSWithdraw = async function (tx) {
 /**
  * Recover and Continue Transactions
  */
-export const isGatewayJSTxComplete = function (status) {
+export const isGatewayJSTxComplete = function (status: any) {
   return (
     status === GatewayJS.LockAndMintStatus.ConfirmedOnEthereum ||
     status === GatewayJS.BurnAndReleaseStatus.ReturnedFromRenVM
   );
 };
 
-export const reOpenTx = async function (trade) {
+export const reOpenTx = async function (trade: any) {
   const store = getStore();
   const gjs = store.get("gjs");
   const localWeb3 = store.get("localWeb3");
@@ -332,7 +329,7 @@ export const reOpenTx = async function (trade) {
 
   gateway
     .result()
-    .on("status", (status) => {
+    .on("status", (status: any) => {
       const completed = isGatewayJSTxComplete(status);
       if (completed) {
         // remove from 3box
@@ -340,14 +337,14 @@ export const reOpenTx = async function (trade) {
       }
       console.log(`[GOT STATUS] ${status}`, gateway, trade);
     })
-    .on("transferUpdated", (transfer) => {
+    .on("transferUpdated", (transfer: any) => {
       console.log(`[GOT TRANSFER]`, transfer);
       if (!transfer.archived) {
         updateTx(transfer);
       }
     })
     .then(console.log)
-    .catch((error) => {
+    .catch((error: any) => {
       if (error.message === "Transfer cancelled by user") {
         // remove from 3box
         removeTx(trade);
@@ -364,7 +361,7 @@ export const recoverTrades = async function () {
 
   // Re-open incomplete trades
   const localGateways = await gjs.getGateways();
-  const localTrades = Array.from(localGateways.values());
+  const localTrades: any[] = Array.from(localGateways.values());
   for (const trade of localTrades) {
     const tradeCompleted = isGatewayJSTxComplete(trade.status);
     if (tradeCompleted) {
@@ -382,9 +379,9 @@ export const recoverTrades = async function () {
     .collection("transactions")
     .where("walletSignature", "==", fsSignature)
     .get();
-  let fsTrades = [];
+  let fsTrades: any[] = [];
   if (!fsDataSnapshot.empty) {
-    fsDataSnapshot.forEach((doc) => {
+    fsDataSnapshot.forEach((doc: any) => {
       const tx = JSON.parse(doc.data().data);
       fsTrades.push(tx);
     });
@@ -412,9 +409,5 @@ export const recoverTrades = async function () {
   //     }
   // })
 };
-
-window.getStore = getStore;
-window.GatewayJS = GatewayJS;
-window.reOpenTx = reOpenTx;
 
 export default {};

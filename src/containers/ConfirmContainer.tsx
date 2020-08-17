@@ -1,21 +1,16 @@
 import React from "react";
 import { withStore } from "@spyna/react-store";
-import { withStyles } from "@material-ui/styles";
+import { withStyles, Styles } from "@material-ui/styles";
 import classNames from "classnames";
 import Numeral from "numeral";
-import {
-  addTx,
-  updateTx,
-  removeTx,
-  initGJSDeposit,
-  initGJSWithdraw,
-} from "../utils/txUtils";
+import { initGJSDeposit, initGJSWithdraw } from "../utils/txUtils";
 import {
   MINI_ICON_MAP,
   SYMBOL_MAP,
   NAME_MAP,
   abbreviateAddress,
 } from "../utils/walletUtils";
+import theme from "../theme/theme";
 
 import DarkTooltip from "../components/DarkTooltip";
 
@@ -25,7 +20,7 @@ import Typography from "@material-ui/core/Typography";
 import BackArrow from "../assets/back-arrow.svg";
 import WalletIcon from "../assets/wallet-icon.svg";
 
-const styles = (theme) => ({
+const styles: Styles<typeof theme, any> = (theme) => ({
   container: {
     background: "#fff",
     border: "1px solid " + theme.palette.divider,
@@ -238,21 +233,13 @@ const styles = (theme) => ({
   },
 });
 
-class ConfirmContainer extends React.Component {
-  constructor(props) {
+class ConfirmContainer extends React.Component<any> {
+  constructor(props: any) {
     super(props);
     this.state = props.store.getState();
   }
 
-  componentDidMount() {
-    // for debugging
-    window.addTx = addTx.bind(this);
-    window.updateTx = updateTx.bind(this);
-    window.removeTx = removeTx.bind(this);
-    window.store = this.props.store;
-  }
-
-  showDepositModal(tx) {
+  showDepositModal(tx: any) {
     const { store } = this.props;
     store.set("showDepositModal", true);
     store.set("depositModalTx", tx);
@@ -307,7 +294,7 @@ class ConfirmContainer extends React.Component {
       <React.Fragment>
         <Grid container>
           <div className={classes.disclosure}>
-            <Typography variant="p">
+            <Typography variant="body1">
               RenVM is new technology and security audits don't completely
               eliminate risks. Please don’t supply assets you can’t afford
               to&nbsp;lose.
@@ -317,6 +304,7 @@ class ConfirmContainer extends React.Component {
                 If you are new to RenBridge, please watch{" "}
                 <a
                   target="_blank"
+                  rel="noreferrer noopener"
                   href="https://www.youtube.com/watch?v=kO0672RJL-Q&feature=youtu.be"
                 >
                   this
@@ -331,6 +319,7 @@ class ConfirmContainer extends React.Component {
             <img
               className={classes.back}
               src={BackArrow}
+              alt="Back"
               onClick={() => {
                 store.set("confirmTx", null);
                 store.set("confirmAction", "");
@@ -344,10 +333,11 @@ class ConfirmContainer extends React.Component {
               variant="h4"
               className={classNames(classes.titleAmount, classes[size])}
             >
-              {confirmTx.amount} {SYMBOL_MAP[sourceAsset]}
+              {confirmTx.amount}{" "}
+              {SYMBOL_MAP[sourceAsset as keyof typeof SYMBOL_MAP]}
             </Typography>
 
-            <Typography variant="p" className={classes.usdAmount}>
+            <Typography variant="body1" className={classes.usdAmount}>
               = {Numeral(usdValue).format("$0,0.00")}
             </Typography>
           </div>
@@ -365,8 +355,11 @@ class ConfirmContainer extends React.Component {
                         {isDeposit ? "Minting" : "Releasing"}
                       </Grid>
                       <Grid item xs={6}>
-                        <img src={MINI_ICON_MAP[sourceAsset]} />
-                        {SYMBOL_MAP[sourceAsset]}
+                        <img
+                          alt={sourceAsset}
+                          src={MINI_ICON_MAP[sourceAsset]}
+                        />
+                        {SYMBOL_MAP[sourceAsset as keyof typeof SYMBOL_MAP]}
                       </Grid>
                     </Grid>
                     <Grid container className={classes.option}>
@@ -380,7 +373,7 @@ class ConfirmContainer extends React.Component {
                           arrow
                         >
                           <div>
-                            <img src={WalletIcon} />
+                            <img src={WalletIcon} alt="Wallet" />
                             {abbreviateAddress(confirmTx.destAddress)}
                           </div>
                         </DarkTooltip>
@@ -392,18 +385,27 @@ class ConfirmContainer extends React.Component {
                         RenVM Fee
                       </Grid>
                       <Grid item xs={6} className={classes.amountCell}>
-                        <img src={MINI_ICON_MAP[sourceAsset]} />
-                        {renVMFee} {SYMBOL_MAP[sourceAsset]}
+                        <img
+                          alt={sourceAsset}
+                          src={MINI_ICON_MAP[sourceAsset]}
+                        />
+                        {renVMFee}{" "}
+                        {SYMBOL_MAP[sourceAsset as keyof typeof SYMBOL_MAP]}
                       </Grid>
                     </Grid>
 
                     <Grid container className={classes.option}>
                       <Grid item xs={6}>
-                        {NAME_MAP[selectedAsset]} Network Fee
+                        {NAME_MAP[selectedAsset as keyof typeof NAME_MAP]}{" "}
+                        Network Fee
                       </Grid>
                       <Grid item xs={6} className={classes.amountCell}>
-                        <img src={MINI_ICON_MAP[selectedAsset]} />
-                        {networkFee} {SYMBOL_MAP[selectedAsset]}
+                        <img
+                          alt={selectedAsset}
+                          src={MINI_ICON_MAP[selectedAsset]}
+                        />
+                        {networkFee}{" "}
+                        {SYMBOL_MAP[selectedAsset as keyof typeof SYMBOL_MAP]}
                       </Grid>
                     </Grid>
                   </Grid>
@@ -416,8 +418,8 @@ class ConfirmContainer extends React.Component {
                     You will receive
                   </Grid>
                   <Grid item xs={6} className={classes.amountCell}>
-                    <img src={MINI_ICON_MAP[destAsset]} />
-                    {total} {SYMBOL_MAP[destAsset]}
+                    <img alt={destAsset} src={MINI_ICON_MAP[destAsset]} />
+                    {total} {SYMBOL_MAP[destAsset as keyof typeof SYMBOL_MAP]}
                   </Grid>
                 </Grid>
               </div>

@@ -1,11 +1,7 @@
 import React from "react";
 import theme from "../theme/theme";
-import classNames from "classnames";
-import { withStyles } from "@material-ui/styles";
+import { Styles, withStyles } from "@material-ui/styles";
 
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -14,7 +10,7 @@ import Menu from "@material-ui/core/Menu";
 
 import { MINI_ICON_MAP } from "../utils/walletUtils";
 
-const styles = () => ({
+const styles: Styles<any, any> = () => ({
   amountField: {
     width: "100%",
   },
@@ -52,8 +48,21 @@ const styles = () => ({
   },
 });
 
-class CurrencyInput extends React.Component {
-  constructor(props) {
+interface Props {
+  onCurrencyChange: (newCurrency: string) => void;
+  onAmountChange: (newAmount: number) => void;
+  items: string[];
+  classes: { [key in string]: string };
+  disabled?: boolean;
+}
+
+class CurrencyInput extends React.Component<Props> {
+  anchorEl: React.RefObject<any>;
+  state = {
+    currency: "",
+    open: false,
+  };
+  constructor(props: any) {
     super(props);
     this.state = {
       currency: "",
@@ -68,7 +77,7 @@ class CurrencyInput extends React.Component {
     });
   }
 
-  handleClose(event) {
+  handleClose(event: any) {
     // console.log(event, event.target, event.target.value)
     const value = event.target.value;
     if (value) {
@@ -110,6 +119,7 @@ class CurrencyInput extends React.Component {
                 >
                   <img
                     src={MINI_ICON_MAP[selected.toLowerCase()]}
+                    alt={selected}
                     className={classes.icon}
                   />
                   <span>{selected}</span>
@@ -135,6 +145,7 @@ class CurrencyInput extends React.Component {
                     >
                       <img
                         src={MINI_ICON_MAP[i.toLowerCase()]}
+                        alt={i}
                         className={classes.icon}
                       />
                       <span>{i}</span>
@@ -149,6 +160,7 @@ class CurrencyInput extends React.Component {
                     {
                       <img
                         src={MINI_ICON_MAP[items[0].toLowerCase()]}
+                        alt={items[0]}
                         className={classes.icon}
                       />
                     }

@@ -4,7 +4,7 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = () => ({});
 
-const ConversionStatus = function (props) {
+const ConversionStatus: React.FC<any> = function (props) {
   const { tx } = props;
 
   return (

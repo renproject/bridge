@@ -69,8 +69,26 @@ const styles = () => ({
   menu: {},
 });
 
-class CurrencySelect extends React.Component {
-  constructor(props) {
+type Balances = {
+  [key in string]: string | any;
+};
+
+interface Props extends Balances {
+  onCurrencyChange: (newCurrency: string) => void;
+  items: Array<keyof typeof NAME_MAP>;
+  className: string;
+  classes: { [key in string]: string };
+  active?: string;
+  disabled?: boolean;
+}
+
+class CurrencySelect extends React.Component<Props> {
+  anchorEl: React.RefObject<any>;
+  state = {
+    currency: "",
+    open: false,
+  };
+  constructor(props: Props) {
     super(props);
     this.state = {
       currency: "",
@@ -85,7 +103,7 @@ class CurrencySelect extends React.Component {
     });
   }
 
-  handleClose(event) {
+  handleClose(event: any) {
     // console.log(event, event.target, event.target.value)
     const value = event.target.value;
     if (value) {
@@ -114,6 +132,7 @@ class CurrencySelect extends React.Component {
         >
           <img
             src={MINI_ICON_MAP[selected.toLowerCase()]}
+            alt={selected}
             className={classes.icon}
           />
           <span>{selected}</span>
@@ -148,13 +167,16 @@ class CurrencySelect extends React.Component {
                 <div>
                   <img
                     src={MINI_ICON_MAP[i.toLowerCase()]}
+                    alt={i}
                     className={classes.icon}
                   />
                 </div>
                 <Grid container direction="column" alignItems="flex-start">
                   <span>{i}</span>
                   <span className={classes.balance}>
-                    {balance ? `${balance} ${i}` : NAME_MAP[i.toLowerCase()]}
+                    {balance
+                      ? `${balance} ${i}`
+                      : NAME_MAP[i.toLowerCase() as keyof typeof NAME_MAP]}
                   </span>
                 </Grid>
               </MenuItem>

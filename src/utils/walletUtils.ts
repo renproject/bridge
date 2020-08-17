@@ -32,7 +32,7 @@ import { getStore } from "../services/storeService";
 import erc20ABI from "./erc20ABI.json";
 
 // used for montoring balances
-let walletDataInterval = null;
+let walletDataInterval: any = null;
 
 export const ASSETS = ["BTC", "WBTC"];
 
@@ -75,7 +75,7 @@ export const NETWORK_MAP = {
   renbch: "ethereum",
 };
 
-export const MINI_ICON_MAP = {
+export const MINI_ICON_MAP: { [key in string]: string } = {
   btc: BTC,
   eth: ETH,
   zec: ZEC,
@@ -88,7 +88,7 @@ export const MINI_ICON_MAP = {
   renbch: RENBCH,
 };
 
-export const abbreviateAddress = function (walletAddress) {
+export const abbreviateAddress = function (walletAddress: string) {
   if (!walletAddress || typeof walletAddress !== "string") {
     return "";
   } else {
@@ -227,7 +227,7 @@ export const initDataWeb3 = async function () {
 /**
  * Connecting to Local Web3 Wallet
  */
-export const initLocalWeb3 = async function (type) {
+export const initLocalWeb3 = async function (type: any) {
   const store = getStore();
   store.set("walletConnecting", true);
 
@@ -256,10 +256,13 @@ export const initLocalWeb3 = async function (type) {
 
       web3 = new Web3(web3Provider);
       currentProvider = web3.currentProvider;
+      if (typeof currentProvider === "string") return;
+      if (!currentProvider) return;
       accounts = await web3.eth.getAccounts();
-      if (currentProvider.networkVersion === "1") {
+      const netId = await web3.eth.net.getId();
+      if (netId === 1) {
         network = "mainnet";
-      } else if (currentProvider.networkVersion === "42") {
+      } else if (netId === 42) {
         network = "testnet";
       }
     } else if (type === "mew-connect") {
@@ -281,6 +284,9 @@ export const initLocalWeb3 = async function (type) {
 
       web3 = new Web3(web3Provider);
       currentProvider = web3.currentProvider;
+
+      if (typeof currentProvider === "string") return;
+      if (!currentProvider) return;
 
       accounts = await web3Provider.enable();
       network = selectedNetwork;
@@ -325,11 +331,12 @@ export const initLocalWeb3 = async function (type) {
       signature = localSigMapData[addressLowerCase];
     } else {
       // get unique wallet signature for firebase backup
+      // @ts-ignore
       const sig = await web3.eth.personal.sign(
         web3.utils.utf8ToHex("Signing in to RenBridge"),
         addressLowerCase
       );
-      signature = web3.utils.sha3(sig);
+      signature = web3.utils.sha3(sig)!;
       localSigMapData[addressLowerCase] = signature;
       localStorage.setItem("sigMap", JSON.stringify(localSigMapData));
     }
@@ -361,26 +368,30 @@ export const initLocalWeb3 = async function (type) {
 
     store.set("fsUser", fsUser);
 
-    // update user collection
-    const doc = await db.collection("users").doc(fsUser.uid);
-    const docData = await doc.get();
+    if (fsUser) {
+      // update user collection
+      const doc = await db.collection("users").doc(fsUser.uid);
+      const docData = await doc.get();
 
-    if (docData.exists) {
-      const data = docData.data();
-      if (data.signatures.indexOf(signature) < 0) {
-        // add a new signature if needed
-        await doc.update({
-          signatures: data.signatures.concat([signature]),
+      if (docData.exists) {
+        const data = docData.data();
+        if (data.signatures.indexOf(signature) < 0) {
+          // add a new signature if needed
+          await doc.update({
+            signatures: data.signatures.concat([signature]),
+            updated: firebase.firestore.Timestamp.fromDate(
+              new Date(Date.now())
+            ),
+          });
+        }
+      } else {
+        // create user
+        await doc.set({
+          uid: fsUser.uid,
           updated: firebase.firestore.Timestamp.fromDate(new Date(Date.now())),
+          signatures: [signature],
         });
       }
-    } else {
-      // create user
-      await doc.set({
-        uid: fsUser.uid,
-        updated: firebase.firestore.Timestamp.fromDate(new Date(Date.now())),
-        signatures: [signature],
-      });
     }
 
     store.set("fsEnabled", true);
@@ -398,21 +409,24 @@ export const initLocalWeb3 = async function (type) {
     recoverTrades();
     updateBalance();
 
-    if (currentProvider.on) {
+    if ((!currentProvider as any).on) return;
+    // FIXME: provide propper provider type
+    const listeningProvider: any = currentProvider;
+    if (listeningProvider.on) {
       // listen for changes
-      currentProvider.on("accountsChanged", async () => {
+      listeningProvider.on("accountsChanged", async () => {
         window.location.reload();
       });
 
-      currentProvider.on("chainChanged", async () => {
+      listeningProvider.on("chainChanged", async () => {
         window.location.reload();
       });
 
-      currentProvider.on("networkChanged", async () => {
+      listeningProvider.on("networkChanged", async () => {
         window.location.reload();
       });
 
-      currentProvider.on("disconnected", async () => {
+      listeningProvider.on("disconnected", async () => {
         window.location.reload();
       });
     }
@@ -440,11 +454,11 @@ export const setAddresses = async function () {
   }
 };
 
-export const setNetwork = async function (network) {
+export const setNetwork = async function (network: any) {
   const store = getStore();
   store.set("selectedNetwork", network);
   store.set("gjs", new GatewayJS(network));
-
+  // @ts-ignore
   setAddresses.bind(this)();
 };
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { withStore } from "@spyna/react-store";
-import { withStyles } from "@material-ui/styles";
+import { Styles, withStyles } from "@material-ui/styles";
 import theme from "../theme/theme";
 
 import Grid from "@material-ui/core/Grid";
@@ -9,7 +9,7 @@ import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 
-const styles = () => ({
+const styles: Styles<typeof theme, any> = (theme) => ({
   modal: {
     display: "flex",
     alignItems: "center",
@@ -41,8 +41,8 @@ const styles = () => ({
   },
 });
 
-class NetworkModalContainer extends React.Component {
-  constructor(props) {
+class NetworkModalContainer extends React.Component<any> {
+  constructor(props: any) {
     super(props);
     this.state = props.store.getState();
   }
