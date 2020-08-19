@@ -1,6 +1,7 @@
 import firebase from "firebase";
 import GatewayJS from "@renproject/gateway";
 import { getStore } from "../services/storeService";
+import * as Sentry from "@sentry/react";
 
 export const MIN_TX_AMOUNTS = {
   btc: 0.00035036,
@@ -77,6 +78,7 @@ export const addTx = async (tx: any) => {
         });
     } catch (e) {
       console.log(e);
+      Sentry.captureException(e);
     }
   }
 };
@@ -120,6 +122,7 @@ export const updateTx = async (newTx: any) => {
         });
     } catch (e) {
       console.log(e);
+      Sentry.captureException(e);
     }
   }
 };
@@ -151,6 +154,7 @@ export const removeTx = async (tx: any) => {
       db.collection("transactions").doc(tx.id).delete();
     } catch (e) {
       console.log(e);
+      Sentry.captureException(e);
     }
   }
 };
@@ -248,6 +252,8 @@ export const initGJSDeposit = async function (tx: any) {
       if (error.message === "Transfer cancelled by user") {
         // remove from 3box
         removeTx(trade);
+      } else {
+        Sentry.captureException(error);
       }
     });
 
@@ -348,6 +354,8 @@ export const reOpenTx = async function (trade: any) {
       if (error.message === "Transfer cancelled by user") {
         // remove from 3box
         removeTx(trade);
+      } else {
+        Sentry.captureException(error);
       }
     });
 };
