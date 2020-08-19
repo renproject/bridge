@@ -4,6 +4,7 @@ import GatewayJS from "@renproject/gateway";
 import Web3Modal from "web3modal";
 import firebase from "firebase";
 import MEWconnect from "@myetherwallet/mewconnect-web-client";
+import * as Sentry from "@sentry/react";
 
 import BTC from "../assets/btc.png";
 import ETH from "../assets/eth.png";
@@ -122,6 +123,7 @@ export const updateFees = async function () {
     store.set("fees", data);
   } catch (e) {
     console.log(e);
+    Sentry.captureException(e);
   }
 };
 
@@ -136,6 +138,7 @@ export const updateMarketData = async function () {
     store.set("btcusd", (await btc.json()).data.priceUsd);
   } catch (e) {
     console.log(e);
+    Sentry.captureException(e);
   }
 
   try {
@@ -146,6 +149,7 @@ export const updateMarketData = async function () {
     store.set("zecusd", (await zec.json()).data.priceUsd);
   } catch (e) {
     console.log(e);
+    Sentry.captureException(e);
   }
 
   try {
@@ -156,6 +160,8 @@ export const updateMarketData = async function () {
     store.set("bchusd", (await bch.json()).data.priceUsd);
   } catch (e) {
     console.log(e);
+
+    Sentry.captureException(e);
   }
 };
 
@@ -299,6 +305,7 @@ export const initLocalWeb3 = async function (type: any) {
     }
   } catch (e) {
     console.log(e);
+    Sentry.captureException(e);
     store.set("spaceError", true);
     store.set("spaceRequesting", false);
     store.set("walletConnecting", false);
@@ -355,6 +362,7 @@ export const initLocalWeb3 = async function (type: any) {
         ).user;
       } catch (e) {
         console.log(e);
+        Sentry.captureException(e);
         console.log("new user");
         fsUser = (
           await firebase
@@ -432,6 +440,7 @@ export const initLocalWeb3 = async function (type: any) {
     }
   } catch (e) {
     console.log(e);
+    Sentry.captureException(e);
     store.set("spaceError", true);
     store.set("spaceRequesting", false);
     store.set("walletConnecting", false);
@@ -457,7 +466,14 @@ export const setAddresses = async function () {
 export const setNetwork = async function (network: any) {
   const store = getStore();
   store.set("selectedNetwork", network);
-  store.set("gjs", new GatewayJS(network));
+  store.set(
+    "gjs",
+    new GatewayJS(network, {
+      // If we want to test against gatewayjs staging, we should change the endpoint
+      // manually in a PR, which does not get merged, and check the preview build
+      // endpoint: "https://ren-gatewayjs-staging.netlify.app/",
+    })
+  );
   // @ts-ignore
   setAddresses.bind(this)();
 };
