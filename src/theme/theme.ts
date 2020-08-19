@@ -32,7 +32,7 @@ export default createMuiTheme({
     divider: "#DBE0E8",
   },
   overrides: {
-    MuiButton: {
+    MuiButtonBase: {
       root: {
         textTransform: "none",
         borderRadius: 4,
@@ -55,9 +55,10 @@ export default createMuiTheme({
         },
       },
     },
-    PrivateNotchedOutline: {
-      root: {},
-    },
+    //@ts-ignore
+    // PrivateNotchedOutline: {
+    //   root: {},
+    // },
     // '.MuiOutlinedInput-root:hover':{
     //     borderColor: '#EBEBEB !important'
     // },
@@ -82,6 +83,7 @@ export default createMuiTheme({
       },
     },
     MuiTextField: {},
+    //@ts-ignore
     MuiToggleButtonGroup: {
       root: {
         backgroundColor: "#fff",

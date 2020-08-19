@@ -1,6 +1,6 @@
 import React from "react";
 import { withStore } from "@spyna/react-store";
-import { withStyles } from "@material-ui/styles";
+import { Styles, withStyles } from "@material-ui/styles";
 import classNames from "classnames";
 import AddressValidator from "wallet-address-validator";
 import bchaddr from "bchaddrjs";
@@ -31,9 +31,11 @@ import BigCurrencyInput from "../components/BigCurrencyInput";
 import ActionLink from "../components/ActionLink";
 import DarkTooltip from "../components/DarkTooltip";
 
+import theme from "../theme/theme";
+
 import WalletIcon from "../assets/wallet-icon.svg";
 
-const styles = (theme) => ({
+const styles: Styles<typeof theme, any> = (theme) => ({
   container: {
     background: "#fff",
     border: "1px solid " + theme.palette.divider,
@@ -230,22 +232,14 @@ const styles = (theme) => ({
   },
 });
 
-class TransferContainer extends React.Component {
-  constructor(props) {
+class TransferContainer extends React.Component<any> {
+  burnInputRef = React.createRef();
+  constructor(props: any) {
     super(props);
     this.state = props.store.getState();
-    this.burnInputRef = React.createRef();
   }
 
-  componentDidMount() {
-    // for debugging
-    window.addTx = addTx.bind(this);
-    window.updateTx = updateTx.bind(this);
-    window.removeTx = removeTx.bind(this);
-    window.store = this.props.store;
-  }
-
-  showDepositModal(tx) {
+  showDepositModal(tx: any) {
     const { store } = this.props;
     store.set("showDepositModal", true);
     store.set("depositModalTx", tx);
@@ -253,7 +247,7 @@ class TransferContainer extends React.Component {
 
   async gatherFeeData() {}
 
-  getBalance(asset) {
+  getBalance(asset: string) {
     const { store } = this.props;
     return store.get(`ren${asset.toUpperCase()}Balance`);
   }
@@ -262,7 +256,9 @@ class TransferContainer extends React.Component {
     const { store } = this.props;
     const selectedAsset = store.get("selectedAsset");
     const amount = store.get("convert.amount");
-    const amountValid = Number(amount) >= MIN_TX_AMOUNTS[selectedAsset];
+    const amountValid =
+      Number(amount) >=
+      MIN_TX_AMOUNTS[selectedAsset as keyof typeof MIN_TX_AMOUNTS];
 
     if (!amount || !amountValid) {
       store.set("convert.showAmountError", true);
@@ -278,8 +274,12 @@ class TransferContainer extends React.Component {
     const amount = store.get("convert.amount");
     const convertAddressValid = store.get("convert.destinationValid");
     const showAddressError = !convertAddressValid;
-    const selectedAsset = store.get("selectedAsset");
-    const selectedFormat = store.get("convert.selectedFormat");
+    const selectedAsset: keyof typeof MIN_TX_AMOUNTS = store.get(
+      "selectedAsset"
+    );
+    const selectedFormat: keyof typeof SYMBOL_MAP = store.get(
+      "convert.selectedFormat"
+    );
     const balance = store.get(SYMBOL_MAP[selectedFormat] + "Balance");
     const amountValid =
       Number(amount) >= MIN_TX_AMOUNTS[selectedAsset] &&
@@ -310,8 +310,10 @@ class TransferContainer extends React.Component {
     const amount = store.get("convert.amount");
     const localWeb3Address = store.get("localWeb3Address");
     const network = store.get("selectedNetwork");
-    const format = store.get("convert.selectedFormat");
-    const asset = store.get("selectedAsset");
+    const format: keyof typeof NETWORK_MAP = store.get(
+      "convert.selectedFormat"
+    );
+    const asset: keyof typeof NETWORK_MAP = store.get("selectedAsset");
 
     const tx = {
       id: "tx-" + Math.floor(Math.random() * 10 ** 16),
@@ -344,8 +346,10 @@ class TransferContainer extends React.Component {
     const amount = store.get("convert.amount");
     const destination = store.get("convert.destination");
     const network = store.get("selectedNetwork");
-    const format = store.get("convert.selectedFormat");
-    const asset = store.get("selectedAsset");
+    const format: keyof typeof NETWORK_MAP = store.get(
+      "convert.selectedFormat"
+    );
+    const asset: keyof typeof NETWORK_MAP = store.get("selectedAsset");
 
     const tx = {
       id: "tx-" + Math.floor(Math.random() * 10 ** 16),
@@ -376,11 +380,15 @@ class TransferContainer extends React.Component {
 
     const selectedNetwork = store.get("selectedNetwork");
     const selectedTab = store.get("selectedTab");
-    const selectedAsset = store.get("selectedAsset");
+    const selectedAsset: keyof typeof MIN_TX_AMOUNTS = store.get(
+      "selectedAsset"
+    );
 
     // 0 = mint, 1 = release
     const selectedDirection = store.get("convert.selectedDirection");
-    const selectedFormat = store.get("convert.selectedFormat");
+    const selectedFormat: keyof typeof SYMBOL_MAP = store.get(
+      "convert.selectedFormat"
+    );
     const localWeb3Address = store.get("localWeb3Address");
     const balance = store.get(SYMBOL_MAP[selectedFormat] + "Balance");
     const amount = store.get("convert.amount");
@@ -409,7 +417,7 @@ class TransferContainer extends React.Component {
       <React.Fragment>
         <Grid container>
           <div className={classes.disclosure}>
-            <Typography variant="p">
+            <Typography variant="inherit">
               RenVM is new technology and security audits don't completely
               eliminate risks. Please don’t supply assets you can’t afford
               to&nbsp;lose.
@@ -418,6 +426,7 @@ class TransferContainer extends React.Component {
               <b>
                 If you are new to RenBridge, please watch{" "}
                 <a
+                  rel="noopener noreferrer"
                   target="_blank"
                   href="https://www.youtube.com/watch?v=kO0672RJL-Q&feature=youtu.be"
                 >
@@ -470,7 +479,7 @@ class TransferContainer extends React.Component {
                             placeholder={"0.00 " + SYMBOL_MAP[selectedAsset]}
                             usdValue={usdValue}
                             value={amount}
-                            onChange={(event) => {
+                            onChange={(event: any) => {
                               const value = event.value || "";
                               store.set("convert.amount", String(value));
                               gatherFeeData();
@@ -500,7 +509,7 @@ class TransferContainer extends React.Component {
                               active={SYMBOL_MAP[selectedAsset]}
                               className={classes.currencySelect}
                               items={["BTC", "ZEC", "BCH"]}
-                              onCurrencyChange={(v) => {
+                              onCurrencyChange={(v: string) => {
                                 const asset = v.toLowerCase();
                                 store.set(
                                   "convert.selectedFormat",
@@ -556,7 +565,7 @@ class TransferContainer extends React.Component {
                             value={amount}
                             placeholder={"0.00 " + SYMBOL_MAP[selectedFormat]}
                             usdValue={usdValue}
-                            onChange={(event) => {
+                            onChange={(event: any) => {
                               const value = event.value || "";
                               store.set("convert.amount", String(value));
                               gatherFeeData();
@@ -604,7 +613,7 @@ class TransferContainer extends React.Component {
                               renBTCBalance={store.get("renBTCBalance")}
                               renZECBalance={store.get("renZECBalance")}
                               renBCHBalance={store.get("renBCHBalance")}
-                              onCurrencyChange={(v) => {
+                              onCurrencyChange={(v: string) => {
                                 const asset = v.toLowerCase();
                                 store.set("convert.selectedFormat", asset);
                                 store.set(
@@ -628,7 +637,7 @@ class TransferContainer extends React.Component {
                               <TextField
                                 label="Destination"
                                 placeholder={`Enter ${NAME_MAP[selectedAsset]} Address`}
-                                size="large"
+                                size="medium"
                                 fullWidth={true}
                                 error={showDestinationError}
                                 helperText={

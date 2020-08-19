@@ -135,8 +135,13 @@ const initialState = {
   "convert.conversionTotal": "",
 };
 
-class AppWrapper extends React.Component {
-  constructor(props) {
+interface Props {
+  store: any;
+  classes: { [key in string]: string };
+}
+
+class AppWrapper extends React.Component<Props> {
+  constructor(props: any) {
     super(props);
     this.state = {};
   }
@@ -186,16 +191,25 @@ class AppWrapper extends React.Component {
             className={classes.footerContainer}
             alignItems="flex-end"
           >
-            <Container size="lg">
+            <Container fixed maxWidth="lg">
               <Grid container alignItems="center" justify="space-between">
                 <Typography className={classes.footerLinks} variant="caption">
-                  <a target="_blank" href={"https://renproject.io/"}>
+                  <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href={"https://renproject.io/"}
+                  >
                     Ren Project Site
                   </a>{" "}
-                  <a target="_blank" href={"https://renproject.io/renvm"}>
+                  <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href={"https://renproject.io/renvm"}
+                  >
                     About RenVM
                   </a>{" "}
                   <a
+                    rel="noreferrer noopener"
                     target="_blank"
                     href={
                       "https://docs.renproject.io/darknodes/faq/renbridge-faq"
@@ -204,12 +218,14 @@ class AppWrapper extends React.Component {
                     FAQs
                   </a>{" "}
                   <a
+                    rel="noreferrer noopener"
                     target="_blank"
                     href={"https://docs.renproject.io/developers/"}
                   >
                     Docs
                   </a>{" "}
                   <a
+                    rel="noreferrer noopener"
                     target="_blank"
                     href={"https://github.com/renproject/ren/wiki/Introduction"}
                   >
@@ -217,20 +233,49 @@ class AppWrapper extends React.Component {
                   </a>
                 </Typography>
                 <Typography className={classes.footerLinks} variant="caption">
-                  <a target="_blank" href={"https://twitter.com/renprotocol"}>
-                    <img className={classes.footerLogo} src={Twitter} />
-                  </a>
-                  <a target="_blank" href={"https://github.com/renproject"}>
-                    <img className={classes.footerLogo} src={Github} />
-                  </a>
-                  <a target="_blank" href={"https://t.me/renproject"}>
-                    <img className={classes.footerLogo} src={Telegram} />
+                  <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href={"https://twitter.com/renprotocol"}
+                  >
+                    <img
+                      alt="Twitter"
+                      className={classes.footerLogo}
+                      src={Twitter}
+                    />
                   </a>
                   <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href={"https://github.com/renproject"}
+                  >
+                    <img
+                      alt="Github"
+                      className={classes.footerLogo}
+                      src={Github}
+                    />
+                  </a>
+                  <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href={"https://t.me/renproject"}
+                  >
+                    <img
+                      alt="Telegram"
+                      className={classes.footerLogo}
+                      src={Telegram}
+                    />
+                  </a>
+                  <a
+                    rel="noreferrer noopener"
                     target="_blank"
                     href={"https://www.reddit.com/r/renproject"}
                   >
-                    <img className={classes.footerLogo} src={Reddit} />
+                    <img
+                      alt="Reddit"
+                      className={classes.footerLogo}
+                      src={Reddit}
+                    />
                   </a>
                 </Typography>
               </Grid>
@@ -244,11 +289,7 @@ class AppWrapper extends React.Component {
 
 const AppWrapperComponent = withStore(AppWrapper);
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
+class App extends React.Component<Props> {
   render() {
     const { classes } = this.props;
     return <AppWrapperComponent classes={classes} />;

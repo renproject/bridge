@@ -1,6 +1,6 @@
 import React from "react";
 import { withStore } from "@spyna/react-store";
-import { withStyles } from "@material-ui/styles";
+import { Styles, withStyles } from "@material-ui/styles";
 import { initLocalWeb3 } from "../utils/walletUtils";
 
 import Grid from "@material-ui/core/Grid";
@@ -10,7 +10,9 @@ import MetaMask from "../assets/metamask-fox.svg";
 import Mew from "../assets/mew.svg";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-const styles = (theme) => ({
+import theme from "../theme/theme";
+
+const styles: Styles<typeof theme, any> = (theme) => ({
   container: {
     textAlign: "center",
     paddingTop: theme.spacing(2),
@@ -113,11 +115,8 @@ const styles = (theme) => ({
   },
 });
 
-class IntroContainer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+class IntroContainer extends React.Component<any> {
+  state = {};
 
   goBack() {
     const { store } = this.props;
@@ -150,7 +149,7 @@ class IntroContainer extends React.Component {
         <Typography className={classes.title} variant="h2">
           Bitcoin, Zcash and Bitcoin Cash on&nbsp;Ethereum.
         </Typography>
-        <Typography className={classes.subtitle} variant="p">
+        <Typography className={classes.subtitle} variant="body1">
           The safe, fast and most secure way to bring cross-chain assets
           to&nbsp;Ethereum.
         </Typography>
@@ -159,17 +158,17 @@ class IntroContainer extends React.Component {
             className={walletType === "injected" ? "selected" : ""}
             onClick={() => store.set("selectedWalletType", "injected")}
           >
-            <img src={MetaMask} />
+            <img src={MetaMask} alt="MetaMask" />
           </div>
           <div
             className={walletType === "mew-connect" ? "selected" : ""}
             onClick={() => store.set("selectedWalletType", "mew-connect")}
           >
-            <img src={Mew} />
+            <img src={Mew} alt="Mew" />
           </div>
         </Grid>
         <Grid container justify="center">
-          <Typography className={classes.message} variant="p">
+          <Typography className={classes.message} variant="body1">
             To mint or release assets, connect your&nbsp;wallet.
           </Typography>
         </Grid>
@@ -210,7 +209,7 @@ class IntroContainer extends React.Component {
             )}
             {text}
           </Button>
-          <Typography variant="p" className={classes.mobileMessage}>
+          <Typography variant="body1" className={classes.mobileMessage}>
             RenBridge is currently only supported on desktop&nbsp;browsers.
           </Typography>
 

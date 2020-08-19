@@ -2,9 +2,9 @@ import React from "react";
 import Numeral from "numeral";
 import NumberFormat from "react-number-format";
 import classNames from "classnames";
-import { withStyles } from "@material-ui/styles";
+import { Styles, withStyles } from "@material-ui/styles";
 
-const styles = () => ({
+const styles: Styles<any, any> = () => ({
   container: {
     width: "100%",
     textAlign: "center",
@@ -45,8 +45,11 @@ const styles = () => ({
   },
 });
 
-class BigCurrencyInput extends React.PureComponent {
-  constructor(props) {
+class BigCurrencyInput extends React.PureComponent<any> {
+  ref: React.RefObject<any>;
+  input: any;
+
+  constructor(props: any) {
     super(props);
     this.ref = React.createRef();
     this.input = null;
@@ -99,7 +102,7 @@ class BigCurrencyInput extends React.PureComponent {
           allowNegative={false}
           suffix={" " + symbol}
           onValueChange={change}
-          getInputRef={(input) => {
+          getInputRef={(input: any) => {
             this.input = input;
           }}
           className={classNames(classes.input, className)}

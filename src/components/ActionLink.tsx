@@ -1,8 +1,6 @@
 import React from "react";
-import theme from "../theme/theme";
 import classNames from "classnames";
 import { withStyles } from "@material-ui/styles";
-import Typography from "@material-ui/core/Typography";
 
 const styles = () => ({
   link: {
@@ -16,7 +14,13 @@ const styles = () => ({
   },
 });
 
-const ActionLink = function (props) {
+interface Props {
+  className?: string;
+  classes: { [key in string]: string };
+  onClick: any;
+}
+
+const ActionLink: React.FC<Props> = function (props) {
   const { children, classes, className } = props;
 
   return (

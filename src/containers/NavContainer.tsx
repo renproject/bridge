@@ -1,6 +1,6 @@
 import React from "react";
 import { withStore } from "@spyna/react-store";
-import { withStyles } from "@material-ui/styles";
+import { Styles, withStyles } from "@material-ui/styles";
 import theme from "../theme/theme";
 import classNames from "classnames";
 import { initLocalWeb3 } from "../utils/walletUtils";
@@ -10,7 +10,7 @@ import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 
-const styles = () => ({
+const styles: Styles<typeof theme, any> = (theme) => ({
   navContainer: {
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4),
@@ -81,11 +81,7 @@ const styles = () => ({
   },
 });
 
-class NavContainer extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
+class NavContainer extends React.Component<any> {
   anchorRef = React.createRef();
 
   async componentDidMount() {}
@@ -104,12 +100,12 @@ class NavContainer extends React.Component {
 
     return (
       <Grid item xs={12} className={classes.navContainer}>
-        <Container size="lg">
+        <Container fixed maxWidth="lg">
           {
             <Grid container alignItems="center">
               <Grid item xs={12} sm={8}>
                 <Grid container alignItems="center">
-                  <img className={classes.logo} src={RenLogo} />
+                  <img alt="Ren Logo" className={classes.logo} src={RenLogo} />
                 </Grid>
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -117,7 +113,7 @@ class NavContainer extends React.Component {
                   {
                     <Button
                       disableRipple={walletAddress.length}
-                      color={""}
+                      color={"default"}
                       onClick={() => {
                         if (!walletAddress) {
                           initLocalWeb3(walletType);
