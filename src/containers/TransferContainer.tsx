@@ -417,7 +417,7 @@ class TransferContainer extends React.Component<any> {
       <React.Fragment>
         <Grid container>
           <div className={classes.disclosure}>
-            <Typography variant="body1">
+            <Typography variant="inherit">
               RenVM is new technology and security audits don't completely
               eliminate risks. Please don’t supply assets you can’t afford
               to&nbsp;lose.
