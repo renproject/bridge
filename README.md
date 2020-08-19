@@ -1,4 +1,4 @@
-# 🌃 RenBridge
+# 🌉 RenBridge
 The safe, fast and most secure way to bring cross-chain assets to Ethereum.
 
 ## Local Development
