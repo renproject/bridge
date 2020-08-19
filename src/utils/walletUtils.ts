@@ -471,7 +471,7 @@ export const setNetwork = async function (network: any) {
     new GatewayJS(network, {
       // If we want to test against gatewayjs staging, we should change the endpoint
       // manually in a PR, which does not get merged, and check the preview build
-      // endpoint: "https://ren-gatewayjs-staging.netlify.app/",
+      endpoint: "https://ren-gatewayjs-staging.netlify.app/",
     })
   );
   // @ts-ignore
