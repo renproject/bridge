@@ -293,7 +293,7 @@ class ConfirmContainer extends React.Component<any> {
     const sourceAsset = confirmTx.sourceAsset;
     const destAsset = confirmTx.destAsset;
     const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(
-      2,
+      2
     );
     const chars = String(amount).replace(".", "");
 
@@ -456,7 +456,7 @@ class ConfirmContainer extends React.Component<any> {
                       fullWidth
                       className={classNames(
                         classes.margin,
-                        classes.actionButton,
+                        classes.actionButton
                       )}
                       onClick={this.confirmDeposit.bind(this)}
                     >
@@ -475,7 +475,7 @@ class ConfirmContainer extends React.Component<any> {
                       fullWidth
                       className={classNames(
                         classes.margin,
-                        classes.actionButton,
+                        classes.actionButton
                       )}
                       onClick={this.confirmWithdraw.bind(this)}
                     >

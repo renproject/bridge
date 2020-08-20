@@ -50,7 +50,7 @@ export const addTx = async (tx: any, id?: string) => {
 
   if (!fsEnabled) {
     throw new Error(
-      `Unable to create transaction - not connected to database.`,
+      `Unable to create transaction - not connected to database.`
     );
   }
 
@@ -194,8 +194,7 @@ export const gatherFeeData = async function () {
   }
 
   const renVMFee = Number(
-    Number(amount) *
-      Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000),
+    Number(amount) * Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000)
   ).toFixed(6);
   const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / 10 ** 8);
   const total =

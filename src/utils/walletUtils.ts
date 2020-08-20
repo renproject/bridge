@@ -186,15 +186,15 @@ export const updateBalance = async function () {
   store.set("ethBalance", Number(web3.utils.fromWei(ethBal)).toFixed(8));
   store.set(
     "renBTCBalance",
-    Number(parseInt(renBTCBalance.toString()) / 10 ** 8).toFixed(8),
+    Number(parseInt(renBTCBalance.toString()) / 10 ** 8).toFixed(8)
   );
   store.set(
     "renZECBalance",
-    Number(parseInt(renZECBalance.toString()) / 10 ** 8).toFixed(8),
+    Number(parseInt(renZECBalance.toString()) / 10 ** 8).toFixed(8)
   );
   store.set(
     "renBCHBalance",
-    Number(parseInt(renBCHBalance.toString()) / 10 ** 8).toFixed(8),
+    Number(parseInt(renBCHBalance.toString()) / 10 ** 8).toFixed(8)
   );
   store.set("loadingBalances", false);
 
@@ -222,8 +222,8 @@ export const initDataWeb3 = async function () {
     new Web3(
       `https://${
         network === "testnet" ? "kovan" : "mainnet"
-      }.infura.io/v3/7117ca7a3c7b4b94b24944c1ef0ecec9`,
-    ),
+      }.infura.io/v3/7117ca7a3c7b4b94b24944c1ef0ecec9`
+    )
   );
 };
 
@@ -280,7 +280,7 @@ export const initLocalWeb3 = async function (type: any) {
       const web3Provider = mewConnect.makeWeb3Provider(
         chainId,
         jsonRpcUrl,
-        true,
+        true
       );
 
       web3 = new Web3(web3Provider);
@@ -336,7 +336,7 @@ export const initLocalWeb3 = async function (type: any) {
       // @ts-ignore
       const sig = await web3.eth.personal.sign(
         web3.utils.utf8ToHex("Signing in to RenBridge"),
-        addressLowerCase,
+        addressLowerCase
       );
       signature = web3.utils.sha3(sig)!;
       localSigMapData[addressLowerCase] = signature;
@@ -382,7 +382,7 @@ export const initLocalWeb3 = async function (type: any) {
           await doc.update({
             signatures: data.signatures.concat([signature]),
             updated: firebase.firestore.Timestamp.fromDate(
-              new Date(Date.now()),
+              new Date(Date.now())
             ),
           });
         }
@@ -466,7 +466,7 @@ export const setNetwork = async function (network: any) {
       // If we want to test against gatewayjs staging, we should change the endpoint
       // manually in a PR, which does not get merged, and check the preview build
       // endpoint: "https://ren-gatewayjs-staging.netlify.app/",
-    }),
+    })
   );
   // @ts-ignore
   setAddresses.bind(this)();
