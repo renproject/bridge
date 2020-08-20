@@ -2,23 +2,24 @@ import React from "react";
 import { createStore, withStore } from "@spyna/react-store";
 import queryString from "query-string";
 import firebase from "firebase";
-import { storeListener } from "./services/storeService";
-import { RENBTC_TEST, RENZEC_TEST, RENBCH_TEST } from "./utils/web3Utils";
-import { setNetwork, updateFees } from "./utils/walletUtils";
-import NavContainer from "./containers/NavContainer";
-import TransferContainer from "./containers/TransferContainer";
-import ConfirmContainer from "./containers/ConfirmContainer";
-import IntroContainer from "./containers/IntroContainer";
-import NetworkModalContainer from "./containers/NetworkModalContainer";
-import Twitter from "./assets/twitter.svg";
-import Github from "./assets/github.svg";
-import Reddit from "./assets/reddit.svg";
-import Telegram from "./assets/telegram.svg";
-import { withStyles, ThemeProvider } from "@material-ui/styles";
-import theme from "./theme/theme";
+import { ThemeProvider, withStyles } from "@material-ui/styles";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+
+import Github from "./assets/github.svg";
+import Reddit from "./assets/reddit.svg";
+import Telegram from "./assets/telegram.svg";
+import Twitter from "./assets/twitter.svg";
+import ConfirmContainer from "./containers/ConfirmContainer";
+import IntroContainer from "./containers/IntroContainer";
+import NavContainer from "./containers/NavContainer";
+import NetworkModalContainer from "./containers/NetworkModalContainer";
+import TransferContainer from "./containers/TransferContainer";
+import { storeListener } from "./services/storeService";
+import theme from "./theme/theme";
+import { setNetwork, updateFees } from "./utils/walletUtils";
+import { RENBCH_TEST, RENBTC_TEST, RENZEC_TEST } from "./utils/web3Utils";
 
 require("dotenv").config();
 
@@ -115,6 +116,9 @@ const initialState = {
   showGatewayModal: false,
   gatewayModalTx: null,
   showAboutModal: false,
+
+  // confirmation error
+  confirmationError: null as string | null,
 
   // conversions
   // 'convert.adapterAddress': ADAPTER_TEST,

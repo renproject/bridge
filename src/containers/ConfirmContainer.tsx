@@ -1,24 +1,25 @@
+import * as Sentry from "@sentry/react";
+
 import React from "react";
 import { withStore } from "@spyna/react-store";
-import { withStyles, Styles } from "@material-ui/styles";
+import { Styles, withStyles } from "@material-ui/styles";
 import classNames from "classnames";
 import Numeral from "numeral";
-import { initGJSDeposit, initGJSWithdraw } from "../utils/txUtils";
-import {
-  MINI_ICON_MAP,
-  SYMBOL_MAP,
-  NAME_MAP,
-  abbreviateAddress,
-} from "../utils/walletUtils";
-import theme from "../theme/theme";
-
-import DarkTooltip from "../components/DarkTooltip";
-
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+
 import BackArrow from "../assets/back-arrow.svg";
 import WalletIcon from "../assets/wallet-icon.svg";
+import DarkTooltip from "../components/DarkTooltip";
+import theme from "../theme/theme";
+import { initGJSDeposit, initGJSWithdraw } from "../utils/txUtils";
+import {
+  abbreviateAddress,
+  MINI_ICON_MAP,
+  NAME_MAP,
+  SYMBOL_MAP,
+} from "../utils/walletUtils";
 
 const styles: Styles<typeof theme, any> = (theme) => ({
   container: {
@@ -231,6 +232,10 @@ const styles: Styles<typeof theme, any> = (theme) => ({
       maxWidth: "100%",
     },
   },
+  error: {
+    marginTop: theme.spacing(2),
+    color: "#FF4545",
+  },
 });
 
 class ConfirmContainer extends React.Component<any> {
@@ -250,15 +255,25 @@ class ConfirmContainer extends React.Component<any> {
   async confirmDeposit() {
     const { store } = this.props;
     const confirmTx = store.get("confirmTx");
+    store.set("confirmationError", null);
 
-    initGJSDeposit(confirmTx);
+    initGJSDeposit(confirmTx).catch((error) => {
+      console.error(error);
+      Sentry.captureException(error);
+      store.set("confirmationError", String(error.message));
+    });
   }
 
   async confirmWithdraw() {
     const { store } = this.props;
     const confirmTx = store.get("confirmTx");
+    store.set("confirmationError", null);
 
-    initGJSWithdraw(confirmTx);
+    initGJSWithdraw(confirmTx).catch((error) => {
+      console.error(error);
+      Sentry.captureException(error);
+      store.set("confirmationError", String(error.message));
+    });
   }
 
   render() {
@@ -274,10 +289,11 @@ class ConfirmContainer extends React.Component<any> {
     const confirmAction = store.get("confirmAction");
     const isDeposit = confirmAction === "deposit";
     const confirmTx = store.get("confirmTx");
+    const confirmationError = store.get("confirmationError");
     const sourceAsset = confirmTx.sourceAsset;
     const destAsset = confirmTx.destAsset;
     const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(
-      2
+      2,
     );
     const chars = String(amount).replace(".", "");
 
@@ -440,7 +456,7 @@ class ConfirmContainer extends React.Component<any> {
                       fullWidth
                       className={classNames(
                         classes.margin,
-                        classes.actionButton
+                        classes.actionButton,
                       )}
                       onClick={this.confirmDeposit.bind(this)}
                     >
@@ -459,13 +475,18 @@ class ConfirmContainer extends React.Component<any> {
                       fullWidth
                       className={classNames(
                         classes.margin,
-                        classes.actionButton
+                        classes.actionButton,
                       )}
                       onClick={this.confirmWithdraw.bind(this)}
                     >
                       Confirm
                     </Button>
                   </Grid>
+                )}
+                {confirmationError && (
+                  <Typography variant="caption" className={classes.error}>
+                    {confirmationError}
+                  </Typography>
                 )}
               </Grid>
             </Grid>

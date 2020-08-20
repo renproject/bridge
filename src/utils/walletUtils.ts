@@ -1,36 +1,33 @@
+import * as Sentry from "@sentry/react";
+
 import Web3 from "web3";
 import GatewayJS from "@renproject/gateway";
 // import Box from '3box'
 import Web3Modal from "web3modal";
 import firebase from "firebase";
 import MEWconnect from "@myetherwallet/mewconnect-web-client";
-import * as Sentry from "@sentry/react";
 
-import BTC from "../assets/btc.png";
-import ETH from "../assets/eth.png";
-import ZEC from "../assets/zec.svg";
 import BCH from "../assets/bch.png";
+import BTC from "../assets/btc.png";
 import DAI from "../assets/dai.png";
-import USDC from "../assets/usdc.png";
-import WBTC from "../assets/wbtc.png";
+import ETH from "../assets/eth.png";
+import RENBCH from "../assets/renBCH.svg";
 import RENBTC from "../assets/renBTC.svg";
 import RENZEC from "../assets/renZEC.svg";
-import RENBCH from "../assets/renBCH.svg";
-
+import USDC from "../assets/usdc.png";
+import WBTC from "../assets/wbtc.png";
+import ZEC from "../assets/zec.svg";
+import { getStore } from "../services/storeService";
+import erc20ABI from "./erc20ABI.json";
+import { recoverTrades } from "./txUtils";
 import {
+  RENBCH_MAIN,
+  RENBCH_TEST,
   RENBTC_MAIN,
   RENBTC_TEST,
   RENZEC_MAIN,
   RENZEC_TEST,
-  RENBCH_MAIN,
-  RENBCH_TEST,
 } from "./web3Utils";
-
-import { recoverTrades } from "./txUtils";
-
-import { getStore } from "../services/storeService";
-
-import erc20ABI from "./erc20ABI.json";
 
 // used for montoring balances
 let walletDataInterval: any = null;
@@ -122,7 +119,7 @@ export const updateFees = async function () {
     const data = (await fees.json()).result;
     store.set("fees", data);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     Sentry.captureException(e);
   }
 };
@@ -137,7 +134,7 @@ export const updateMarketData = async function () {
 
     store.set("btcusd", (await btc.json()).data.priceUsd);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     Sentry.captureException(e);
   }
 
@@ -148,7 +145,7 @@ export const updateMarketData = async function () {
 
     store.set("zecusd", (await zec.json()).data.priceUsd);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     Sentry.captureException(e);
   }
 
@@ -159,7 +156,7 @@ export const updateMarketData = async function () {
 
     store.set("bchusd", (await bch.json()).data.priceUsd);
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
     Sentry.captureException(e);
   }
@@ -189,15 +186,15 @@ export const updateBalance = async function () {
   store.set("ethBalance", Number(web3.utils.fromWei(ethBal)).toFixed(8));
   store.set(
     "renBTCBalance",
-    Number(parseInt(renBTCBalance.toString()) / 10 ** 8).toFixed(8)
+    Number(parseInt(renBTCBalance.toString()) / 10 ** 8).toFixed(8),
   );
   store.set(
     "renZECBalance",
-    Number(parseInt(renZECBalance.toString()) / 10 ** 8).toFixed(8)
+    Number(parseInt(renZECBalance.toString()) / 10 ** 8).toFixed(8),
   );
   store.set(
     "renBCHBalance",
-    Number(parseInt(renBCHBalance.toString()) / 10 ** 8).toFixed(8)
+    Number(parseInt(renBCHBalance.toString()) / 10 ** 8).toFixed(8),
   );
   store.set("loadingBalances", false);
 
@@ -225,8 +222,8 @@ export const initDataWeb3 = async function () {
     new Web3(
       `https://${
         network === "testnet" ? "kovan" : "mainnet"
-      }.infura.io/v3/7117ca7a3c7b4b94b24944c1ef0ecec9`
-    )
+      }.infura.io/v3/7117ca7a3c7b4b94b24944c1ef0ecec9`,
+    ),
   );
 };
 
@@ -277,15 +274,13 @@ export const initLocalWeb3 = async function (type: any) {
         selectedNetwork === "testnet" ? "kovan" : "mainnet"
       }.infura.io/ws/v3/7117ca7a3c7b4b94b24944c1ef0ecec9`;
 
-      console.log(chainId, jsonRpcUrl);
-
       const mewConnect = new MEWconnect.Provider({
         windowClosedError: true,
       });
       const web3Provider = mewConnect.makeWeb3Provider(
         chainId,
         jsonRpcUrl,
-        true
+        true,
       );
 
       web3 = new Web3(web3Provider);
@@ -297,14 +292,14 @@ export const initLocalWeb3 = async function (type: any) {
       accounts = await web3Provider.enable();
       network = selectedNetwork;
     } else {
-      console.log("invalid wallet type");
+      console.error("Invalid wallet type.");
       store.set("spaceError", true);
       store.set("spaceRequesting", false);
       store.set("walletConnecting", false);
       return;
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
     Sentry.captureException(e);
     store.set("spaceError", true);
     store.set("spaceRequesting", false);
@@ -341,7 +336,7 @@ export const initLocalWeb3 = async function (type: any) {
       // @ts-ignore
       const sig = await web3.eth.personal.sign(
         web3.utils.utf8ToHex("Signing in to RenBridge"),
-        addressLowerCase
+        addressLowerCase,
       );
       signature = web3.utils.sha3(sig)!;
       localSigMapData[addressLowerCase] = signature;
@@ -361,9 +356,8 @@ export const initLocalWeb3 = async function (type: any) {
           await firebase.auth().signInWithEmailAndPassword(bridgeId, signature)
         ).user;
       } catch (e) {
-        console.log(e);
+        console.error(e);
         Sentry.captureException(e);
-        console.log("new user");
         fsUser = (
           await firebase
             .auth()
@@ -388,7 +382,7 @@ export const initLocalWeb3 = async function (type: any) {
           await doc.update({
             signatures: data.signatures.concat([signature]),
             updated: firebase.firestore.Timestamp.fromDate(
-              new Date(Date.now())
+              new Date(Date.now()),
             ),
           });
         }
@@ -439,7 +433,7 @@ export const initLocalWeb3 = async function (type: any) {
       });
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
     Sentry.captureException(e);
     store.set("spaceError", true);
     store.set("spaceRequesting", false);
@@ -472,7 +466,7 @@ export const setNetwork = async function (network: any) {
       // If we want to test against gatewayjs staging, we should change the endpoint
       // manually in a PR, which does not get merged, and check the preview build
       // endpoint: "https://ren-gatewayjs-staging.netlify.app/",
-    })
+    }),
   );
   // @ts-ignore
   setAddresses.bind(this)();

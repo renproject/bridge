@@ -1,7 +1,10 @@
+import * as Sentry from "@sentry/react";
+
 import firebase from "firebase";
 import GatewayJS from "@renproject/gateway";
+import { randomBytes } from "@renproject/utils";
+
 import { getStore } from "../services/storeService";
-import * as Sentry from "@sentry/react";
 
 export const MIN_TX_AMOUNTS = {
   btc: 0.00035036,
@@ -35,7 +38,7 @@ export const removeWindowBlocker = function () {
 /**
  * Create/Update/Delete Transactions on Firebase and 3box
  */
-export const addTx = async (tx: any) => {
+export const addTx = async (tx: any, id?: string) => {
   const store = getStore();
   const storeString = "convert.transactions";
 
@@ -46,7 +49,9 @@ export const addTx = async (tx: any) => {
   const fsSignature = store.get("fsSignature");
 
   if (!fsEnabled) {
-    throw new Error(`Unable to create transaction - not connected to database.`);
+    throw new Error(
+      `Unable to create transaction - not connected to database.`,
+    );
   }
 
   // add timestamps
@@ -68,22 +73,25 @@ export const addTx = async (tx: any) => {
   //     space.private.set(storeString, JSON.stringify(newTxs))
   // }
 
+  id = id || tx.id;
+
   // update firebase
   try {
     db.collection("transactions")
-      .doc(tx.id)
+      .doc(id)
       .set({
         user: localWeb3Address.toLowerCase(),
         walletSignature: fsSignature,
-        id: tx.id,
+        id,
         updated: timestamp,
         data: JSON.stringify(tx),
       });
   } catch (e) {
-    console.log(e);
-    Sentry.captureException(e);
     const errorMessage = String(e && e.message);
-    throw new Error(`Unable to store transaction to database${errorMessage ? `: ${errorMessage}` : "."}`);
+    e.message = `Unable to store transaction to database${
+      errorMessage ? `: ${errorMessage}` : "."
+    }`;
+    throw e;
   }
 };
 
@@ -101,8 +109,6 @@ export const updateTx = async (newTx: any) => {
 
   const filtered = txs.filter((t: any) => t.id !== newTx.id);
   const newTxs = filtered.concat([newTx]);
-
-  // console.log('newTxs', newTxs)
 
   // update state
   store.set(storeString, newTxs);
@@ -125,7 +131,7 @@ export const updateTx = async (newTx: any) => {
           updated: newTx.updated,
         });
     } catch (e) {
-      console.log(e);
+      console.error(e);
       Sentry.captureException(e);
     }
   }
@@ -157,7 +163,7 @@ export const removeTx = async (tx: any) => {
     try {
       db.collection("transactions").doc(tx.id).delete();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       Sentry.captureException(e);
     }
   }
@@ -188,7 +194,8 @@ export const gatherFeeData = async function () {
   }
 
   const renVMFee = Number(
-    Number(amount) * Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000)
+    Number(amount) *
+      Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000),
   ).toFixed(6);
   const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / 10 ** 8);
   const total =
@@ -209,7 +216,7 @@ export const initGJSDeposit = async function (tx: any) {
   const store = getStore() as any;
   const { gjs, localWeb3, localWeb3Address, selectedAsset } = store.getState();
 
-  const data = {
+  const storableData = {
     sendToken:
       GatewayJS.Tokens[
         selectedAsset.toUpperCase() as keyof typeof GatewayJS.Tokens
@@ -217,17 +224,24 @@ export const initGJSDeposit = async function (tx: any) {
     // every source asset for now uses the same unit number as BTC
     sendAmount: GatewayJS.utils.value(amount, "btc").sats().toString(),
     sendTo: localWeb3Address,
+  };
+
+  const data = {
+    ...storableData,
     web3Provider: localWeb3.currentProvider,
   };
 
   const preOpenTrades = Array.from((await gjs.getGateways()).values());
 
+  const id = randomBytes(8);
+  await addTx(storableData, id);
+
   let trade: any = null;
-  const open = gjs.open(data);
+  const open = gjs.open(data, id);
   open
     .result()
     .on("status", async (status: any) => {
-      console.log(`[GOT STATUS] ${status}`);
+      console.info(`[GOT STATUS] ${status}`);
       if (status === GatewayJS.LockAndMintStatus.Committed) {
         const postOpenTrades = Array.from((await gjs.getGateways()).values());
 
@@ -236,7 +250,7 @@ export const initGJSDeposit = async function (tx: any) {
           postOpenTrades.map((pot: any) => {
             // if unique, add to 3box
             if (preOpenIds.indexOf(pot.id)) {
-              addTx(pot);
+              updateTx(pot);
               trade = pot;
             }
           });
@@ -244,7 +258,7 @@ export const initGJSDeposit = async function (tx: any) {
       }
     })
     .on("transferUpdated", (transfer: any) => {
-      console.log(`[GOT TRANSFER]`, transfer);
+      console.info(`[GOT TRANSFER]`, transfer);
       if (
         !transfer.archived &&
         transfer.status !== GatewayJS.LockAndMintStatus.Committed
@@ -262,7 +276,7 @@ export const initGJSDeposit = async function (tx: any) {
     });
 
   store.set("confirmTx", null);
-  store.set("confrirmAction", "");
+  store.set("confirmAction", "");
 };
 
 export const initGJSWithdraw = async function (tx: any) {
@@ -270,7 +284,7 @@ export const initGJSWithdraw = async function (tx: any) {
   const store = getStore() as any;
   const { gjs, localWeb3, selectedAsset } = store.getState();
 
-  const data = {
+  const storableData = {
     sendToken:
       GatewayJS.Tokens[
         selectedAsset.toUpperCase() as keyof typeof GatewayJS.Tokens
@@ -281,14 +295,22 @@ export const initGJSWithdraw = async function (tx: any) {
     web3Provider: localWeb3.currentProvider,
   };
 
+  const data = {
+    ...storableData,
+    web3Provider: localWeb3.currentProvider,
+  };
+
   const preOpenTrades = Array.from((await gjs.getGateways()).values());
 
+  const id = randomBytes(8);
+  await addTx(storableData, id);
+
   let trade: any = null;
-  const open = gjs.open(data);
+  const open = gjs.open(data, id);
   open
     .result()
     .on("status", async (status: any) => {
-      console.log(`[GOT STATUS] ${status}`);
+      console.info(`[GOT STATUS] ${status}`);
       if (status === GatewayJS.BurnAndReleaseStatus.Committed) {
         const postOpenTrades = Array.from((await gjs.getGateways()).values());
 
@@ -297,7 +319,7 @@ export const initGJSWithdraw = async function (tx: any) {
           postOpenTrades.map((pot: any) => {
             // if unique, add to 3box
             if (preOpenIds.indexOf(pot.id)) {
-              addTx(pot);
+              updateTx(pot);
               trade = pot;
             }
           });
@@ -305,7 +327,7 @@ export const initGJSWithdraw = async function (tx: any) {
       }
     })
     .on("transferUpdated", (transfer: any) => {
-      console.log(`[GOT TRANSFER]`, transfer);
+      console.info(`[GOT TRANSFER]`, transfer);
       if (
         !transfer.archived &&
         transfer.status !== GatewayJS.BurnAndReleaseStatus.Committed
@@ -331,13 +353,14 @@ export const isGatewayJSTxComplete = function (status: any) {
   );
 };
 
-export const reOpenTx = async function (trade: any) {
+export const reOpenTx = async function (trade: any, id?: string) {
   const store = getStore();
   const gjs = store.get("gjs");
   const localWeb3 = store.get("localWeb3");
-  const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade);
+  const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade, id);
 
   gateway
+    .pause()
     .result()
     .on("status", (status: any) => {
       const completed = isGatewayJSTxComplete(status);
@@ -345,10 +368,10 @@ export const reOpenTx = async function (trade: any) {
         // remove from 3box
         removeTx(trade);
       }
-      console.log(`[GOT STATUS] ${status}`, gateway, trade);
+      console.info(`[GOT STATUS] ${status}`, gateway, trade);
     })
     .on("transferUpdated", (transfer: any) => {
-      console.log(`[GOT TRANSFER]`, transfer);
+      console.info(`[GOT TRANSFER]`, transfer);
       if (!transfer.archived) {
         updateTx(transfer);
       }
@@ -391,23 +414,24 @@ export const recoverTrades = async function () {
     .collection("transactions")
     .where("walletSignature", "==", fsSignature)
     .get();
-  let fsTrades: any[] = [];
+  let fsTrades: [any, string][] = [];
   if (!fsDataSnapshot.empty) {
     fsDataSnapshot.forEach((doc: any) => {
-      const tx = JSON.parse(doc.data().data);
-      fsTrades.push(tx);
+      const data = doc.data();
+      const tx = JSON.parse(data.data);
+      fsTrades.push([tx, data.id]);
     });
   }
-  const fsTradeIds = fsTrades.map((f) => f.id);
+  const fsTradeIds = fsTrades.map(([f]) => f.id);
 
   // if firebase has transactions not found locally, reopen those
   const localTradeIds = localTrades.map((t) => t.id);
-  fsTrades.map((ftx) => {
+  fsTrades.map(([ftx, id]) => {
     if (
       !isGatewayJSTxComplete(ftx.status) &&
       localTradeIds.indexOf(ftx.id) < 0
     ) {
-      reOpenTx(ftx);
+      reOpenTx(ftx, id);
     }
   });
 
