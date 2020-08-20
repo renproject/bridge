@@ -1,5 +1,6 @@
 import firebase from "firebase";
 import GatewayJS from "@renproject/gateway";
+
 import { getStore } from "../services/storeService";
 import * as Sentry from "@sentry/react";
 
@@ -45,6 +46,10 @@ export const addTx = async (tx: any) => {
   const localWeb3Address = store.get("localWeb3Address");
   const fsSignature = store.get("fsSignature");
 
+  if (!fsEnabled) {
+    throw new Error(`Unable to create transaction - not connected to database.`);
+  }
+
   // add timestamps
   const timestamp = firebase.firestore.Timestamp.fromDate(new Date(Date.now()));
   tx.created = timestamp;
@@ -65,21 +70,21 @@ export const addTx = async (tx: any) => {
   // }
 
   // update firebase
-  if (fsEnabled) {
-    try {
-      db.collection("transactions")
-        .doc(tx.id)
-        .set({
-          user: localWeb3Address.toLowerCase(),
-          walletSignature: fsSignature,
-          id: tx.id,
-          updated: timestamp,
-          data: JSON.stringify(tx),
-        });
-    } catch (e) {
-      console.log(e);
-      Sentry.captureException(e);
-    }
+  try {
+    db.collection("transactions")
+      .doc(tx.id)
+      .set({
+        user: localWeb3Address.toLowerCase(),
+        walletSignature: fsSignature,
+        id: tx.id,
+        updated: timestamp,
+        data: JSON.stringify(tx),
+      });
+  } catch (e) {
+    console.log(e);
+    Sentry.captureException(e);
+    const errorMessage = String(e && e.message);
+    throw new Error(`Unable to store transaction to database${errorMessage ? `: ${errorMessage}` : "."}`);
   }
 };
 
