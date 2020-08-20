@@ -1,6 +1,5 @@
 import firebase from "firebase";
 import GatewayJS from "@renproject/gateway";
-
 import { getStore } from "../services/storeService";
 import * as Sentry from "@sentry/react";
 
