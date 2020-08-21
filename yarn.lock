@@ -2751,20 +2751,20 @@
     bs58 "^4.0.1"
     wallet-address-validator "^0.2.4"
 
-"@renproject/contracts@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@renproject/contracts/-/contracts-0.6.0.tgz#1a565e4ccb2418cae3df51eb4dad37cb1d27e9d5"
-  integrity sha512-LdQw7gJG7QB6Bl7AeCIU5WFlzICsNOiuJlPK8IE1rasBZvbdk9f/vet4LKKS/rBKTxuZDu7QL3A/yli9RjEhCw==
+"@renproject/contracts@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@renproject/contracts/-/contracts-0.6.1.tgz#b1724fb8896a5178df4a1fa262b13f1ba2258cdb"
+  integrity sha512-YpOK7fY9OaCaXILITbDBwd0RxjNimyWZ7k4IFOkQr6gAy+8dEAjDxcadf7xdF8bmqK1+kY25nfvJZjIzvz+i7Q==
   dependencies:
-    darknode-sol "https://github.com/renproject/darknode-sol#f692da1b99a88d7691d80d6e28337a9dedfbe501"
+    "@renproject/sol" "^1.0.1"
 
-"@renproject/gateway@^1.0.2":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@renproject/gateway/-/gateway-1.0.5.tgz#41d1dd729a264e7cd6ea91ab42885f2cf21c99c8"
-  integrity sha512-aBr4QNTLt4KThM0aZQKRU7SELeAsXmyMecdw9C3jcsdTjcanrkyePWp0u7Unx3hHTYpT+25fa0ai0xXQbyLVAw==
+"@renproject/gateway@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@renproject/gateway/-/gateway-1.0.8.tgz#b1d8e0bc9d629daf4386a7e8a2ce51067c7f507b"
+  integrity sha512-MQmWf5eEqtkARBNeqsmdvEv+87rpmuaPgBziYEllT7Xl1/+ooLocQKptYRzNHRFvzB47V+uLubURkwt0EYJcHQ==
   dependencies:
     "@renproject/interfaces" "^1.0.3"
-    "@renproject/utils" "^1.0.5"
+    "@renproject/utils" "^1.0.7"
     "@types/node" "^14.0.5"
     push.js "^1.0.12"
     web3 "^2.0.0-alpha.1"
@@ -2778,13 +2778,22 @@
     bignumber.js "^9.0.0"
     web3-core "^2.0.0-alpha.1"
 
-"@renproject/utils@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@renproject/utils/-/utils-1.0.5.tgz#5cea4884226889e0519c3c05924d79fbc0bd720d"
-  integrity sha512-oGEZGXNuO5PskyGfG+f86TAmjbpx5vuwMMojeGiolTQJyiRlbUSBMEwLu4TG52uO35v+Uy8pVUNey/QSx+B5ag==
+"@renproject/sol@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@renproject/sol/-/sol-1.0.1.tgz#d103c6d1f54cb4004d7bf6c0fe5cb6f932bfe98f"
+  integrity sha512-QXt3mZKUWr/ChefvOE1seZW6pgrA0RpABMbF4cMKdG+p1TfH1css+Wp3UvG+9pFlUtNge0JQv9pUU+kCPMQ2Sw==
+  dependencies:
+    "@openzeppelin/contracts" "^2.5.0"
+    "@openzeppelin/contracts-ethereum-package" "^2.4.0"
+    "@openzeppelin/upgrades" "^2.7.2"
+
+"@renproject/utils@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@renproject/utils/-/utils-1.0.7.tgz#c12f1893aea2ecc558529510607cc2be90ab5488"
+  integrity sha512-wvTln0NjOLQY/mGKNT3p7dAviq21dFpvnzU7Egjwq7dQhvezF0yXFh/tCvmLiryLt+KuBWya9V2rk/ay9A1U5g==
   dependencies:
     "@renproject/chains" "^1.0.3"
-    "@renproject/contracts" "^0.6.0"
+    "@renproject/contracts" "^0.6.1"
     "@renproject/interfaces" "^1.0.3"
     "@types/node" "^14.0.5"
     axios "^0.19.2"
@@ -2793,7 +2802,7 @@
     ethereumjs-util "^7.0.1"
     events "^3.1.0"
     immutable "^4.0.0-rc.12"
-    send-crypto "0.2.10"
+    send-crypto "0.2.14"
     web3 "^2.0.0-alpha.1"
     web3-core "^2.0.0-alpha.1"
     web3-eth-abi "^2.0.0-alpha.1"
@@ -7078,14 +7087,6 @@ damerau-levenshtein@^1.0.4:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/damerau-levenshtein/-/damerau-levenshtein-1.0.6.tgz#143c1641cb3d85c60c32329e26899adea8701791"
   integrity sha512-JVrozIeElnj3QzfUIt8tB8YMluBJom4Vw9qTPpjGYQ9fYlB3D/rb6OordUxf3xeFB35LKWs0xqcO5U6ySvBtug==
-
-"darknode-sol@https://github.com/renproject/darknode-sol#f692da1b99a88d7691d80d6e28337a9dedfbe501":
-  version "1.0.0"
-  resolved "https://github.com/renproject/darknode-sol#f692da1b99a88d7691d80d6e28337a9dedfbe501"
-  dependencies:
-    "@openzeppelin/contracts" "^2.5.0"
-    "@openzeppelin/contracts-ethereum-package" "^2.4.0"
-    "@openzeppelin/upgrades" "^2.7.2"
 
 dashdash@^1.12.0:
   version "1.14.1"
@@ -18209,10 +18210,10 @@ semver@~5.4.1:
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.4.1.tgz#e059c09d8571f0540823733433505d3a2f00b18e"
   integrity sha512-WfG/X9+oATh81XtllIo/I8gOiY9EXRdv1cQdyykeXK17YcUW3EXUAi2To4pcH6nZtJPr7ZOpM5OMyWJZm+8Rsg==
 
-send-crypto@0.2.10:
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/send-crypto/-/send-crypto-0.2.10.tgz#d6127abbb6274b95be1a8bb60569fde11bff6eda"
-  integrity sha512-K4TxQSgx4dVjtLHntzgApt9ICRaJyWqf23v4vQr5QXXUzOofvqaq75bYHQ14ItBI0w6xD4IvrIolPcVeer4WSg==
+send-crypto@0.2.14:
+  version "0.2.14"
+  resolved "https://registry.yarnpkg.com/send-crypto/-/send-crypto-0.2.14.tgz#b935909eab187308cbb3b8c21fe1db7c8d5a3502"
+  integrity sha512-RomH45b8dSGxhMQlbjvqd25DBzC4aXASa9BiLrIRZbyRyAZM0XzJdbLFb/0eNYSjE5LuA6+pb4z1cn94QDrgtQ==
   dependencies:
     "@types/bchaddrjs" "^0.4.0"
     "@types/web3-provider-engine" "^14.0.0"
