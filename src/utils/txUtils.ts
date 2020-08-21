@@ -132,7 +132,10 @@ export const updateTx = async (newTx: any) => {
         });
     } catch (e) {
       console.error(e);
-      Sentry.captureException(e);
+      Sentry.withScope(function (scope) {
+        scope.setTag("error-hint", "adding transaction");
+        Sentry.captureException(e);
+      });
     }
   }
 };
@@ -164,7 +167,10 @@ export const removeTx = async (tx: any) => {
       db.collection("transactions").doc(tx.id).delete();
     } catch (e) {
       console.error(e);
-      Sentry.captureException(e);
+      Sentry.withScope(function (scope) {
+        scope.setTag("error-hint", "removing transaction");
+        Sentry.captureException(e);
+      });
     }
   }
 };
@@ -270,7 +276,10 @@ export const initGJSDeposit = async function (tx: any) {
         // remove from 3box
         removeTx(trade);
       } else {
-        Sentry.captureException(error);
+        Sentry.withScope(function (scope) {
+          scope.setTag("error-hint", "gatewayjs error");
+          Sentry.captureException(error);
+        });
       }
     });
 
@@ -381,7 +390,10 @@ export const reOpenTx = async function (trade: any, id?: string) {
         // remove from 3box
         removeTx(trade);
       } else {
-        Sentry.captureException(error);
+        Sentry.withScope(function (scope) {
+          scope.setTag("error-hint", "gatewayjs error re-opening");
+          Sentry.captureException(error);
+        });
       }
     });
 };
