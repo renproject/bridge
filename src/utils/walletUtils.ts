@@ -120,7 +120,10 @@ export const updateFees = async function () {
     store.set("fees", data);
   } catch (e) {
     console.error(e);
-    Sentry.captureException(e);
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "updating fees");
+      Sentry.captureException(e);
+    });
   }
 };
 
@@ -135,7 +138,10 @@ export const updateMarketData = async function () {
     store.set("btcusd", (await btc.json()).data.priceUsd);
   } catch (e) {
     console.error(e);
-    Sentry.captureException(e);
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "updating market data");
+      Sentry.captureException(e);
+    });
   }
 
   try {
@@ -146,7 +152,10 @@ export const updateMarketData = async function () {
     store.set("zecusd", (await zec.json()).data.priceUsd);
   } catch (e) {
     console.error(e);
-    Sentry.captureException(e);
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "updating market data");
+      Sentry.captureException(e);
+    });
   }
 
   try {
@@ -158,7 +167,10 @@ export const updateMarketData = async function () {
   } catch (e) {
     console.error(e);
 
-    Sentry.captureException(e);
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "updating market data");
+      Sentry.captureException(e);
+    });
   }
 };
 
@@ -300,7 +312,10 @@ export const initLocalWeb3 = async function (type: any) {
     }
   } catch (e) {
     console.error(e);
-    Sentry.captureException(e);
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "web3 init");
+      Sentry.captureException(e);
+    });
     store.set("spaceError", true);
     store.set("spaceRequesting", false);
     store.set("walletConnecting", false);
@@ -356,13 +371,20 @@ export const initLocalWeb3 = async function (type: any) {
           await firebase.auth().signInWithEmailAndPassword(bridgeId, signature)
         ).user;
       } catch (e) {
-        console.error(e);
-        Sentry.captureException(e);
-        fsUser = (
-          await firebase
-            .auth()
-            .createUserWithEmailAndPassword(bridgeId, signature)
-        ).user;
+        // We can register this user as they do not exist
+        if (e.message.includes("There is no user record")) {
+          fsUser = (
+            await firebase
+              .auth()
+              .createUserWithEmailAndPassword(bridgeId, signature)
+          ).user;
+        } else {
+          console.error(e);
+          Sentry.withScope(function (scope) {
+            scope.setTag("error-hint", "web3 init");
+            Sentry.captureException(e);
+          });
+        }
       }
     } else {
       fsUser = currentFsUser;
@@ -434,7 +456,10 @@ export const initLocalWeb3 = async function (type: any) {
     }
   } catch (e) {
     console.error(e);
-    Sentry.captureException(e);
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "main initialization");
+      Sentry.captureException(e);
+    });
     store.set("spaceError", true);
     store.set("spaceRequesting", false);
     store.set("walletConnecting", false);

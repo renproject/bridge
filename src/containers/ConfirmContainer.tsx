@@ -259,7 +259,10 @@ class ConfirmContainer extends React.Component<any> {
 
     initGJSDeposit(confirmTx).catch((error) => {
       console.error(error);
-      Sentry.captureException(error);
+      Sentry.withScope(function (scope) {
+        scope.setTag("error-hint", "initGJSDeposit");
+        Sentry.captureException(error);
+      });
       store.set("confirmationError", String(error.message));
     });
   }
@@ -271,7 +274,10 @@ class ConfirmContainer extends React.Component<any> {
 
     initGJSWithdraw(confirmTx).catch((error) => {
       console.error(error);
-      Sentry.captureException(error);
+      Sentry.withScope(function (scope) {
+        scope.setTag("error-hint", "initGJSWithdraw");
+        Sentry.captureException(error);
+      });
       store.set("confirmationError", String(error.message));
     });
   }
