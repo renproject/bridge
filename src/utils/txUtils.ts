@@ -101,6 +101,7 @@ export const updateTx = async (newTx: any) => {
   // const space = store.get('space')
   const db = store.get("db");
   const fsEnabled = store.get("fsEnabled");
+  const localWeb3Address = store.get("localWeb3Address");
 
   // update timestamp
   newTx.updated = firebase.firestore.Timestamp.fromDate(new Date(Date.now()));
@@ -123,19 +124,32 @@ export const updateTx = async (newTx: any) => {
 
   // update firebase
   if (fsEnabled) {
+    const doc = (db as firebase.firestore.Firestore)
+      .collection("transactions")
+      .doc(newTx.id);
+    let docData;
     try {
-      db.collection("transactions")
-        .doc(newTx.id)
-        .update({
-          data: JSON.stringify(newTx),
-          updated: newTx.updated,
-        });
+      docData = await doc.get();
     } catch (e) {
       console.error(e);
-      Sentry.withScope(function (scope) {
-        scope.setTag("error-hint", "adding transaction");
-        Sentry.captureException(e);
-      });
+    }
+
+    if (docData?.exists) {
+      try {
+        await doc.update({
+          data: JSON.stringify(newTx),
+          user: localWeb3Address,
+          updated: newTx.updated,
+        });
+      } catch (e) {
+        console.error(e);
+        Sentry.withScope(function (scope) {
+          scope.setTag("error-hint", "adding transaction");
+          Sentry.captureException(e);
+        });
+      }
+    } else {
+      await addTx(newTx, newTx.id);
     }
   }
 };
@@ -403,6 +417,7 @@ export const recoverTrades = async function () {
   const gjs = store.get("gjs");
   const space = store.get("space");
   const fsSignature = store.get("fsSignature");
+  const localWeb3Address = store.get("localWeb3Address");
   const db = store.get("db");
 
   // Re-open incomplete trades
@@ -421,18 +436,37 @@ export const recoverTrades = async function () {
   // const boxTrades = boxData ? JSON.parse(boxData) : []
 
   // Get firebase transactions
-  const fsDataSnapshot = await db
+  const fsDataSnapshotBySignature = await (db as firebase.firestore.Firestore)
     .collection("transactions")
     .where("walletSignature", "==", fsSignature)
     .get();
+
+  const fsDataSnapshotByUser = await (db as firebase.firestore.Firestore)
+    .collection("transactions")
+    .where("user", "==", localWeb3Address)
+    .get();
+
   let fsTrades: [any, string][] = [];
-  if (!fsDataSnapshot.empty) {
-    fsDataSnapshot.forEach((doc: any) => {
+
+  if (!fsDataSnapshotBySignature.empty) {
+    fsDataSnapshotBySignature.forEach((doc) => {
       const data = doc.data();
       const tx = JSON.parse(data.data);
       fsTrades.push([tx, data.id]);
     });
   }
+
+  if (!fsDataSnapshotByUser.empty) {
+    fsDataSnapshotByUser.forEach((doc) => {
+      const data = doc.data();
+      if (data.walletSignature === fsSignature) {
+        return; // We don't want to double-count transactions
+      }
+      const tx = JSON.parse(data.data);
+      fsTrades.push([tx, data.id]);
+    });
+  }
+
   const fsTradeIds = fsTrades.map(([f]) => f.id);
 
   // if firebase has transactions not found locally, reopen those
