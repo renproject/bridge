@@ -88,6 +88,10 @@ export const addTx = async (tx: any, id?: string) => {
       });
   } catch (e) {
     const errorMessage = String(e && e.message);
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "storing transaction");
+      Sentry.captureException(e);
+    });
     e.message = `Unable to store transaction to database${
       errorMessage ? `: ${errorMessage}` : "."
     }`;
@@ -132,6 +136,10 @@ export const updateTx = async (newTx: any) => {
       docData = await doc.get();
     } catch (e) {
       console.error(e);
+      Sentry.withScope(function (scope) {
+        scope.setTag("error-hint", "missing transaction");
+        Sentry.captureException(e);
+      });
     }
 
     if (docData?.exists) {
@@ -444,7 +452,16 @@ export const recoverTrades = async function () {
   const fsDataSnapshotByUser = await (db as firebase.firestore.Firestore)
     .collection("transactions")
     .where("user", "==", localWeb3Address)
-    .get();
+    .get()
+    .catch((e) => {
+      Sentry.withScope(function (scope) {
+        scope.setTag(
+          "error-hint",
+          "user has transactions with mismatched signatures"
+        );
+        Sentry.captureException(e);
+      });
+    });
 
   let fsTrades: [any, string][] = [];
 
@@ -456,7 +473,7 @@ export const recoverTrades = async function () {
     });
   }
 
-  if (!fsDataSnapshotByUser.empty) {
+  if (fsDataSnapshotByUser && fsDataSnapshotByUser.empty) {
     fsDataSnapshotByUser.forEach((doc) => {
       const data = doc.data();
       if (data.walletSignature === fsSignature) {
