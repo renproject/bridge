@@ -60,7 +60,14 @@ export const addTx = async (tx: any, id?: string) => {
   tx.updated = timestamp;
 
   const txs = store.get(storeString);
-  const newTxs = txs.concat([tx]);
+  let newTxs = [];
+  const oldTxIndex = txs.findIndex((x: any) => x.id === tx.id);
+  if (oldTxIndex >= 0) {
+    txs[oldTxIndex] = tx;
+    newTxs = txs;
+  } else {
+    newTxs = txs.concat([tx]);
+  }
 
   // update state
   store.set(storeString, newTxs);
@@ -68,16 +75,12 @@ export const addTx = async (tx: any, id?: string) => {
   // update localStorage just in case
   localStorage.setItem(storeString, JSON.stringify(newTxs));
 
-  // // update 3box
-  // if (space) {
-  //     space.private.set(storeString, JSON.stringify(newTxs))
-  // }
-
   id = id || tx.id;
 
   // update firebase
   try {
-    db.collection("transactions")
+    await db
+      .collection("transactions")
       .doc(id)
       .set({
         user: localWeb3Address.toLowerCase(),
@@ -152,9 +155,10 @@ export const updateTx = async (newTx: any) => {
       } catch (e) {
         console.error(e);
         Sentry.withScope(function (scope) {
-          scope.setTag("error-hint", "adding transaction");
+          scope.setTag("error-hint", "updating transaction");
           Sentry.captureException(e);
         });
+        throw e;
       }
     } else {
       await addTx(newTx, newTx.id);
@@ -422,34 +426,19 @@ export const reOpenTx = async function (trade: any, id?: string) {
 
 export const recoverTrades = async function () {
   const store = getStore();
-  const gjs = store.get("gjs");
-  const space = store.get("space");
+  const gjs: GatewayJS = store.get("gjs");
   const fsSignature = store.get("fsSignature");
   const localWeb3Address = store.get("localWeb3Address");
-  const db = store.get("db");
-
-  // Re-open incomplete trades
-  const localGateways = await gjs.getGateways();
-  const localTrades: any[] = Array.from(localGateways.values());
-  for (const trade of localTrades) {
-    const tradeCompleted = isGatewayJSTxComplete(trade.status);
-    if (tradeCompleted) {
-      continue;
-    }
-    reOpenTx(trade);
-  }
-
-  // // Get 3box transactions
-  // const boxData = await space.private.get('convert.transactions')
-  // const boxTrades = boxData ? JSON.parse(boxData) : []
+  const db: firebase.firestore.Firestore = store.get("db");
+  const failedTxes: any[] = [];
 
   // Get firebase transactions
-  const fsDataSnapshotBySignature = await (db as firebase.firestore.Firestore)
+  const fsDataSnapshotBySignature = await db
     .collection("transactions")
     .where("walletSignature", "==", fsSignature)
     .get();
 
-  const fsDataSnapshotByUser = await (db as firebase.firestore.Firestore)
+  const fsDataSnapshotByUser = await db
     .collection("transactions")
     .where("user", "==", localWeb3Address)
     .get()
@@ -485,6 +474,31 @@ export const recoverTrades = async function () {
   }
 
   const fsTradeIds = fsTrades.map(([f]) => f.id);
+
+  // Re-open incomplete trades that weren't persisted to firebase
+  const localGateways = await gjs.getGateways();
+  const localTrades = Array.from(localGateways.values());
+  for (const trade of localTrades) {
+    if (fsTradeIds.includes(trade.id)) {
+      // skip this trade as we already have it persisted
+      continue;
+    }
+
+    const tradeCompleted = isGatewayJSTxComplete(trade.status);
+    if (tradeCompleted) {
+      continue;
+    }
+    // add this trade for the user as they don't have it persisted
+    try {
+      await addTx(trade, trade.id);
+      await reOpenTx(trade);
+    } catch (e) {
+      // this trade is probably tracked under another account
+      console.error("Failed to add transaction", e);
+      failedTxes.push(trade);
+    }
+  }
+  console.log("these transactions belong to a different account", failedTxes);
 
   // if firebase has transactions not found locally, reopen those
   const localTradeIds = localTrades.map((t) => t.id);
