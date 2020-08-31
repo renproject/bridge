@@ -146,7 +146,7 @@ export const updateTx = async (newTx: any) => {
       try {
         await doc.update({
           data: JSON.stringify(newTx),
-          user: localWeb3Address,
+          user: localWeb3Address.toLowerCase(),
           updated: newTx.updated,
         });
       } catch (e) {
