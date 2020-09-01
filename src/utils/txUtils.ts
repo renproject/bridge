@@ -423,9 +423,8 @@ export const reOpenTx = async function (trade: any, id?: string) {
 export const recoverTrades = async function () {
   const store = getStore();
   const gjs = store.get("gjs");
-  const space = store.get("space");
   const fsSignature = store.get("fsSignature");
-  const localWeb3Address = store.get("localWeb3Address");
+  const localWeb3Address: string = store.get("localWeb3Address");
   const db = store.get("db");
 
   // Re-open incomplete trades
@@ -439,10 +438,6 @@ export const recoverTrades = async function () {
     reOpenTx(trade);
   }
 
-  // // Get 3box transactions
-  // const boxData = await space.private.get('convert.transactions')
-  // const boxTrades = boxData ? JSON.parse(boxData) : []
-
   // Get firebase transactions
   const fsDataSnapshotBySignature = await (db as firebase.firestore.Firestore)
     .collection("transactions")
@@ -451,7 +446,7 @@ export const recoverTrades = async function () {
 
   const fsDataSnapshotByUser = await (db as firebase.firestore.Firestore)
     .collection("transactions")
-    .where("user", "==", localWeb3Address)
+    .where("user", "==", localWeb3Address.toLowerCase())
     .get()
     .catch((e) => {
       Sentry.withScope(function (scope) {
