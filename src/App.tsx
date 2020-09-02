@@ -27,8 +27,18 @@ require("dotenv").config();
 firebase.initializeApp({
   apiKey: process.env.REACT_APP_FB_KEY,
   authDomain: window.location.hostname,
-  projectId: "ren-bridge",
+  projectId: process.env.REACT_APP_FB_PROJECT || "ren-bridge",
 });
+const db = firebase.firestore();
+const fns = firebase.functions();
+
+if (process.env.REACT_APP_FB_EMULATOR === "true") {
+  fns.useFunctionsEmulator("http://localhost:5001");
+  db.settings({
+    host: "localhost:8080",
+    ssl: false,
+  });
+}
 
 const styles = () => ({
   container: {
@@ -96,7 +106,8 @@ const initialState = {
   selectedWalletType: "injected",
 
   // firebase
-  db: firebase.firestore(),
+  db,
+  fns,
   fsUser: null,
   fsSignature: null,
   fsEnabled: false,

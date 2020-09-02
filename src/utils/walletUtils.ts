@@ -325,6 +325,7 @@ export const initLocalWeb3 = async function (type: any) {
   const address = accounts[0];
   const addressLowerCase = address.toLowerCase();
   const db = store.get("db");
+  const fns = store.get("fns");
 
   if (selectedNetwork !== network) {
     store.set("showNetworkModal", true);
@@ -340,25 +341,48 @@ export const initLocalWeb3 = async function (type: any) {
     //////////////////////////////////////////////////////
 
     let signature = "";
+    let rawSig = "";
 
     // get from local storage if user has signed in already
     const localSigMap = localStorage.getItem("sigMap");
+    const localRawSigMap = JSON.parse(
+      localStorage.getItem("rawSigMap") || "{}"
+    );
     const localSigMapData = localSigMap ? JSON.parse(localSigMap) : {};
-    if (localSigMapData[addressLowerCase]) {
+    if (localSigMapData[addressLowerCase] && localRawSigMap[addressLowerCase]) {
       signature = localSigMapData[addressLowerCase];
+      rawSig = localRawSigMap[addressLowerCase];
     } else {
       // get unique wallet signature for firebase backup
       // @ts-ignore
-      const sig = await web3.eth.personal.sign(
+      rawSig = await web3.eth.personal.sign(
         web3.utils.utf8ToHex("Signing in to RenBridge"),
         addressLowerCase
       );
-      signature = web3.utils.sha3(sig)!;
+      signature = web3.utils.sha3(rawSig)!;
       localSigMapData[addressLowerCase] = signature;
       localStorage.setItem("sigMap", JSON.stringify(localSigMapData));
+
+      localRawSigMap[addressLowerCase] = rawSig;
+      localStorage.setItem("rawSigMap", JSON.stringify(localRawSigMap));
     }
 
     store.set("fsSignature", signature);
+
+    let token: string | null = null;
+    try {
+      const res = await fns.httpsCallable("authenticate")({
+        signed: rawSig,
+        account: addressLowerCase,
+      });
+
+      token = res.data.token;
+      if (!token) {
+        throw new Error("missing token");
+      }
+    } catch (e) {
+      console.log("No token auth, falling back to email / sig");
+    }
 
     // auth with firestore
     const bridgeId = `${addressLowerCase}@renproject.io`;
@@ -367,10 +391,15 @@ export const initLocalWeb3 = async function (type: any) {
 
     if (!currentFsUser || currentFsUser.email !== bridgeId) {
       try {
-        fsUser = (
-          await firebase.auth().signInWithEmailAndPassword(bridgeId, signature)
-        ).user;
+        fsUser = token
+          ? (await firebase.auth().signInWithCustomToken(token)).user
+          : (
+              await firebase
+                .auth()
+                .signInWithEmailAndPassword(bridgeId, signature)
+            ).user;
       } catch (e) {
+        console.error(e);
         // We can register this user as they do not exist
         if (e.message.includes("There is no user record")) {
           fsUser = (
