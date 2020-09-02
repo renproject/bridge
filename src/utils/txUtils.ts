@@ -186,7 +186,7 @@ export const removeTx = async (tx: any) => {
   // update firebase
   if (fsEnabled) {
     try {
-      db.collection("transactions").doc(tx.id).delete();
+      await db.collection("transactions").doc(tx.id).delete();
     } catch (e) {
       console.error(e);
       Sentry.withScope(function (scope) {
