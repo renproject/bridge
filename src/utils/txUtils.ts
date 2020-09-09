@@ -83,6 +83,7 @@ export const addTx = async (tx: any, id?: string) => {
         user: localWeb3Address.toLowerCase(),
         walletSignature: fsSignature,
         id,
+        created: timestamp,
         updated: timestamp,
         data: JSON.stringify(tx),
       });
