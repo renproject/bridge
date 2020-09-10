@@ -83,6 +83,7 @@ export const addTx = async (tx: any, id?: string) => {
         user: localWeb3Address.toLowerCase(),
         walletSignature: fsSignature,
         id,
+        created: timestamp,
         updated: timestamp,
         data: JSON.stringify(tx),
       });
@@ -168,6 +169,7 @@ export const removeTx = async (tx: any) => {
   // const space = store.get('space')
   const db = store.get("db");
   const fsEnabled = store.get("fsEnabled");
+  const gjs: GatewayJS = store.get("gjs");
 
   const txs = store.get(storeString);
   const newTxs = txs.filter((t: any) => t.id !== tx.id);
@@ -177,6 +179,8 @@ export const removeTx = async (tx: any) => {
 
   // update localStorage just in case
   localStorage.setItem(storeString, JSON.stringify(newTxs));
+  const localGateways = await gjs.getGateways();
+  localGateways.delete(tx.id);
 
   // // update 3box
   // if (space) {
@@ -186,7 +190,9 @@ export const removeTx = async (tx: any) => {
   // update firebase
   if (fsEnabled) {
     try {
-      await db.collection("transactions").doc(tx.id).delete();
+      await db.collection("transactions").doc(tx.id).update({
+        deleted: true,
+      });
     } catch (e) {
       console.error(e);
       Sentry.withScope(function (scope) {
@@ -422,14 +428,14 @@ export const reOpenTx = async function (trade: any, id?: string) {
 
 export const recoverTrades = async function () {
   const store = getStore();
-  const gjs = store.get("gjs");
+  const gjs: GatewayJS = store.get("gjs");
   const fsSignature = store.get("fsSignature");
   const localWeb3Address: string = store.get("localWeb3Address");
   const db = store.get("db");
 
   // Re-open incomplete trades
   const localGateways = await gjs.getGateways();
-  const localTrades: any[] = Array.from(localGateways.values());
+  const localTrades = Array.from(localGateways.values());
   for (const trade of localTrades) {
     const tradeCompleted = isGatewayJSTxComplete(trade.status);
     if (tradeCompleted) {
@@ -463,6 +469,7 @@ export const recoverTrades = async function () {
   if (!fsDataSnapshotBySignature.empty) {
     fsDataSnapshotBySignature.forEach((doc) => {
       const data = doc.data();
+      if (data.deleted) return;
       const tx = JSON.parse(data.data);
       fsTrades.push([tx, data.id]);
     });
