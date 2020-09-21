@@ -163,7 +163,11 @@ export const updateTx = async (newTx: any) => {
   }
 };
 
-export const removeTx = async (tx: any) => {
+export const removeTx = async <T extends { id: string }>(tx: T) => {
+  if (!tx.id) {
+    console.error("failed to remove tx");
+    return;
+  }
   const store = getStore();
   const storeString = "convert.transactions";
   // const space = store.get('space')
@@ -247,7 +251,8 @@ export const gatherFeeData = async function () {
 export const initGJSDeposit = async function (tx: any) {
   const { amount } = tx;
   const store = getStore() as any;
-  const { gjs, localWeb3, localWeb3Address, selectedAsset } = store.getState();
+  const { localWeb3, localWeb3Address, selectedAsset } = store.getState();
+  const gjs: GatewayJS = store.get("gjs");
 
   const storableData = {
     sendToken:
@@ -270,6 +275,8 @@ export const initGJSDeposit = async function (tx: any) {
   await addTx(storableData, id);
 
   let trade: any = null;
+  // If a tx is cancelled before it is persisted, we should flag it
+  let shouldRemove = false;
   const open = gjs.open(data, id);
   open
     .result()
@@ -280,13 +287,15 @@ export const initGJSDeposit = async function (tx: any) {
 
         if (preOpenTrades.length !== postOpenTrades.length) {
           const preOpenIds = preOpenTrades.map((t: any) => t.id);
-          postOpenTrades.map((pot: any) => {
-            // if unique, add to 3box
+          for (let pot of postOpenTrades) {
             if (preOpenIds.indexOf(pot.id)) {
-              updateTx(pot);
+              await updateTx(pot);
               trade = pot;
+              if (shouldRemove) {
+                removeTx(trade);
+              }
             }
-          });
+          }
         }
       }
     })
@@ -301,8 +310,12 @@ export const initGJSDeposit = async function (tx: any) {
     })
     .catch((error: any) => {
       if (error.message === "Transfer cancelled by user") {
-        // remove from 3box
-        removeTx(trade);
+        // ensure that trade is removed after updates
+        shouldRemove = true;
+
+        if (trade) {
+          removeTx(trade);
+        }
       } else {
         Sentry.withScope(function (scope) {
           scope.setTag("error-hint", "gatewayjs error");
@@ -318,7 +331,8 @@ export const initGJSDeposit = async function (tx: any) {
 export const initGJSWithdraw = async function (tx: any) {
   const { amount, destAddress } = tx;
   const store = getStore() as any;
-  const { gjs, localWeb3, selectedAsset } = store.getState();
+  const { localWeb3, selectedAsset } = store.getState();
+  const gjs: GatewayJS = store.get("gjs");
 
   const storableData = {
     sendToken:
@@ -352,13 +366,12 @@ export const initGJSWithdraw = async function (tx: any) {
 
         if (preOpenTrades.length !== postOpenTrades.length) {
           const preOpenIds = preOpenTrades.map((t: any) => t.id);
-          postOpenTrades.map((pot: any) => {
-            // if unique, add to 3box
+          for (let pot of postOpenTrades) {
             if (preOpenIds.indexOf(pot.id)) {
-              updateTx(pot);
+              await updateTx(pot);
               trade = pot;
             }
-          });
+          }
         }
       }
     })
@@ -442,7 +455,7 @@ export const recoverTrades = async function () {
     if (tradeCompleted) {
       continue;
     }
-    reOpenTx(trade);
+    await reOpenTx(trade);
   }
 
   // Get firebase transactions
@@ -491,14 +504,14 @@ export const recoverTrades = async function () {
 
   // if firebase has transactions not found locally, reopen those
   const localTradeIds = localTrades.map((t) => t.id);
-  fsTrades.map(([ftx, id]) => {
+  for (let [ftx, id] of fsTrades) {
     if (
       !isGatewayJSTxComplete(ftx.status) &&
       localTradeIds.indexOf(ftx.id) < 0
     ) {
-      reOpenTx(ftx, id);
+      await reOpenTx(ftx, id);
     }
-  });
+  }
 
   // // if 3box has transactions not found locally or in firebase, reopen those
   // // remove this when we fully switch away from 3box
