@@ -394,6 +394,7 @@ export const reOpenTx = async function (trade: any, id?: string) {
   const gjs = store.get("gjs");
   const localWeb3 = store.get("localWeb3");
   const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade, id);
+  trade.id = id;
 
   gateway
     .pause()
