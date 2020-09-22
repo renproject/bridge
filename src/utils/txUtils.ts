@@ -128,11 +128,12 @@ export const updateTx = async (newTx: any) => {
   // }
 
   // update firebase
-  if (fsEnabled) {
+  if (fsEnabled && newTx.id) {
+    let docData;
+
     const doc = (db as firebase.firestore.Firestore)
       .collection("transactions")
       .doc(newTx.id);
-    let docData;
     try {
       docData = await doc.get();
     } catch (e) {
@@ -165,7 +166,10 @@ export const updateTx = async (newTx: any) => {
 
 export const removeTx = async <T extends { id: string }>(tx: T) => {
   if (!tx.id) {
-    console.error("failed to remove tx");
+    Sentry.withScope(function (scope) {
+      scope.setTag("error-hint", "missing transaction id");
+      Sentry.captureException(new Error("failed to remove tx - missing id"));
+    });
     return;
   }
   const store = getStore();
@@ -294,6 +298,8 @@ export const initGJSDeposit = async function (tx: any) {
               if (shouldRemove) {
                 removeTx(trade);
               }
+              // we should never process more than one version of the same trade, so return
+              return;
             }
           }
         }
@@ -402,10 +408,11 @@ export const isGatewayJSTxComplete = function (status: any) {
   );
 };
 
-export const reOpenTx = async function (trade: any, id?: string) {
+export const reOpenTx = function (trade: any, id?: string) {
   const store = getStore();
-  const gjs = store.get("gjs");
+  const gjs: GatewayJS = store.get("gjs");
   const localWeb3 = store.get("localWeb3");
+  // Does gatewayjs remove the id for a trade if it is recovered without an id?
   const gateway = gjs.recoverTransfer(localWeb3.currentProvider, trade, id);
   trade.id = id;
 
@@ -422,6 +429,7 @@ export const reOpenTx = async function (trade: any, id?: string) {
     })
     .on("transferUpdated", (transfer: any) => {
       console.info(`[GOT TRANSFER]`, transfer);
+      transfer.id = transfer.id || trade.id || id;
       if (!transfer.archived) {
         updateTx(transfer);
       }
@@ -455,7 +463,26 @@ export const recoverTrades = async function () {
     if (tradeCompleted) {
       continue;
     }
-    await reOpenTx(trade);
+    if (!trade.id) {
+      Sentry.withScope(function (scope) {
+        const e = new Error("tx with no id: " + JSON.stringify(trade));
+        console.error(e);
+        scope.setTag("error-hint", "corrupted tx");
+        Sentry.captureException(e);
+      });
+      // If a trade has no ID, we cannot persist it properly, and it will duplicate
+      // so instead continue and hope that it has been persisted to firebase and
+      // we can restore from there
+      continue;
+    }
+    try {
+      reOpenTx(trade);
+    } catch (e) {
+      Sentry.withScope(function (scope) {
+        scope.setTag("error-hint", "reopening local transaction");
+        Sentry.captureException(e);
+      });
+    }
   }
 
   // Get firebase transactions
@@ -500,28 +527,20 @@ export const recoverTrades = async function () {
     });
   }
 
-  const fsTradeIds = fsTrades.map(([f]) => f.id);
-
   // if firebase has transactions not found locally, reopen those
   const localTradeIds = localTrades.map((t) => t.id);
   for (let [ftx, id] of fsTrades) {
-    if (
-      !isGatewayJSTxComplete(ftx.status) &&
-      localTradeIds.indexOf(ftx.id) < 0
-    ) {
-      await reOpenTx(ftx, id);
+    if (!isGatewayJSTxComplete(ftx.status) && localTradeIds.indexOf(id) < 0) {
+      try {
+        reOpenTx(ftx, id);
+      } catch (e) {
+        Sentry.withScope(function (scope) {
+          scope.setTag("error-hint", "reopening remote transaction");
+          Sentry.captureException(e);
+        });
+      }
     }
   }
-
-  // // if 3box has transactions not found locally or in firebase, reopen those
-  // // remove this when we fully switch away from 3box
-  // boxTrades.map(btx => {
-  //     if (!isGatewayJSTxComplete(btx.status)
-  //         && localTradeIds.indexOf(btx.id) < 0
-  //         && fsTradeIds.indexOf(btx.id) < 0) {
-  //         reOpenTx(btx)
-  //     }
-  // })
 };
 
 export default {};
