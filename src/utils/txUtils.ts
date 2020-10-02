@@ -177,7 +177,6 @@ export const removeTx = async <T extends { id: string }>(tx: T) => {
   // const space = store.get('space')
   const db = store.get("db");
   const fsEnabled = store.get("fsEnabled");
-  const gjs: GatewayJS = store.get("gjs");
 
   const txs = store.get(storeString);
   const newTxs = txs.filter((t: any) => t.id !== tx.id);
@@ -187,13 +186,11 @@ export const removeTx = async <T extends { id: string }>(tx: T) => {
 
   // update localStorage just in case
   localStorage.setItem(storeString, JSON.stringify(newTxs));
-  const localGateways = await gjs.getGateways();
-  localGateways.delete(tx.id);
 
-  // // update 3box
-  // if (space) {
-  //     space.private.set(storeString, JSON.stringify(newTxs))
-  // }
+  // Don't manually delete gateway from gjs, as it maintains
+  // the archival state
+  // const localGateways = await gjs.getGateways();
+  // localGateways.delete(tx.id);
 
   // update firebase
   if (fsEnabled) {
@@ -516,7 +513,7 @@ export const recoverTrades = async function () {
     });
   }
 
-  if (fsDataSnapshotByUser && fsDataSnapshotByUser.empty) {
+  if (fsDataSnapshotByUser && !fsDataSnapshotByUser.empty) {
     fsDataSnapshotByUser.forEach((doc) => {
       const data = doc.data();
       if (data.walletSignature === fsSignature) {
