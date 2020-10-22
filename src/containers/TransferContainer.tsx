@@ -4,13 +4,7 @@ import { Styles, withStyles } from "@material-ui/styles";
 import classNames from "classnames";
 import AddressValidator from "wallet-address-validator";
 import bchaddr from "bchaddrjs";
-import {
-  addTx,
-  updateTx,
-  removeTx,
-  gatherFeeData,
-  MIN_TX_AMOUNTS,
-} from "../utils/txUtils";
+import { gatherFeeData, MIN_TX_AMOUNTS } from "../utils/txUtils";
 import {
   MINI_ICON_MAP,
   SYMBOL_MAP,
@@ -275,10 +269,10 @@ class TransferContainer extends React.Component<any> {
     const convertAddressValid = store.get("convert.destinationValid");
     const showAddressError = !convertAddressValid;
     const selectedAsset: keyof typeof MIN_TX_AMOUNTS = store.get(
-      "selectedAsset"
+      "selectedAsset",
     );
     const selectedFormat: keyof typeof SYMBOL_MAP = store.get(
-      "convert.selectedFormat"
+      "convert.selectedFormat",
     );
     const balance = store.get(SYMBOL_MAP[selectedFormat] + "Balance");
     const amountValid =
@@ -311,7 +305,7 @@ class TransferContainer extends React.Component<any> {
     const localWeb3Address = store.get("localWeb3Address");
     const network = store.get("selectedNetwork");
     const format: keyof typeof NETWORK_MAP = store.get(
-      "convert.selectedFormat"
+      "convert.selectedFormat",
     );
     const asset: keyof typeof NETWORK_MAP = store.get("selectedAsset");
 
@@ -347,7 +341,7 @@ class TransferContainer extends React.Component<any> {
     const destination = store.get("convert.destination");
     const network = store.get("selectedNetwork");
     const format: keyof typeof NETWORK_MAP = store.get(
-      "convert.selectedFormat"
+      "convert.selectedFormat",
     );
     const asset: keyof typeof NETWORK_MAP = store.get("selectedAsset");
 
@@ -381,36 +375,36 @@ class TransferContainer extends React.Component<any> {
     const selectedNetwork = store.get("selectedNetwork");
     const selectedTab = store.get("selectedTab");
     const selectedAsset: keyof typeof MIN_TX_AMOUNTS = store.get(
-      "selectedAsset"
+      "selectedAsset",
     );
 
     // 0 = mint, 1 = release
     const selectedDirection = store.get("convert.selectedDirection");
     const selectedFormat: keyof typeof SYMBOL_MAP = store.get(
-      "convert.selectedFormat"
+      "convert.selectedFormat",
     );
     const localWeb3Address = store.get("localWeb3Address");
     const balance = store.get(SYMBOL_MAP[selectedFormat] + "Balance");
     const amount = store.get("convert.amount");
     const total = store.get("convert.conversionTotal");
 
-    const allowance = store.get("convert.adapterWbtcAllowance");
-    const hasAllowance = Number(amount) <= Number(allowance);
-    const allowanceRequesting = store.get(
-      "convert.adapterWbtcAllowanceRequesting"
-    );
+    // const allowance = store.get("convert.adapterWbtcAllowance");
+    // const hasAllowance = Number(amount) <= Number(allowance);
+    // const allowanceRequesting = store.get(
+    //   "convert.adapterWbtcAllowanceRequesting"
+    // );
 
-    const convertAddressValid = store.get("convert.destinationValid");
-    const canConvertTo = amount >= MIN_TX_AMOUNTS[selectedAsset];
-    const canConvertFrom =
-      Number(amount) >= MIN_TX_AMOUNTS[selectedAsset] &&
-      amount <= Number(balance) &&
-      convertAddressValid;
+    // const convertAddressValid = store.get("convert.destinationValid");
+    // const canConvertTo = amount >= MIN_TX_AMOUNTS[selectedAsset];
+    // const canConvertFrom =
+    //   Number(amount) >= MIN_TX_AMOUNTS[selectedAsset] &&
+    //   amount <= Number(balance) &&
+    //   convertAddressValid;
     const showAmountError = store.get("convert.showAmountError");
     const showDestinationError = store.get("convert.showDestinationError");
     const destAsset = selectedDirection ? selectedAsset : selectedFormat;
     const usdValue = Number(store.get(`${selectedAsset}usd`) * amount).toFixed(
-      2
+      2,
     );
 
     return (
@@ -498,7 +492,7 @@ class TransferContainer extends React.Component<any> {
                           container
                           className={classNames(
                             classes.standaloneOption,
-                            classes.option
+                            classes.option,
                           )}
                         >
                           <Grid item xs={6}>
@@ -513,7 +507,7 @@ class TransferContainer extends React.Component<any> {
                                 const asset = v.toLowerCase();
                                 store.set(
                                   "convert.selectedFormat",
-                                  `ren${asset}`
+                                  `ren${asset}`,
                                 );
                                 store.set("selectedAsset", asset);
                                 gatherFeeData();
@@ -538,7 +532,7 @@ class TransferContainer extends React.Component<any> {
                                 arrow
                               >
                                 <div>
-                                  <img src={WalletIcon} />
+                                  <img alt="" src={WalletIcon} />
                                   {abbreviateAddress(localWeb3Address)}
                                 </div>
                               </DarkTooltip>
@@ -549,7 +543,7 @@ class TransferContainer extends React.Component<any> {
                               You will receive
                             </Grid>
                             <Grid item xs={6} className={classes.totalCell}>
-                              <img src={MINI_ICON_MAP[destAsset]} />
+                              <img alt="" src={MINI_ICON_MAP[destAsset]} />
                               {total || ""} {SYMBOL_MAP[destAsset]}
                             </Grid>
                           </Grid>
@@ -599,7 +593,7 @@ class TransferContainer extends React.Component<any> {
                           container
                           className={classNames(
                             classes.standaloneOption,
-                            classes.option
+                            classes.option,
                           )}
                         >
                           <Grid item xs={6}>
@@ -618,7 +612,7 @@ class TransferContainer extends React.Component<any> {
                                 store.set("convert.selectedFormat", asset);
                                 store.set(
                                   "selectedAsset",
-                                  asset.replace("ren", "")
+                                  asset.replace("ren", ""),
                                 );
                                 gatherFeeData();
                               }}
@@ -629,7 +623,7 @@ class TransferContainer extends React.Component<any> {
                           container
                           className={classNames(
                             classes.standaloneOption,
-                            classes.option
+                            classes.option,
                           )}
                         >
                           <Grid xs={12}>
@@ -655,13 +649,13 @@ class TransferContainer extends React.Component<any> {
                                   onFocus: () => {
                                     store.set(
                                       "convert.destinationInputFocused",
-                                      true
+                                      true,
                                     );
                                   },
                                   onBlur: () => {
                                     store.set(
                                       "convert.destinationInputFocused",
-                                      false
+                                      false,
                                     );
                                   },
                                 }}
@@ -671,7 +665,7 @@ class TransferContainer extends React.Component<any> {
                                   if (selectedAsset === "bch") {
                                     store.set(
                                       "convert.destinationValid",
-                                      bchaddr.isValidAddress(value)
+                                      bchaddr.isValidAddress(value),
                                     );
                                   } else {
                                     store.set(
@@ -681,8 +675,8 @@ class TransferContainer extends React.Component<any> {
                                         selectedAsset.toUpperCase(),
                                         selectedNetwork === "testnet"
                                           ? "testnet"
-                                          : "prod"
-                                      )
+                                          : "prod",
+                                      ),
                                     );
                                   }
                                 }}
@@ -701,7 +695,7 @@ class TransferContainer extends React.Component<any> {
                               You will receive
                             </Grid>
                             <Grid item xs={6} className={classes.totalCell}>
-                              <img src={MINI_ICON_MAP[destAsset]} />
+                              <img alt="" src={MINI_ICON_MAP[destAsset]} />
                               {total || ""} {SYMBOL_MAP[destAsset]}
                             </Grid>
                           </Grid>
@@ -727,7 +721,7 @@ class TransferContainer extends React.Component<any> {
                         fullWidth
                         className={classNames(
                           classes.margin,
-                          classes.actionButton
+                          classes.actionButton,
                         )}
                         onClick={this.newDeposit.bind(this)}
                       >
@@ -746,7 +740,7 @@ class TransferContainer extends React.Component<any> {
                         size="large"
                         className={classNames(
                           classes.margin,
-                          classes.actionButton
+                          classes.actionButton,
                         )}
                         onClick={this.newWithdraw.bind(this)}
                       >

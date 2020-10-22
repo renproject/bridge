@@ -18,7 +18,7 @@ if (process.env.REACT_APP_SENTRY_DSN) {
   });
 }
 
-window.onload = function () {
+window.onload = () => {
   // hide 3box iframe
   Array.from(document.getElementsByTagName("iframe")).map((iframe) => {
     if (iframe.src && iframe.src.indexOf("3box") > -1) {
@@ -26,6 +26,7 @@ window.onload = function () {
     } else if (iframe.src && iframe.src.indexOf("portis") > -1) {
       iframe.remove();
     }
+    return iframe;
   });
 };
 
