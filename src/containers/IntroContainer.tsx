@@ -150,7 +150,7 @@ class IntroContainer extends React.Component<any> {
           Bitcoin, Zcash and Bitcoin Cash on&nbsp;Ethereum.
         </Typography>
         <Typography className={classes.subtitle} variant="body1">
-          The safe, fast and most secure way to bring cross-chain assets
+          The easy and permission-less way to bring cross-chain assets
           to&nbsp;Ethereum.
         </Typography>
         <Grid className={classes.metamask} container justify="center">
