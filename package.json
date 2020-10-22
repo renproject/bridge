@@ -1,6 +1,6 @@
 {
   "name": "ren-bridge",
-  "version": "0.2.0",
+  "version": "0.3.7",
   "private": true,
   "homepage": "https://bridge.renproject.io",
   "dependencies": {
