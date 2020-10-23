@@ -214,7 +214,6 @@ export const updateBalance = async function () {
 };
 
 export const watchWalletData = async function () {
-  const store = getStore();
   if (walletDataInterval) {
     clearInterval(walletDataInterval);
   }
