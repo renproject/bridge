@@ -233,7 +233,7 @@ export const gatherFeeData = async function () {
   }
 
   const renVMFee = Number(
-    Number(amount) * Number(fees[selectedAsset].ethereum[dynamicFeeKey] / 10000)
+    Number(amount) * Number((dynamicFeeKey === "mint" ? 20 : 10) / 10000)
   ).toFixed(6);
   const fixedFee = Number(fees[selectedAsset][fixedFeeKey] / 10 ** 8);
   const total =
